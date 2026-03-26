@@ -10,8 +10,15 @@ import Box from '@cloudscape-design/components/box'
 import Button from '@cloudscape-design/components/button'
 import Pagination from '@cloudscape-design/components/pagination'
 import Spinner from '@cloudscape-design/components/spinner'
+import Modal from '@cloudscape-design/components/modal'
+import FormField from '@cloudscape-design/components/form-field'
+import Input from '@cloudscape-design/components/input'
+import Textarea from '@cloudscape-design/components/textarea'
+import Select from '@cloudscape-design/components/select'
+import Alert from '@cloudscape-design/components/alert'
 import { useCollection } from '@cloudscape-design/collection-hooks'
-import { listTickets } from '@/utils/api'
+import { listTickets, createTicket } from '@/utils/api'
+import { useAuth } from '@/App'
 import type { Ticket, TicketStatus, Severity } from '@/types'
 
 // ── Status / Severity rendering ──────────────────────────────────────
@@ -50,7 +57,7 @@ function ticketToInvestigation(ticket: Ticket): Investigation {
     status: ticket.status,
     severity: ticket.severity,
     assignee: ticket.assigneeId,
-    created: new Date(ticket.createdAt).toISOString().slice(0, 10),
+    created: new Date(Number(ticket.createdAt) * 1000).toISOString().slice(0, 10),
     description: ticket.description,
     findings: [],
   }
@@ -98,20 +105,34 @@ function InvestigationDetail({ item }: { item: Investigation }) {
 
 // ── Main component ───────────────────────────────────────────────────
 
+const SEVERITY_OPTIONS = [
+  { value: 'critical', label: 'Critical' },
+  { value: 'high', label: 'High' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'low', label: 'Low' },
+]
+
 export default function OsintInvestigations() {
+  const { userId } = useAuth()
   const [selectedItems, setSelectedItems] = useState<Investigation[]>([])
   const [investigations, setInvestigations] = useState<Investigation[]>([])
   const [loading, setLoading] = useState(true)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [creating, setCreating] = useState(false)
+  const [createError, setCreateError] = useState<string | null>(null)
+  const [newInv, setNewInv] = useState({ title: '', description: '', severity: 'high' })
 
   useEffect(() => {
     let cancelled = false
     async function fetchInvestigations() {
       try {
-        const tickets = await listTickets('ticketType', 'osint-investigation')
+        const tickets = await listTickets('type', 'osint-investigation')
+        console.log('[OsintInvestigations] listTickets result:', tickets)
         if (!cancelled) {
           setInvestigations(tickets.map(ticketToInvestigation))
         }
-      } catch {
+      } catch (err) {
+        console.error('[OsintInvestigations] listTickets error:', err)
         if (!cancelled) {
           setInvestigations([])
         }
@@ -122,6 +143,27 @@ export default function OsintInvestigations() {
     fetchInvestigations()
     return () => { cancelled = true }
   }, [])
+
+  const handleCreate = async () => {
+    setCreating(true)
+    setCreateError(null)
+    try {
+      const created = await createTicket({
+        title: newInv.title,
+        description: newInv.description,
+        severity: newInv.severity as Severity,
+        ticketType: 'osint-investigation',
+        assigneeId: userId,
+      })
+      setInvestigations(prev => [ticketToInvestigation(created), ...prev])
+      setNewInv({ title: '', description: '', severity: 'high' })
+      setShowCreateModal(false)
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : 'Failed to create investigation')
+    } finally {
+      setCreating(false)
+    }
+  }
 
   const { items, collectionProps, filterProps, paginationProps } = useCollection(investigations, {
     filtering: {
@@ -153,7 +195,7 @@ export default function OsintInvestigations() {
             variant="h2"
             counter={`(${investigations.length})`}
             actions={
-              <Button variant="primary" iconName="add-plus">
+              <Button variant="primary" iconName="add-plus" onClick={() => setShowCreateModal(true)}>
                 Create Investigation
               </Button>
             }
@@ -215,6 +257,37 @@ export default function OsintInvestigations() {
           <InvestigationDetail item={selectedItem} />
         </Container>
       )}
+
+      <Modal
+        visible={showCreateModal}
+        onDismiss={() => setShowCreateModal(false)}
+        header="Create Investigation"
+        footer={
+          <Box float="right">
+            <SpaceBetween size="xs" direction="horizontal">
+              <Button variant="link" onClick={() => setShowCreateModal(false)}>Cancel</Button>
+              <Button variant="primary" onClick={handleCreate} disabled={!newInv.title.trim()} loading={creating}>Create</Button>
+            </SpaceBetween>
+          </Box>
+        }
+      >
+        <SpaceBetween size="m">
+          {createError && <Alert type="error" dismissible onDismiss={() => setCreateError(null)}>{createError}</Alert>}
+          <FormField label="Title">
+            <Input value={newInv.title} onChange={({ detail }) => setNewInv(p => ({ ...p, title: detail.value }))} placeholder="e.g. Exposed MongoDB on Meridian DMZ" />
+          </FormField>
+          <FormField label="Description">
+            <Textarea value={newInv.description} onChange={({ detail }) => setNewInv(p => ({ ...p, description: detail.value }))} placeholder="Describe the finding and initial observations" rows={3} />
+          </FormField>
+          <FormField label="Severity">
+            <Select
+              selectedOption={SEVERITY_OPTIONS.find(o => o.value === newInv.severity) ?? null}
+              options={SEVERITY_OPTIONS}
+              onChange={({ detail }) => setNewInv(p => ({ ...p, severity: detail.selectedOption.value ?? 'high' }))}
+            />
+          </FormField>
+        </SpaceBetween>
+      </Modal>
     </SpaceBetween>
   )
 }

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import Markdown from 'react-markdown'
 import Container from '@cloudscape-design/components/container'
 import Header from '@cloudscape-design/components/header'
 import SpaceBetween from '@cloudscape-design/components/space-between'
@@ -120,11 +121,10 @@ export default function OsintChat() {
                   ? 'var(--color-background-button-primary-default, #0972d3)'
                   : 'var(--color-background-container-content, #1a2332)',
                 color: m.role === 'user' ? '#fff' : 'inherit',
-                whiteSpace: 'pre-wrap',
                 fontSize: 14,
                 lineHeight: 1.6,
               }}>
-                {m.content}
+                {m.role === 'user' ? m.content : <div className="chat-markdown"><Markdown>{m.content}</Markdown></div>}
               </div>
             </div>
           ))}

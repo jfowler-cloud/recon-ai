@@ -9,8 +9,15 @@ import SpaceBetween from '@cloudscape-design/components/space-between'
 import TextFilter from '@cloudscape-design/components/text-filter'
 import ContentLayout from '@cloudscape-design/components/content-layout'
 import Spinner from '@cloudscape-design/components/spinner'
+import Modal from '@cloudscape-design/components/modal'
+import FormField from '@cloudscape-design/components/form-field'
+import Input from '@cloudscape-design/components/input'
+import Textarea from '@cloudscape-design/components/textarea'
+import Select from '@cloudscape-design/components/select'
+import Alert from '@cloudscape-design/components/alert'
 import { useCollection } from '@cloudscape-design/collection-hooks'
-import { listTickets } from '@/utils/api'
+import { listTickets, createTicket } from '@/utils/api'
+import { useAuth } from '@/App'
 import type { Ticket } from '@/types'
 
 function statusBadge(status: string) {
@@ -35,9 +42,21 @@ function severityBadge(severity: string) {
   return <Badge color={colorMap[severity] ?? 'grey'}>{severity}</Badge>
 }
 
+const SEVERITY_OPTIONS = [
+  { value: 'critical', label: 'Critical' },
+  { value: 'high', label: 'High' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'low', label: 'Low' },
+]
+
 export default function RedTeamOperations() {
+  const { userId } = useAuth()
   const [operations, setOperations] = useState<Ticket[]>([])
   const [loading, setLoading] = useState(true)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [creating, setCreating] = useState(false)
+  const [createError, setCreateError] = useState<string | null>(null)
+  const [newOp, setNewOp] = useState({ title: '', description: '', severity: 'high', targetId: '' })
 
   useEffect(() => {
     let cancelled = false
@@ -64,6 +83,28 @@ export default function RedTeamOperations() {
     sorting: { defaultState: { sortingColumn: { sortingField: 'createdAt' }, isDescending: true } },
   })
 
+  const handleCreate = async () => {
+    setCreating(true)
+    setCreateError(null)
+    try {
+      const created = await createTicket({
+        title: newOp.title,
+        description: newOp.description,
+        severity: newOp.severity as Ticket['severity'],
+        ticketType: 'red-team-operation',
+        assigneeId: userId,
+        targetId: newOp.targetId || undefined,
+      })
+      setOperations(prev => [created, ...prev])
+      setNewOp({ title: '', description: '', severity: 'high', targetId: '' })
+      setShowCreateModal(false)
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : 'Failed to create operation')
+    } finally {
+      setCreating(false)
+    }
+  }
+
   if (loading) {
     return (
       <Box textAlign="center" padding={{ vertical: 'xxxl' }}>
@@ -81,7 +122,7 @@ export default function RedTeamOperations() {
             <Header
               variant="h2"
               counter={`(${operations.length})`}
-              actions={<Button variant="primary">Create Operation</Button>}
+              actions={<Button variant="primary" onClick={() => setShowCreateModal(true)}>Create Operation</Button>}
             >
               Operations
             </Header>
@@ -111,6 +152,39 @@ export default function RedTeamOperations() {
           </SpaceBetween>
         </Container>
       </SpaceBetween>
+      <Modal
+        visible={showCreateModal}
+        onDismiss={() => setShowCreateModal(false)}
+        header="Create Operation"
+        footer={
+          <Box float="right">
+            <SpaceBetween size="xs" direction="horizontal">
+              <Button variant="link" onClick={() => setShowCreateModal(false)}>Cancel</Button>
+              <Button variant="primary" onClick={handleCreate} disabled={!newOp.title.trim()} loading={creating}>Create</Button>
+            </SpaceBetween>
+          </Box>
+        }
+      >
+        <SpaceBetween size="m">
+          {createError && <Alert type="error" dismissible onDismiss={() => setCreateError(null)}>{createError}</Alert>}
+          <FormField label="Title">
+            <Input value={newOp.title} onChange={({ detail }) => setNewOp(p => ({ ...p, title: detail.value }))} placeholder="e.g. ProxyLogon Exploitation on Exchange" />
+          </FormField>
+          <FormField label="Description">
+            <Textarea value={newOp.description} onChange={({ detail }) => setNewOp(p => ({ ...p, description: detail.value }))} placeholder="Describe the operation objective and approach" rows={3} />
+          </FormField>
+          <FormField label="Severity">
+            <Select
+              selectedOption={SEVERITY_OPTIONS.find(o => o.value === newOp.severity) ?? null}
+              options={SEVERITY_OPTIONS}
+              onChange={({ detail }) => setNewOp(p => ({ ...p, severity: detail.selectedOption.value ?? 'high' }))}
+            />
+          </FormField>
+          <FormField label="Target ID (optional)">
+            <Input value={newOp.targetId} onChange={({ detail }) => setNewOp(p => ({ ...p, targetId: detail.value }))} placeholder="e.g. t-001" />
+          </FormField>
+        </SpaceBetween>
+      </Modal>
     </ContentLayout>
   )
 }

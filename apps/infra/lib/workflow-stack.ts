@@ -290,6 +290,34 @@ export class WorkflowStack extends cdk.Stack {
       resources: bedrockModelArns,
     }));
 
+    // Admin role — superset of ALL permissions (matched first in rules)
+    const adminRole = new iam.Role(this, 'AdminRole', {
+      assumedBy: federatedPrincipal,
+    });
+    // All Lambda invoke permissions
+    const allFns = [
+      fns.uploadDataFn, fns.getConfigFn, fns.updateConfigFn, fns.triggerIngestionFn,
+      fns.createTicketFn, fns.updateTicketFn, fns.listTicketsFn,
+      fns.getDashboardFn, fns.queueForRedteamFn,
+      fns.createTargetFn, fns.updateTargetFn, fns.manageToolsFn, fns.recordToolActionFn,
+      fns.updateContextFn,
+      fns.chatHandlerFn, fns.getSessionFn, fns.listSessionsFn,
+    ];
+    for (const fn of allFns) { fn.grantInvoke(adminRole); }
+    // All DynamoDB read access
+    const allTables = [
+      db.uploadsTable, db.ticketsTable, db.targetsTable,
+      db.toolActionsTable, db.toolsTable, db.leadershipContextTable,
+      db.scoringHistoryTable,
+    ];
+    for (const table of allTables) { table.grantReadData(adminRole); }
+    db.leadershipContextTable.grantReadWriteData(adminRole);
+    // Bedrock
+    adminRole.addToPolicy(new iam.PolicyStatement({
+      actions: ['bedrock:InvokeModelWithResponseStream', 'bedrock:InvokeModel'],
+      resources: bedrockModelArns,
+    }));
+
     // Default authenticated role (falls back to osint-analyst permissions)
     const defaultRole = new iam.Role(this, 'DefaultAuthRole', {
       assumedBy: federatedPrincipal,
@@ -305,12 +333,19 @@ export class WorkflowStack extends cdk.Stack {
           type: 'Rules',
           ambiguousRoleResolution: 'AuthenticatedRole',
           rulesConfiguration: {
+            // Admin first — full access; then leadership, red-team, osint
             rules: [
               {
                 claim: 'cognito:groups',
                 matchType: 'Contains',
-                value: 'osint-analyst',
-                roleArn: osintRole.roleArn,
+                value: 'admin',
+                roleArn: adminRole.roleArn,
+              },
+              {
+                claim: 'cognito:groups',
+                matchType: 'Contains',
+                value: 'leadership',
+                roleArn: leadershipRole.roleArn,
               },
               {
                 claim: 'cognito:groups',
@@ -321,8 +356,8 @@ export class WorkflowStack extends cdk.Stack {
               {
                 claim: 'cognito:groups',
                 matchType: 'Contains',
-                value: 'leadership',
-                roleArn: leadershipRole.roleArn,
+                value: 'osint-analyst',
+                roleArn: osintRole.roleArn,
               },
             ],
           },

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import Markdown from 'react-markdown'
 import Container from '@cloudscape-design/components/container'
 import Header from '@cloudscape-design/components/header'
 import SpaceBetween from '@cloudscape-design/components/space-between'
@@ -25,7 +26,6 @@ function ChatBubble({ message }: { message: ChatMessage }) {
           borderRadius: '12px',
           backgroundColor: isUser ? '#0972d3' : isDarkMode ? '#1e2228' : '#f2f3f3',
           color: isUser ? '#ffffff' : isDarkMode ? '#e8eaed' : '#000716',
-          whiteSpace: 'pre-wrap',
         }}
       >
         {isUser ? (
@@ -39,7 +39,7 @@ function ChatBubble({ message }: { message: ChatMessage }) {
               <Icon name="contact" />
               <Box variant="small" fontWeight="bold" color="text-body-secondary">Red Team Assistant</Box>
             </div>
-            <Box variant="p">{message.content}</Box>
+            <div className="chat-markdown"><Markdown>{message.content}</Markdown></div>
           </>
         )}
       </div>

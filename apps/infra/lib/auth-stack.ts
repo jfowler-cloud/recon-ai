@@ -49,6 +49,10 @@ export class AuthStack extends cdk.Stack {
       userPoolId: this.userPool.userPoolId,
       groupName: 'leadership',
     });
+    new cognito.CfnUserPoolGroup(this, 'AdminGroup', {
+      userPoolId: this.userPool.userPoolId,
+      groupName: 'admin',
+    });
 
     this.userPoolClient = this.userPool.addClient('WebClient', {
       userPoolClientName: 'ReconAIWebClient',

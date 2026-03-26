@@ -22,6 +22,7 @@ import RedTeamOperations from './components/RedTeamOperations'
 import RedTeamChat from './components/RedTeamChat'
 import LeadershipDashboard from './components/LeadershipDashboard'
 import GoalManagement from './components/GoalManagement'
+import RunDemo from './components/RunDemo'
 import LeadershipChat from './components/LeadershipChat'
 import './index.css'
 
@@ -34,10 +35,11 @@ interface AuthContextType {
   userId: string
   groups: string[]
   persona: Persona
+  isAdmin: boolean
   isDarkMode: boolean
 }
 export const AuthContext = createContext<AuthContextType>({
-  userId: '', groups: [], persona: 'osint-analyst', isDarkMode: true,
+  userId: '', groups: [], persona: 'osint-analyst', isAdmin: false, isDarkMode: true,
 })
 export function useAuth() { return useContext(AuthContext) }
 
@@ -180,6 +182,7 @@ interface AuthenticatedAppProps {
 function AuthenticatedApp({ signOut, user, darkMode, toggleTheme, currentView, setCurrentView, navigationOpen, setNavigationOpen }: AuthenticatedAppProps) {
   const userId = user?.signInDetails?.loginId ?? user?.username ?? ''
   const [groups, setGroups] = useState<string[]>([])
+  const [demoVisible, setDemoVisible] = useState(false)
 
   useEffect(() => {
     fetchAuthSession().then(session => {
@@ -189,27 +192,45 @@ function AuthenticatedApp({ signOut, user, darkMode, toggleTheme, currentView, s
   }, [])
 
   const persona = getPersona(groups)
-  const navItems = buildNavItems(persona)
+  const isAdmin = groups.includes('admin')
+  const navItems = buildNavItems(isAdmin ? 'leadership' : persona) // admin sees all nav sections
 
   useEffect(() => {
-    if (groups.length > 0) setCurrentView(getDefaultView(persona))
-  }, [persona, groups, setCurrentView])
+    if (groups.length > 0) setCurrentView(getDefaultView(isAdmin ? 'leadership' : persona))
+  }, [persona, isAdmin, groups, setCurrentView])
+
+  const utilities: Parameters<typeof TopNavigation>[0]['utilities'] = [
+    ...(isAdmin ? [{ type: 'button' as const, text: 'Seed Demo', onClick: () => setDemoVisible(true) }] : []),
+    { type: 'button' as const, text: darkMode ? 'Light' : 'Dark', onClick: toggleTheme },
+    {
+      type: 'menu-dropdown' as const,
+      text: userId || 'Account',
+      iconName: 'user-profile' as const,
+      items: [{ id: 'signout', text: 'Sign out' }],
+      onItemClick: ({ detail }: { detail: { id: string } }) => { if (detail.id === 'signout') signOut?.() },
+    },
+  ]
 
   return (
-    <AuthContext.Provider value={{ userId, groups, persona, isDarkMode: darkMode }}>
-      <div id="top-nav" style={{ position: 'sticky', top: 0, zIndex: 1002 }}>
+    <AuthContext.Provider value={{ userId, groups, persona: isAdmin ? 'leadership' : persona, isAdmin, isDarkMode: darkMode }}>
+      <RunDemo visible={demoVisible} onDismiss={() => setDemoVisible(false)} userId={userId} />
+      {isAdmin && (
+        <div style={{
+          background: 'linear-gradient(90deg, #e8001c, #d91515)',
+          color: '#fff',
+          textAlign: 'center',
+          padding: '4px 0',
+          fontSize: 12,
+          fontWeight: 600,
+          letterSpacing: '0.5px',
+        }}>
+          ADMIN MODE — Full access to all personas and features
+        </div>
+      )}
+      <div id="top-nav" style={{ position: 'sticky', top: isAdmin ? 0 : 0, zIndex: 1002 }}>
         <TopNavigation
           identity={{ href: '#', title: 'Recon AI' }}
-          utilities={[
-            { type: 'button', text: darkMode ? 'Light' : 'Dark', onClick: toggleTheme },
-            {
-              type: 'menu-dropdown',
-              text: userId || 'Account',
-              iconName: 'user-profile',
-              items: [{ id: 'signout', text: 'Sign out' }],
-              onItemClick: ({ detail }) => { if (detail.id === 'signout') signOut?.() },
-            },
-          ]}
+          utilities={utilities}
         />
       </div>
 
