@@ -70,8 +70,8 @@ describe('AuthStack', () => {
     })
   })
 
-  it('creates three user pool groups', () => {
-    template.resourceCountIs('AWS::Cognito::UserPoolGroup', 3)
+  it('creates four user pool groups', () => {
+    template.resourceCountIs('AWS::Cognito::UserPoolGroup', 4)
   })
 
   it('creates osint-analyst group', () => {
@@ -89,6 +89,12 @@ describe('AuthStack', () => {
   it('creates leadership group', () => {
     template.hasResourceProperties('AWS::Cognito::UserPoolGroup', {
       GroupName: 'leadership',
+    })
+  })
+
+  it('creates admin group', () => {
+    template.hasResourceProperties('AWS::Cognito::UserPoolGroup', {
+      GroupName: 'admin',
     })
   })
 

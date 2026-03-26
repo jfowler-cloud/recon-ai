@@ -111,12 +111,13 @@ describe('FunctionsStack', () => {
     }
   })
 
-  it('all handler functions use handler.handler', () => {
+  it('all handler functions use handler.handler pattern', () => {
     const fns = template.findResources('AWS::Lambda::Function', {
       Properties: { Runtime: 'python3.13' },
     })
     for (const [, resource] of Object.entries(fns)) {
-      expect((resource as any).Properties.Handler).toBe('handler.handler')
+      // Regular functions: handler.handler; Agents: {agentDir}/handler.handler
+      expect((resource as any).Properties.Handler).toMatch(/^(\w+\/)?handler\.handler$/)
     }
   })
 
@@ -276,6 +277,27 @@ describe('FunctionsStack', () => {
     })
     // 24 functions x 2 alarms each = 48
     expect(Object.keys(alarms).length).toBe(48)
+  })
+
+  it('creates a Lambda DLQ (SQS queue)', () => {
+    template.hasResourceProperties('AWS::SQS::Queue', {
+      QueueName: 'RA-LambdaFailures',
+      MessageRetentionPeriod: 1209600, // 14 days
+    })
+  })
+
+  it('Lambda functions have onFailure destination configured', () => {
+    const eventConfigs = template.findResources('AWS::Lambda::EventInvokeConfig')
+    expect(Object.keys(eventConfigs).length).toBeGreaterThan(0)
+    // At least one event invoke config should have OnFailure destination
+    const hasOnFailure = Object.values(eventConfigs).some(
+      (r: Record<string, unknown>) => {
+        const props = r.Properties as Record<string, unknown> | undefined
+        const dest = props?.DestinationConfig as Record<string, unknown> | undefined
+        return !!dest?.OnFailure
+      }
+    )
+    expect(hasOnFailure).toBe(true)
   })
 
   it('outputs function names including Phase 3 and 4', () => {

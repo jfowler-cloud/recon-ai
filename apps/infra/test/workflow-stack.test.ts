@@ -134,8 +134,8 @@ describe('WorkflowStack', () => {
     })
   })
 
-  it('creates 4 IAM roles for Cognito identity pool', () => {
-    // OsintAnalystRole, RedTeamAnalystRole, LeadershipRole, DefaultAuthRole
+  it('creates 5 IAM roles for Cognito identity pool', () => {
+    // OsintAnalystRole, RedTeamAnalystRole, LeadershipRole, AdminRole, DefaultAuthRole
     const roles = template.findResources('AWS::IAM::Role', {
       Properties: {
         AssumeRolePolicyDocument: Match.objectLike({
@@ -147,7 +147,28 @@ describe('WorkflowStack', () => {
         }),
       },
     })
-    expect(Object.keys(roles).length).toBe(4)
+    expect(Object.keys(roles).length).toBe(5)
+  })
+
+  it('creates a workflow DLQ (SQS queue)', () => {
+    template.hasResourceProperties('AWS::SQS::Queue', {
+      QueueName: 'RA-WorkflowFailures',
+      MessageRetentionPeriod: 1209600,
+    })
+  })
+
+  it('role mapping has rules for admin group', () => {
+    template.hasResourceProperties('AWS::Cognito::IdentityPoolRoleAttachment', {
+      RoleMappings: Match.objectLike({
+        cognitoProvider: Match.objectLike({
+          RulesConfiguration: {
+            Rules: Match.arrayWith([
+              Match.objectLike({ Claim: 'cognito:groups', Value: 'admin' }),
+            ]),
+          },
+        }),
+      }),
+    })
   })
 
   it('creates an identity pool role attachment with rules mapping', () => {
@@ -161,20 +182,20 @@ describe('WorkflowStack', () => {
     })
   })
 
-  it('role mapping has rules for all 3 groups', () => {
-    template.hasResourceProperties('AWS::Cognito::IdentityPoolRoleAttachment', {
-      RoleMappings: Match.objectLike({
-        cognitoProvider: Match.objectLike({
-          RulesConfiguration: {
-            Rules: Match.arrayWith([
-              Match.objectLike({ Claim: 'cognito:groups', Value: 'osint-analyst' }),
-              Match.objectLike({ Claim: 'cognito:groups', Value: 'red-team-analyst' }),
-              Match.objectLike({ Claim: 'cognito:groups', Value: 'leadership' }),
-            ]),
-          },
-        }),
-      }),
-    })
+  it('role mapping has rules for all 4 groups', () => {
+    const resources = template.findResources('AWS::Cognito::IdentityPoolRoleAttachment')
+    const attachment = Object.values(resources)[0] as Record<string, unknown>
+    const props = attachment.Properties as Record<string, unknown>
+    const mappings = props.RoleMappings as Record<string, unknown>
+    const provider = mappings.cognitoProvider as Record<string, unknown>
+    const config = provider.RulesConfiguration as Record<string, unknown>
+    const rules = config.Rules as Array<Record<string, unknown>>
+    const groupValues = rules.map(r => r.Value)
+    expect(groupValues).toContain('admin')
+    expect(groupValues).toContain('osint-analyst')
+    expect(groupValues).toContain('red-team-analyst')
+    expect(groupValues).toContain('leadership')
+    expect(rules).toHaveLength(4)
   })
 
   it('outputs workflow ARNs for all 3 workflows', () => {

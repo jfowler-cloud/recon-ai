@@ -117,6 +117,16 @@ describe('DatabaseStack', () => {
     })
   })
 
+  it('Tools table has CategoryIndex and StatusIndex GSIs', () => {
+    template.hasResourceProperties('AWS::DynamoDB::Table', {
+      TableName: 'RA-Tools',
+      GlobalSecondaryIndexes: Match.arrayWith([
+        Match.objectLike({ IndexName: 'CategoryIndex' }),
+        Match.objectLike({ IndexName: 'StatusIndex' }),
+      ]),
+    })
+  })
+
   it('Config table has correct partition key', () => {
     template.hasResourceProperties('AWS::DynamoDB::Table', {
       TableName: 'RA-Config',
@@ -147,6 +157,15 @@ describe('DatabaseStack', () => {
     })
   })
 
+  it('uploads and vectors buckets have versioning enabled', () => {
+    const buckets = template.findResources('AWS::S3::Bucket', {
+      Properties: {
+        VersioningConfiguration: { Status: 'Enabled' },
+      },
+    })
+    expect(Object.keys(buckets).length).toBeGreaterThanOrEqual(2)
+  })
+
   it('uploads bucket has CORS configuration for PUT', () => {
     template.hasResourceProperties('AWS::S3::Bucket', {
       CorsConfiguration: {
@@ -163,6 +182,19 @@ describe('DatabaseStack', () => {
   // CloudFront
   it('creates a CloudFront distribution', () => {
     template.resourceCountIs('AWS::CloudFront::Distribution', 1)
+  })
+
+  it('creates a CloudFront response headers policy with security headers', () => {
+    template.hasResourceProperties('AWS::CloudFront::ResponseHeadersPolicy', {
+      ResponseHeadersPolicyConfig: {
+        SecurityHeadersConfig: Match.objectLike({
+          StrictTransportSecurity: Match.objectLike({ Override: true }),
+          ContentTypeOptions: { Override: true },
+          FrameOptions: Match.objectLike({ FrameOption: 'DENY' }),
+          XSSProtection: Match.objectLike({ Protection: true, ModeBlock: true }),
+        }),
+      },
+    })
   })
 
   it('distribution defaults to index.html', () => {
@@ -199,5 +231,8 @@ describe('DatabaseStack', () => {
     expect(outputKeys.some(k => k.startsWith('DistributionDomain'))).toBe(true)
     expect(outputKeys.some(k => k.startsWith('UploadsBucketName'))).toBe(true)
     expect(outputKeys.some(k => k.startsWith('VectorsBucketName'))).toBe(true)
+    expect(outputKeys.some(k => k.startsWith('UploadsTableName'))).toBe(true)
+    expect(outputKeys.some(k => k.startsWith('DocumentsTableName'))).toBe(true)
+    expect(outputKeys.some(k => k.startsWith('TargetsTableName'))).toBe(true)
   })
 })
