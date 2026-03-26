@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recon AI — Architecture Overview</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0e1a;
+            color: #e0e6f0;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f1629 0%, #1a1020 40%, #2a0f1a 100%);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding: 3rem 2rem 2.5rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #e8001c, #f59e0b, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            color: #8892b0;
+            font-size: 1.05rem;
+            margin-top: 0.5rem;
+            font-weight: 300;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 4rem;
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(145deg, #111827, #0f1320);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255,255,255,0.12);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .stat-card:nth-child(1) .stat-number { color: #e8001c; }
+        .stat-card:nth-child(2) .stat-number { color: #3b82f6; }
+        .stat-card:nth-child(3) .stat-number { color: #10b981; }
+        .stat-card:nth-child(4) .stat-number { color: #f59e0b; }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 0.4rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 2.5rem;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #f0f4ff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* Card Grid */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .card {
+            background: #111827;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .card:hover { border-color: rgba(255,255,255,0.12); }
+
+        .card-top { height: 4px; }
+
+        .card-top.red    { background: linear-gradient(90deg, #e8001c, #dc2626); }
+        .card-top.blue   { background: linear-gradient(90deg, #3b82f6, #2563eb); }
+        .card-top.green  { background: linear-gradient(90deg, #10b981, #059669); }
+        .card-top.amber  { background: linear-gradient(90deg, #f59e0b, #d97706); }
+        .card-top.pink   { background: linear-gradient(90deg, #ec4899, #db2777); }
+        .card-top.purple { background: linear-gradient(90deg, #a78bfa, #7c3aed); }
+
+        .card-body {
+            padding: 1.25rem;
+        }
+
+        .card-body h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.15rem;
+        }
+
+        .card-body .subtitle {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-body ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .card-body li {
+            font-size: 0.88rem;
+            color: #9ca3af;
+            padding: 0.2rem 0;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .card-body li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #4b5563;
+            transform: translateY(-50%);
+        }
+
+        .card-body li strong {
+            color: #d1d5db;
+            font-weight: 600;
+        }
+
+        /* Coverage Bars */
+        .coverage-section {
+            margin-top: 1rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .coverage-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .coverage-label {
+            font-size: 0.8rem;
+            color: #6b7280;
+            width: 90px;
+            flex-shrink: 0;
+            text-align: right;
+        }
+
+        .coverage-bar-bg {
+            flex: 1;
+            height: 8px;
+            background: #1f2937;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .coverage-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.6s ease;
+        }
+
+        .coverage-bar-fill.high   { background: linear-gradient(90deg, #10b981, #34d399); }
+        .coverage-bar-fill.medium { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+
+        .coverage-value {
+            font-size: 0.8rem;
+            font-weight: 600;
+            width: 40px;
+            flex-shrink: 0;
+        }
+
+        .coverage-value.high   { color: #34d399; }
+        .coverage-value.medium { color: #fbbf24; }
+
+        /* Tables */
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+            background: #111827;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .styled-table thead {
+            background: #1a2035;
+        }
+
+        .styled-table th {
+            padding: 0.85rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #9ca3af;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .styled-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: #d1d5db;
+        }
+
+        .styled-table tbody tr:last-child td { border-bottom: none; }
+
+        .styled-table tbody tr:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .styled-table code {
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 0.82rem;
+            color: #a78bfa;
+            background: rgba(167, 139, 250, 0.08);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+        }
+
+        /* Tier Badges */
+        .tier {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .tier.testing  { background: rgba(59,130,246,0.15); color: #60a5fa; }
+        .tier.optimized { background: rgba(245,158,11,0.15); color: #fbbf24; }
+        .tier.premium  { background: rgba(168,85,247,0.15); color: #c084fc; }
+
+        /* Tech Pills */
+        .pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 0.4rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+            color: #9ca3af;
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .pill:hover {
+            border-color: rgba(255,255,255,0.15);
+            color: #d1d5db;
+        }
+
+        .pill.highlight {
+            border-color: rgba(232, 0, 28, 0.3);
+            color: #fca5a5;
+            background: rgba(232, 0, 28, 0.06);
+        }
+
+        /* Flow Diagram */
+        .flow-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .flow-row {
+            display: flex;
+            gap: 0.75rem;
+            align-items: stretch;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .flow-node {
+            background: #111827;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 0.75rem 1.25rem;
+            text-align: center;
+            min-width: 140px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .flow-node:hover {
+            transform: translateY(-1px);
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .flow-node .fn-name {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #e0e6f0;
+        }
+
+        .flow-node .fn-desc {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 0.2rem;
+        }
+
+        .flow-node.trigger  { border-color: rgba(232, 0, 28, 0.3); background: #1a0a0e; }
+        .flow-node.agent    { border-color: rgba(168, 85, 247, 0.3); background: #1b1023; }
+        .flow-node.lambda   { border-color: rgba(59, 130, 246, 0.3); background: #0f1a2e; }
+        .flow-node.storage  { border-color: rgba(16, 185, 129, 0.3); background: #0f1f1a; }
+        .flow-node.frontend { border-color: rgba(245, 158, 11, 0.3); background: #1f1a0f; }
+
+        .flow-arrow {
+            color: #4b5563;
+            font-size: 1.4rem;
+            line-height: 1;
+            padding: 0.25rem 0;
+            text-align: center;
+        }
+
+        .flow-arrow-right {
+            color: #4b5563;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            padding: 0 0.25rem;
+        }
+
+        /* Persona Cards */
+        .persona-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .persona-card {
+            background: #111827;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: border-color 0.2s;
+        }
+
+        .persona-card:hover { border-color: rgba(255,255,255,0.12); }
+
+        .persona-card h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .persona-card.osint h4  { color: #60a5fa; }
+        .persona-card.redteam h4 { color: #e8001c; }
+        .persona-card.leadership h4 { color: #f59e0b; }
+
+        .persona-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .persona-card li {
+            font-size: 0.85rem;
+            color: #9ca3af;
+            padding: 0.15rem 0;
+            padding-left: 0.8rem;
+            position: relative;
+        }
+
+        .persona-card li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #4b5563;
+            transform: translateY(-50%);
+        }
+
+        /* Risk Gauge */
+        .risk-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+
+        .risk-item {
+            background: #111827;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .risk-item .risk-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .risk-item .risk-value {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-top: 0.3rem;
+        }
+
+        .risk-value.none     { color: #34d399; }
+        .risk-value.low      { color: #6ee7b7; }
+        .risk-value.medium   { color: #fbbf24; }
+        .risk-value.high     { color: #f87171; }
+        .risk-value.critical { color: #ef4444; }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            color: #4b5563;
+            font-size: 0.82rem;
+            border-top: 1px solid rgba(255,255,255,0.04);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .card-grid { grid-template-columns: 1fr; }
+            .persona-grid { grid-template-columns: 1fr; }
+            .risk-grid { grid-template-columns: 1fr; }
+            .flow-row { flex-direction: column; align-items: center; }
+            .flow-arrow-right { transform: rotate(90deg); }
+            .header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Recon AI</h1>
+    <p>OSINT Intelligence Portal &mdash; AI-Powered Threat Analysis for Three Personas</p>
+</div>
+
+<div class="container">
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-number">5</div>
+            <div class="stat-label">Strands Agents</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">19</div>
+            <div class="stat-label">Lambda Functions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">13</div>
+            <div class="stat-label">DynamoDB Tables</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">3</div>
+            <div class="stat-label">User Personas</div>
+        </div>
+    </div>
+
+    <!-- Personas -->
+    <div class="section">
+        <div class="section-title">
+            <span class="dot" style="background: #e8001c;"></span>
+            User Personas &amp; Cognito Groups
+        </div>
+        <div class="persona-grid">
+            <div class="persona-card osint">
+                <h4>OSINT Analyst</h4>
+                <ul>
+                    <li>Upload &amp; parse diverse data sources</li>
+                    <li>Investigate vulnerabilities</li>
+                    <li>AI chat with semantic search</li>
+                    <li>Queue findings for red team</li>
+                    <li>Ticket management (OSINT)</li>
+                </ul>
+            </div>
+            <div class="persona-card redteam">
+                <h4>Red Team Operator</h4>
+                <ul>
+                    <li>Prioritized target queue</li>
+                    <li>Tool registry with risk analysis</li>
+                    <li>Semantic tool search</li>
+                    <li>Operations tracking</li>
+                    <li>AI chat with tool recommendations</li>
+                </ul>
+            </div>
+            <div class="persona-card leadership">
+                <h4>Leadership</h4>
+                <ul>
+                    <li>Set goals &amp; KPIs</li>
+                    <li>Cross-domain visibility</li>
+                    <li>Auto-reprioritization on goal change</li>
+                    <li>AI Q&amp;A with visualizations</li>
+                    <li>Operations overview dashboards</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Components (2x2 grid) -->
+    <div class="section">
+        <div class="section-title">
+            <span class="dot" style="background: #3b82f6;"></span>
+            Application Components
+        </div>
+        <div class="card-grid">
+            <!-- Agents Card -->
+            <div class="card">
+                <div class="card-top purple"></div>
+                <div class="card-body">
+                    <h3>Strands AI Agents</h3>
+                    <div class="subtitle">5 agents &bull; Python 3.13+ &bull; Bedrock (Claude + Titan)</div>
+                    <ul>
+                        <li><strong>OSINT Chat</strong> &mdash; semantic search, vulnerability summary, charts</li>
+                        <li><strong>Red Team Chat</strong> &mdash; targets, tool search, risk analysis, goals</li>
+                        <li><strong>Leadership Chat</strong> &mdash; cross-domain Q&amp;A, workload, activities</li>
+                        <li><strong>Target Enrichment</strong> &mdash; plain text &rarr; structured target</li>
+                        <li><strong>Prioritization</strong> &mdash; tool-aware weighted scoring engine</li>
+                    </ul>
+                    <div class="coverage-section">
+                        <div class="coverage-row">
+                            <div class="coverage-label">Tests</div>
+                            <div class="coverage-bar-bg"><div class="coverage-bar-fill high" style="width: 100%"></div></div>
+                            <div class="coverage-value high">44</div>
+                        </div>
+                        <div class="coverage-row">
+                            <div class="coverage-label">Coverage</div>
+                            <div class="coverage-bar-bg"><div class="coverage-bar-fill high" style="width: 100%"></div></div>
+                            <div class="coverage-value high">100%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Functions Card -->
+            <div class="card">
+                <div class="card-top blue"></div>
+                <div class="card-body">
+                    <h3>Lambda Functions</h3>
+                    <div class="subtitle">19 handlers &bull; Python 3.13+ &bull; ARM64 Graviton</div>
+                    <ul>
+                        <li><strong>Data Pipeline</strong> &mdash; upload_data, parse_upload, trigger_ingestion</li>
+                        <li><strong>Ticketing</strong> &mdash; create_ticket, update_ticket, list_tickets</li>
+                        <li><strong>Red Team</strong> &mdash; create_target, update_target, manage_tools, record_tool_action</li>
+                        <li><strong>Context</strong> &mdash; update_context, get_config, update_config, seed_data</li>
+                        <li><strong>Chat</strong> &mdash; chat_handler, get_session, list_sessions</li>
+                        <li><strong>Views</strong> &mdash; get_dashboard, queue_for_redteam</li>
+                    </ul>
+                    <div class="coverage-section">
+                        <div class="coverage-row">
+                            <div class="coverage-label">Tests</div>
+                            <div class="coverage-bar-bg"><div class="coverage-bar-fill high" style="width: 100%"></div></div>
+                            <div class="coverage-value high">199</div>
+                        </div>
+                        <div class="coverage-row">
+                            <div class="coverage-label">Coverage</div>
+                            <div class="coverage-bar-bg"><div class="coverage-bar-fill high" style="width: 99%"></div></div>
+                            <div class="coverage-value high">99%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Infrastructure Card -->
+            <div class="card">
+                <div class="card-top green"></div>
+                <div class="card-body">
+                    <h3>CDK Infrastructure</h3>
+                    <div class="subtitle">4 stacks &bull; TypeScript &bull; CDK v2</div>
+                    <ul>
+                        <li><strong>RA-Auth</strong> &mdash; Cognito User Pool + Identity Pool + 3 groups</li>
+                        <li><strong>RA-Database</strong> &mdash; 13 DynamoDB tables, S3 buckets, CloudFront</li>
+                        <li><strong>RA-Functions</strong> &mdash; 19 Lambda functions + shared layers + IAM</li>
+                        <li><strong>RA-Workflow</strong> &mdash; 3 Step Functions, EventBridge, Cognito roles</li>
+                    </ul>
+                    <div class="coverage-section">
+                        <div class="coverage-row">
+                            <div class="coverage-label">CDK Tests</div>
+                            <div class="coverage-bar-bg"><div class="coverage-bar-fill high" style="width: 90%"></div></div>
+                            <div class="coverage-value high">66</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Frontend Card -->
+            <div class="card">
+                <div class="card-top amber"></div>
+                <div class="card-body">
+                    <h3>React Frontend</h3>
+                    <div class="subtitle">React 19 &bull; Vite 7 &bull; Cloudscape &bull; Dark Mode</div>
+                    <ul>
+                        <li><strong>OSINT Views</strong> &mdash; upload wizard, vulnerability dashboard, data sources</li>
+                        <li><strong>Red Team Views</strong> &mdash; target queue, operations, tool tracking, dashboard</li>
+                        <li><strong>Leadership Views</strong> &mdash; goal management, cross-domain dashboard</li>
+                        <li><strong>Chat UIs</strong> &mdash; 3 persona-specific chats with OutputPanel (Recharts)</li>
+                        <li><strong>Auth</strong> &mdash; Amplify Authenticator, role-based navigation</li>
+                    </ul>
+                    <div class="coverage-section">
+                        <div class="coverage-row">
+                            <div class="coverage-label">Unit Tests</div>
+                            <div class="coverage-bar-bg"><div class="coverage-bar-fill medium" style="width: 50%"></div></div>
+                            <div class="coverage-value medium">13</div>
+                        </div>
+                        <div class="coverage-row">
+                            <div class="coverage-label">E2E Tests</div>
+                            <div class="coverage-bar-bg"><div class="coverage-bar-fill high" style="width: 80%"></div></div>
+                            <div class="coverage-value high">34</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Ingestion Flow -->
+    <div class="section">
+        <div class="section-title">
+            <span class="dot" style="background: #10b981;"></span>
+            Data Ingestion Pipeline
+        </div>
+        <div class="flow-container">
+            <div class="flow-row">
+                <div class="flow-node trigger">
+                    <div class="fn-name">File Upload</div>
+                    <div class="fn-desc">S3 presigned URL</div>
+                </div>
+                <div class="flow-arrow-right">&rarr;</div>
+                <div class="flow-node storage">
+                    <div class="fn-name">S3 Bucket</div>
+                    <div class="fn-desc">uploads/{type}/{id}/</div>
+                </div>
+                <div class="flow-arrow-right">&rarr;</div>
+                <div class="flow-node lambda">
+                    <div class="fn-name">EventBridge</div>
+                    <div class="fn-desc">Object Created</div>
+                </div>
+                <div class="flow-arrow-right">&rarr;</div>
+                <div class="flow-node agent">
+                    <div class="fn-name">Step Functions</div>
+                    <div class="fn-desc">RA-IngestionWorkflow</div>
+                </div>
+            </div>
+            <div class="flow-arrow">&darr;</div>
+            <div class="flow-row">
+                <div class="flow-node lambda">
+                    <div class="fn-name">Detect Type</div>
+                    <div class="fn-desc">6 adapters</div>
+                </div>
+                <div class="flow-arrow-right">&rarr;</div>
+                <div class="flow-node lambda">
+                    <div class="fn-name">Parse &amp; Extract</div>
+                    <div class="fn-desc">Textract / Comprehend</div>
+                </div>
+                <div class="flow-arrow-right">&rarr;</div>
+                <div class="flow-node agent">
+                    <div class="fn-name">Embed (Titan v2)</div>
+                    <div class="fn-desc">Vectorize documents</div>
+                </div>
+                <div class="flow-arrow-right">&rarr;</div>
+                <div class="flow-node storage">
+                    <div class="fn-name">DynamoDB + S3</div>
+                    <div class="fn-desc">Documents + Vectors</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Red Team Prioritization Flow -->
+    <div class="section">
+        <div class="section-title">
+            <span class="dot" style="background: #e8001c;"></span>
+            Red Team Target Prioritization
+        </div>
+        <div class="flow-container">
+            <div class="flow-row">
+                <div class="flow-node trigger">
+                    <div class="fn-name">Plain-Text Goal</div>
+                    <div class="fn-desc">Analyst submits target</div>
+                </div>
+                <div class="flow-arrow-right">&rarr;</div>
+                <div class="flow-node lambda">
+                    <div class="fn-name">create_target</div>
+                    <div class="fn-desc">Stub + queue</div>
+                </div>
+                <div class="flow-arrow-right">&rarr;</div>
+                <div class="flow-node agent">
+                    <div class="fn-name">Enrichment Agent</div>
+                    <div class="fn-desc">Claude + leadership ctx</div>
+                </div>
+                <div class="flow-arrow-right">&rarr;</div>
+                <div class="flow-node storage">
+                    <div class="fn-name">RA-Targets</div>
+                    <div class="fn-desc">Structured target</div>
+                </div>
+            </div>
+            <div class="flow-arrow">&darr;</div>
+            <div class="flow-row">
+                <div class="flow-node frontend">
+                    <div class="fn-name">Leadership Goals</div>
+                    <div class="fn-desc">update_context</div>
+                </div>
+                <div class="flow-arrow-right">&rarr;</div>
+                <div class="flow-node agent">
+                    <div class="fn-name">Prioritization Agent</div>
+                    <div class="fn-desc">Tool-aware scoring</div>
+                </div>
+                <div class="flow-arrow-right">&rarr;</div>
+                <div class="flow-node lambda">
+                    <div class="fn-name">Score Formula</div>
+                    <div class="fn-desc">align*0.4 + sev*0.3 + eff*0.2 + urg*0.1</div>
+                </div>
+                <div class="flow-arrow-right">&rarr;</div>
+                <div class="flow-node storage">
+                    <div class="fn-name">Ranked Queue</div>
+                    <div class="fn-desc">RA-ScoringHistory</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tool Registry & Vectorization Flow -->
+    <div class="section">
+        <div class="section-title">
+            <span class="dot" style="background: #a78bfa;"></span>
+            Tool Registry &amp; Risk Vectorization
+        </div>
+        <div class="flow-container">
+            <div class="flow-row">
+                <div class="flow-node trigger">
+                    <div class="fn-name">Register Tool</div>
+                    <div class="fn-desc">manage_tools (create)</div>
+                </div>
+                <div class="flow-arrow-right">&rarr;</div>
+                <div class="flow-node storage">
+                    <div class="fn-name">RA-Tools</div>
+                    <div class="fn-desc">Risk + success profiles</div>
+                </div>
+                <div class="flow-arrow-right">&rarr;</div>
+                <div class="flow-node agent">
+                    <div class="fn-name">Titan v2 Embed</div>
+                    <div class="fn-desc">Vectorize description + risk</div>
+                </div>
+                <div class="flow-arrow-right">&rarr;</div>
+                <div class="flow-node storage">
+                    <div class="fn-name">S3 Vectors</div>
+                    <div class="fn-desc">embeddings/tools/</div>
+                </div>
+            </div>
+            <div class="flow-arrow">&darr;</div>
+            <div class="flow-row">
+                <div class="flow-node agent">
+                    <div class="fn-name">Red Team Chat</div>
+                    <div class="fn-desc">search_tools (semantic)</div>
+                </div>
+                <div class="flow-arrow-right">&rarr;</div>
+                <div class="flow-node agent">
+                    <div class="fn-name">Prioritization</div>
+                    <div class="fn-desc">get_available_tools</div>
+                </div>
+                <div class="flow-arrow-right">&rarr;</div>
+                <div class="flow-node lambda">
+                    <div class="fn-name">Risk-Adjusted Score</div>
+                    <div class="fn-desc">Collateral tags + penalties</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Risk Profile Example -->
+        <div style="margin-top: 1.5rem;">
+            <div style="font-size: 0.9rem; color: #8892b0; margin-bottom: 0.75rem; font-weight: 600;">Tool Risk Profile Dimensions</div>
+            <div class="risk-grid">
+                <div class="risk-item">
+                    <div class="risk-label">Service Disruption</div>
+                    <div class="risk-value high">none &rarr; critical</div>
+                </div>
+                <div class="risk-item">
+                    <div class="risk-label">System Damage</div>
+                    <div class="risk-value high">none &rarr; critical</div>
+                </div>
+                <div class="risk-item">
+                    <div class="risk-label">Detection Likelihood</div>
+                    <div class="risk-value medium">low &rarr; high</div>
+                </div>
+                <div class="risk-item">
+                    <div class="risk-label">Success Rate</div>
+                    <div class="risk-value low">0-100%</div>
+                </div>
+                <div class="risk-item">
+                    <div class="risk-label">Reversible</div>
+                    <div class="risk-value none">yes / no</div>
+                </div>
+                <div class="risk-item">
+                    <div class="risk-label">Noisy</div>
+                    <div class="risk-value medium">yes / no</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DynamoDB Tables -->
+    <div class="section">
+        <div class="section-title">
+            <span class="dot" style="background: #10b981;"></span>
+            DynamoDB Tables (13)
+        </div>
+        <table class="styled-table">
+            <thead>
+                <tr><th>Table</th><th>PK</th><th>SK</th><th>GSIs</th><th>TTL</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><code>RA-DataSources</code></td><td>sourceId</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+                <tr><td><code>RA-Uploads</code></td><td>uploadId</td><td>&mdash;</td><td>AnalystIndex, StatusIndex</td><td>&mdash;</td></tr>
+                <tr><td><code>RA-Documents</code></td><td>uploadId</td><td>documentId</td><td>&mdash;</td><td>365d</td></tr>
+                <tr><td><code>RA-Tickets</code></td><td>ticketId</td><td>&mdash;</td><td>OwnerIndex, StatusIndex, TypeIndex, TargetIndex</td><td>&mdash;</td></tr>
+                <tr><td><code>RA-TicketNotes</code></td><td>ticketId</td><td>noteId</td><td>&mdash;</td><td>&mdash;</td></tr>
+                <tr><td><code>RA-Targets</code></td><td>targetId</td><td>&mdash;</td><td>StatusIndex(status, priorityScore)</td><td>&mdash;</td></tr>
+                <tr><td><code>RA-LeadershipContext</code></td><td>contextId</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+                <tr><td><code>RA-ToolActions</code></td><td>ticketId</td><td>actionId</td><td>&mdash;</td><td>&mdash;</td></tr>
+                <tr><td><code>RA-Tools</code></td><td>toolId</td><td>&mdash;</td><td>CategoryIndex, StatusIndex</td><td>&mdash;</td></tr>
+                <tr><td><code>RA-ChatSessions</code></td><td>userId</td><td>sessionId</td><td>&mdash;</td><td>90d</td></tr>
+                <tr><td><code>RA-ChatMessages</code></td><td>sessionId</td><td>messageId</td><td>&mdash;</td><td>90d</td></tr>
+                <tr><td><code>RA-Config</code></td><td>configKey</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+                <tr><td><code>RA-ScoringHistory</code></td><td>runId</td><td>&mdash;</td><td>&mdash;</td><td>90d</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Deployment Tiers -->
+    <div class="section">
+        <div class="section-title">
+            <span class="dot" style="background: #f59e0b;"></span>
+            Deployment Tiers
+        </div>
+        <table class="styled-table">
+            <thead>
+                <tr><th>Tier</th><th>Chat Agent</th><th>Enrichment</th><th>Prioritization</th><th>Est. Cost</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="tier testing">testing</span></td>
+                    <td>Haiku 4.5</td><td>Haiku 4.5</td><td>Haiku 4.5</td><td>~$2/mo</td>
+                </tr>
+                <tr>
+                    <td><span class="tier optimized">optimized</span></td>
+                    <td>Sonnet 4.5</td><td>Haiku 4.5</td><td>Sonnet 4.5</td><td>~$5/mo</td>
+                </tr>
+                <tr>
+                    <td><span class="tier premium">premium</span></td>
+                    <td>Opus 4.5</td><td>Sonnet 4.5</td><td>Opus 4.5</td><td>~$12/mo</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Tech Stack -->
+    <div class="section">
+        <div class="section-title">
+            <span class="dot" style="background: #ec4899;"></span>
+            Tech Stack
+        </div>
+        <div class="pills">
+            <span class="pill highlight">React 19</span>
+            <span class="pill highlight">Vite 7</span>
+            <span class="pill highlight">Cloudscape</span>
+            <span class="pill">TypeScript 5.7</span>
+            <span class="pill highlight">Python 3.13+</span>
+            <span class="pill highlight">Strands SDK</span>
+            <span class="pill highlight">Claude (Bedrock)</span>
+            <span class="pill">Titan Embeddings v2</span>
+            <span class="pill">Comprehend</span>
+            <span class="pill">Textract</span>
+            <span class="pill highlight">DynamoDB</span>
+            <span class="pill">S3</span>
+            <span class="pill">CloudFront</span>
+            <span class="pill">Step Functions</span>
+            <span class="pill">EventBridge</span>
+            <span class="pill highlight">CDK v2</span>
+            <span class="pill">Cognito</span>
+            <span class="pill">Amplify Auth</span>
+            <span class="pill">Recharts</span>
+            <span class="pill">Lambda Powertools</span>
+            <span class="pill">Playwright</span>
+            <span class="pill">pytest + moto</span>
+            <span class="pill">Vitest</span>
+            <span class="pill">Ruff</span>
+            <span class="pill">uv</span>
+        </div>
+    </div>
+
+    <!-- Key Design Decisions -->
+    <div class="section">
+        <div class="section-title">
+            <span class="dot" style="background: #6b7280;"></span>
+            Key Design Decisions
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <ul>
+                    <li><strong>No API Gateway</strong> &mdash; frontend calls DynamoDB + Lambda directly via Cognito identity pool credentials</li>
+                    <li><strong>Adapter pattern</strong> &mdash; single parse_upload Lambda with pluggable adapters for each data source type</li>
+                    <li><strong>Three separate chat agents</strong> &mdash; focused tool surfaces and prompts, not one multi-persona agent</li>
+                    <li><strong>S3 vectors + in-memory cosine</strong> &mdash; no OpenSearch needed for &lt;10K document corpus</li>
+                    <li><strong>Tool vectorization</strong> &mdash; risk profiles, success rates, and pros/cons embedded alongside documents for semantic search</li>
+                    <li><strong>Tool-aware prioritization</strong> &mdash; scoring factors tool availability, collateral risk, and detection likelihood</li>
+                    <li><strong>Weighted formula</strong> &mdash; alignment*0.40 + severity*0.30 + (100-effort)*0.20 + urgency*0.10 with leadership-configurable weights</li>
+                    <li><strong>Ticket state machine</strong> &mdash; new &rarr; triaging &rarr; investigating &rarr; active &rarr; completed &rarr; closed</li>
+                    <li><strong>Comprehend for entity extraction</strong> &mdash; budget-conscious, LLMs only for semantic enrichment and chat</li>
+                    <li><strong>Manual tool tracking</strong> &mdash; automation hooks built in but execution is currently manual</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    Generated March 2026 &bull; Recon AI &bull; Architecture Overview
+</footer>
+
+</body>
+</html>

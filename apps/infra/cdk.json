@@ -1,0 +1,13 @@
+{
+  "app": "npx ts-node bin/recon-ai.ts",
+  "watch": {
+    "include": ["**"],
+    "exclude": ["README.md", "cdk*.json", "**/*.d.ts", "**/*.js", "tsconfig.json", "package*.json", "node_modules", "test"]
+  },
+  "context": {
+    "@aws-cdk/aws-lambda:recognizeLayerVersion": true,
+    "@aws-cdk/core:checkSecretUsage": true,
+    "@aws-cdk-lib/aws-s3:serverAccessLogsUsePolicyByDefault": true,
+    "@aws-cdk/core:target-partitions": ["aws"]
+  }
+}

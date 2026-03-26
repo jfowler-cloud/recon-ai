@@ -1,0 +1,51 @@
+"""Leadership chat agent Lambda handler — invoked by chat_handler with a message."""
+
+import json
+
+from aws_lambda_powertools import Logger, Tracer
+
+from leadership_chat_agent.agent import create_chat_agent
+from shared.chat_tools import clear_collected_output, get_collected_output
+
+logger = Logger(service="recon-ai")
+tracer = Tracer(service="recon-ai")
+
+
+@tracer.capture_lambda_handler
+@logger.inject_lambda_context
+def handler(event, context):
+    """Invoke leadership chat agent and return response with any collected output."""
+    message = event.get("message", "").strip()
+    if not message:
+        return {"statusCode": 400, "body": json.dumps({"error": "message is required"})}
+
+    response_text = ""
+    output_data = None
+
+    try:
+        clear_collected_output()
+        agent = create_chat_agent()
+        result = agent(message)
+
+        if isinstance(result, dict):
+            response_text = result.get("content", str(result))
+            output_data = result.get("outputData")
+        else:
+            response_text = str(result)
+
+        if not output_data:
+            collected = get_collected_output()
+            if collected:
+                output_data = collected if len(collected) > 1 else collected[0]
+
+    except Exception:
+        logger.exception("Leadership chat agent error")
+        response_text = "I encountered an error processing your request. Please try again."
+
+    return {
+        "statusCode": 200,
+        "body": json.dumps({
+            "content": response_text,
+            "outputData": output_data,
+        }),
+    }

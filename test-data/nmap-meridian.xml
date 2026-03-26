@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/share/nmap/nmap.xsl" type="text/xsl"?>
+<nmaprun scanner="nmap" args="nmap -sV -sC -O -A -T4 10.10.1.0/24" start="1711000000" startstr="Thu Mar 20 08:00:00 2026" version="7.94" xmloutputversion="1.05">
+<scaninfo type="syn" protocol="tcp" numservices="1000" services="1-1000,3306,3389,5432,5601,6379,6443,8080,8443,9200,27017"/>
+<verbose level="1"/>
+<debugging level="0"/>
+
+<!-- Domain Controller -->
+<host starttime="1711000010" endtime="1711000045">
+<status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.1.1" addrtype="ipv4"/>
+<address addr="00:50:56:A1:01:01" addrtype="mac" vendor="VMware"/>
+<hostnames><hostname name="dc01.meridian-defense.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="53"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="domain" product="Microsoft DNS" version="10.0.17763" ostype="Windows" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="88"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="kerberos-sec" product="Microsoft Windows Kerberos" ostype="Windows" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="135"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="msrpc" product="Microsoft Windows RPC" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="139"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="netbios-ssn" product="Microsoft Windows netbios-ssn" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="389"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="ldap" product="Microsoft Windows Active Directory LDAP" version="10.0.17763" method="probed" conf="10">
+<script id="ldap-rootdse" output="&#xa;    namingContexts: DC=meridian-defense,DC=local&#xa;    defaultNamingContext: DC=meridian-defense,DC=local&#xa;    domainFunctionality: 7&#xa;    forestFunctionality: 7&#xa;    domainControllerFunctionality: 7&#xa;    serverName: CN=DC01,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=meridian-defense,DC=local"/>
+</service></port>
+<port protocol="tcp" portid="443"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="https" product="Microsoft HTTPAPI" version="2.0" tunnel="ssl" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="445"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="microsoft-ds" product="Windows Server 2019 Standard 17763" method="probed" conf="10">
+<script id="smb2-security-mode" output="&#xa;  3.1.1:&#xa;    Message signing enabled and required"/>
+<script id="smb-os-discovery" output="&#xa;  OS: Windows Server 2019 Standard 17763&#xa;  Computer name: DC01&#xa;  NetBIOS computer name: DC01&#xa;  Domain name: meridian-defense.local&#xa;  Forest name: meridian-defense.local&#xa;  FQDN: DC01.meridian-defense.local"/>
+</service></port>
+<port protocol="tcp" portid="464"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="kpasswd5" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="636"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="ldapssl" product="Microsoft Windows Active Directory LDAP" tunnel="ssl" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="3268"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="globalcatLDAP" product="Microsoft Windows Active Directory LDAP" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="3269"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="globalcatLDAPssl" product="Microsoft Windows Active Directory LDAP" tunnel="ssl" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="3389"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="ms-wbt-server" product="Microsoft Terminal Services" tunnel="ssl" method="probed" conf="10">
+<script id="rdp-ntlm-info" output="&#xa;  Target_Name: MERIDIAN&#xa;  NetBIOS_Domain_Name: MERIDIAN&#xa;  NetBIOS_Computer_Name: DC01&#xa;  DNS_Domain_Name: meridian-defense.local&#xa;  DNS_Computer_Name: DC01.meridian-defense.local&#xa;  Product_Version: 10.0.17763"/>
+</service></port>
+</ports>
+<os><osmatch name="Microsoft Windows Server 2019" accuracy="98"><osclass type="general purpose" vendor="Microsoft" osfamily="Windows" osgen="2019"/></osmatch></os>
+</host>
+
+<!-- File Server -->
+<host starttime="1711000050" endtime="1711000080">
+<status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.1.2" addrtype="ipv4"/>
+<address addr="00:50:56:A1:01:02" addrtype="mac" vendor="VMware"/>
+<hostnames><hostname name="fs01.meridian-defense.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="111"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="rpcbind" version="2-4" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="139"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="netbios-ssn" product="Samba smbd 4.15.13-Ubuntu" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="445"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="microsoft-ds" product="Samba smbd 4.15.13-Ubuntu" method="probed" conf="10">
+<script id="smb2-security-mode" output="&#xa;  3.1.1:&#xa;    Message signing enabled but not required"/>
+<script id="smb-enum-shares" output="&#xa;  account_used: guest&#xa;  \\10.10.1.2\public: &#xa;    Type: STYPE_DISKTREE&#xa;    Access: READ&#xa;  \\10.10.1.2\engineering: &#xa;    Type: STYPE_DISKTREE&#xa;    Access: DENIED&#xa;  \\10.10.1.2\contracts: &#xa;    Type: STYPE_DISKTREE&#xa;    Access: DENIED&#xa;  \\10.10.1.2\hr-docs: &#xa;    Type: STYPE_DISKTREE&#xa;    Access: DENIED"/>
+</service></port>
+<port protocol="tcp" portid="2049"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="nfs" version="3-4" method="probed" conf="10">
+<script id="nfs-showmount" output="&#xa;  /exports/public *&#xa;  /exports/engineering 10.10.1.0/24&#xa;  /exports/backups 10.10.1.1"/>
+</service></port>
+<port protocol="tcp" portid="22"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ssh" product="OpenSSH" version="8.9p1 Ubuntu 3ubuntu0.6" method="probed" conf="10"/></port>
+</ports>
+<os><osmatch name="Linux 5.15" accuracy="95"><osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="5.X"/></osmatch></os>
+</host>
+
+<!-- Mail Relay -->
+<host starttime="1711000085" endtime="1711000110">
+<status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.1.3" addrtype="ipv4"/>
+<address addr="00:50:56:A1:01:03" addrtype="mac" vendor="VMware"/>
+<hostnames><hostname name="smtp01.meridian-defense.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="25"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="smtp" product="Postfix smtpd" method="probed" conf="10">
+<script id="smtp-commands" output="smtp01.meridian-defense.local, PIPELINING, SIZE 52428800, VRFY, ETRN, STARTTLS, AUTH PLAIN LOGIN, ENHANCEDSTATUSCODES, 8BITMIME, DSN"/>
+</service></port>
+<port protocol="tcp" portid="587"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="submission" product="Postfix smtpd" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="993"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="imaps" product="Dovecot imapd" version="2.3.20" tunnel="ssl" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="22"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ssh" product="OpenSSH" version="8.9p1 Ubuntu 3ubuntu0.6" method="probed" conf="10"/></port>
+</ports>
+<os><osmatch name="Linux 5.15" accuracy="95"><osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="5.X"/></osmatch></os>
+</host>
+
+<!-- DHCP / Management VLAN switch -->
+<host starttime="1711000115" endtime="1711000135">
+<status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.1.4" addrtype="ipv4"/>
+<address addr="00:50:56:A1:01:04" addrtype="mac" vendor="VMware"/>
+<hostnames><hostname name="mgmt-sw01.meridian-defense.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="22"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ssh" product="OpenSSH" version="7.6" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" product="Cisco IOS http config" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="161"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="snmp" method="probed" conf="8">
+<script id="snmp-info" output="&#xa;  community: public&#xa;  sysDescr: Cisco IOS Software, Catalyst 9300&#xa;  sysContact: netops@meridian-defense.com&#xa;  sysLocation: Building A, MDF"/>
+</service></port>
+</ports>
+<os><osmatch name="Cisco IOS 17.x" accuracy="90"><osclass type="switch" vendor="Cisco" osfamily="IOS" osgen="17.X"/></osmatch></os>
+</host>
+
+<!-- MySQL Database -->
+<host starttime="1711000140" endtime="1711000165">
+<status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.1.5" addrtype="ipv4"/>
+<address addr="00:50:56:A1:01:05" addrtype="mac" vendor="VMware"/>
+<hostnames><hostname name="db-mysql01.meridian-defense.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="3306"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="mysql" product="MySQL" version="8.0.32" method="probed" conf="10">
+<script id="mysql-info" output="&#xa;  Protocol: 10&#xa;  Version: 8.0.32&#xa;  Thread ID: 847&#xa;  Status: Autocommit&#xa;  Salt: &amp;Kx#random_salt_bytes"/>
+<script id="mysql-databases" output="&#xa;  information_schema&#xa;  meridian_prod&#xa;  meridian_staging&#xa;  meridian_hr&#xa;  mysql&#xa;  performance_schema"/>
+</service></port>
+<port protocol="tcp" portid="22"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ssh" product="OpenSSH" version="8.9p1 Ubuntu 3ubuntu0.6" method="probed" conf="10"/></port>
+</ports>
+<os><osmatch name="Linux 5.15" accuracy="96"><osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="5.X"/></osmatch></os>
+</host>
+
+<!-- PostgreSQL Database -->
+<host starttime="1711000170" endtime="1711000195">
+<status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.1.6" addrtype="ipv4"/>
+<address addr="00:50:56:A1:01:06" addrtype="mac" vendor="VMware"/>
+<hostnames><hostname name="db-pg01.meridian-defense.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="5432"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="postgresql" product="PostgreSQL DB" version="14.2" method="probed" conf="10">
+<script id="pgsql-info" output="&#xa;  Version: PostgreSQL 14.2 on x86_64-pc-linux-gnu&#xa;  SSL: disabled&#xa;  Authentication: md5"/>
+</service></port>
+<port protocol="tcp" portid="22"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ssh" product="OpenSSH" version="8.9p1 Ubuntu 3ubuntu0.6" method="probed" conf="10"/></port>
+</ports>
+<os><osmatch name="Linux 5.15" accuracy="96"><osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="5.X"/></osmatch></os>
+</host>
+
+<!-- Redis Cache -->
+<host starttime="1711000200" endtime="1711000225">
+<status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.1.7" addrtype="ipv4"/>
+<address addr="00:50:56:A1:01:07" addrtype="mac" vendor="VMware"/>
+<hostnames><hostname name="cache01.meridian-defense.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="6379"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="redis" product="Redis key-value store" version="7.0.11" method="probed" conf="10">
+<script id="redis-info" output="&#xa;  Version: 7.0.11&#xa;  Mode: standalone&#xa;  OS: Linux 5.15.0-92-generic x86_64&#xa;  Connected clients: 14&#xa;  Used memory: 2.71M&#xa;  Auth: disabled&#xa;  Keyspace: db0:keys=1247,expires=312"/>
+</service></port>
+<port protocol="tcp" portid="22"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ssh" product="OpenSSH" version="8.9p1 Ubuntu 3ubuntu0.6" method="probed" conf="10"/></port>
+</ports>
+<os><osmatch name="Linux 5.15" accuracy="96"><osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="5.X"/></osmatch></os>
+</host>
+
+<!-- Elasticsearch -->
+<host starttime="1711000230" endtime="1711000255">
+<status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.1.8" addrtype="ipv4"/>
+<address addr="00:50:56:A1:01:08" addrtype="mac" vendor="VMware"/>
+<hostnames><hostname name="elastic01.meridian-defense.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="9200"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" product="Elasticsearch REST API" version="7.17.9" method="probed" conf="10">
+<script id="http-title" output="Site doesn't have a title."/>
+</service></port>
+<port protocol="tcp" portid="9300"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="vce" product="Elasticsearch transport" version="7.17.9" method="probed" conf="8"/></port>
+<port protocol="tcp" portid="22"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ssh" product="OpenSSH" version="8.9p1 Ubuntu 3ubuntu0.6" method="probed" conf="10"/></port>
+</ports>
+<os><osmatch name="Linux 5.15" accuracy="96"><osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="5.X"/></osmatch></os>
+</host>
+
+<!-- MongoDB -->
+<host starttime="1711000260" endtime="1711000285">
+<status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.1.9" addrtype="ipv4"/>
+<address addr="00:50:56:A1:01:09" addrtype="mac" vendor="VMware"/>
+<hostnames><hostname name="mongo01.meridian-defense.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="27017"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="mongodb" product="MongoDB" version="6.0.5" method="probed" conf="10">
+<script id="mongodb-info" output="&#xa;  MongoDB server version: 6.0.5&#xa;  Authentication: NONE&#xa;  Databases:&#xa;    meridian_hr (512 MB)&#xa;    meridian_contracts (1.8 GB)&#xa;    meridian_ops (890 MB)&#xa;    admin (40 KB)&#xa;    local (73 KB)"/>
+<script id="mongodb-databases" output="&#xa;  meridian_hr - 512.00 MB&#xa;  meridian_contracts - 1.80 GB&#xa;  meridian_ops - 890.00 MB"/>
+</service></port>
+<port protocol="tcp" portid="22"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ssh" product="OpenSSH" version="8.9p1 Ubuntu 3ubuntu0.6" method="probed" conf="10"/></port>
+</ports>
+<os><osmatch name="Linux 5.15" accuracy="96"><osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="5.X"/></osmatch></os>
+</host>
+
+<!-- Grafana -->
+<host starttime="1711000290" endtime="1711000315">
+<status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.1.10" addrtype="ipv4"/>
+<address addr="00:50:56:A1:01:0A" addrtype="mac" vendor="VMware"/>
+<hostnames><hostname name="grafana.meridian-defense.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="3000"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" product="Grafana" version="9.5.2" method="probed" conf="10">
+<script id="http-title" output="Grafana"/>
+<script id="http-auth" output="&#xa;  Default credentials detected: admin:admin&#xa;  Login page: /login"/>
+</service></port>
+<port protocol="tcp" portid="22"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ssh" product="OpenSSH" version="8.9p1 Ubuntu 3ubuntu0.6" method="probed" conf="10"/></port>
+</ports>
+<os><osmatch name="Linux 5.15" accuracy="96"><osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="5.X"/></osmatch></os>
+</host>
+
+<!-- Kibana -->
+<host starttime="1711000320" endtime="1711000345">
+<status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.1.11" addrtype="ipv4"/>
+<address addr="00:50:56:A1:01:0B" addrtype="mac" vendor="VMware"/>
+<hostnames><hostname name="kibana.meridian-defense.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="5601"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" product="Kibana" version="7.17.9" method="probed" conf="10">
+<script id="http-title" output="Elastic Kibana"/>
+</service></port>
+<port protocol="tcp" portid="22"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ssh" product="OpenSSH" version="8.9p1 Ubuntu 3ubuntu0.6" method="probed" conf="10"/></port>
+</ports>
+<os><osmatch name="Linux 5.15" accuracy="96"><osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="5.X"/></osmatch></os>
+</host>
+
+<!-- GitLab -->
+<host starttime="1711000350" endtime="1711000375">
+<status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.1.12" addrtype="ipv4"/>
+<address addr="00:50:56:A1:01:0C" addrtype="mac" vendor="VMware"/>
+<hostnames><hostname name="gitlab.meridian-defense.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="8443"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="https" product="nginx" version="1.22.1" tunnel="ssl" method="probed" conf="10">
+<script id="http-title" output="GitLab"/>
+<script id="http-server-header" output="nginx"/>
+</service></port>
+<port protocol="tcp" portid="22"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ssh" product="OpenSSH (GitLab)" version="8.9p1 Ubuntu 3ubuntu0.6" method="probed" conf="10">
+<script id="ssh-auth-methods" output="publickey,password"/>
+</service></port>
+<port protocol="tcp" portid="5050"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" product="GitLab Container Registry" method="probed" conf="8"/></port>
+</ports>
+<os><osmatch name="Linux 5.15" accuracy="96"><osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="5.X"/></osmatch></os>
+</host>
+
+<!-- Kubernetes API -->
+<host starttime="1711000380" endtime="1711000405">
+<status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.1.13" addrtype="ipv4"/>
+<address addr="00:50:56:A1:01:0D" addrtype="mac" vendor="VMware"/>
+<hostnames><hostname name="k8s-api.meridian-defense.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="6443"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="https" product="Kubernetes API" version="1.25.6" tunnel="ssl" method="probed" conf="10">
+<script id="http-title" output=""/>
+<script id="kubernetes-info" output="&#xa;  Version: v1.25.6&#xa;  Platform: linux/amd64&#xa;  Anonymous auth: enabled&#xa;  Namespaces accessible: default, kube-system, meridian-prod, meridian-staging, monitoring"/>
+</service></port>
+<port protocol="tcp" portid="10250"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="https" product="Kubelet API" tunnel="ssl" method="probed" conf="8"/></port>
+<port protocol="tcp" portid="2379"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="https" product="etcd" version="3.5.6" tunnel="ssl" method="probed" conf="8"/></port>
+<port protocol="tcp" portid="22"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ssh" product="OpenSSH" version="8.9p1 Ubuntu 3ubuntu0.6" method="probed" conf="10"/></port>
+</ports>
+<os><osmatch name="Linux 5.15" accuracy="96"><osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="5.X"/></osmatch></os>
+</host>
+
+<!-- Windows RDP / Domain Controller 2 -->
+<host starttime="1711000410" endtime="1711000435">
+<status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.1.14" addrtype="ipv4"/>
+<address addr="00:50:56:A1:01:0E" addrtype="mac" vendor="VMware"/>
+<hostnames><hostname name="dc02.meridian-defense.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="3389"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="ms-wbt-server" product="Microsoft Terminal Services" tunnel="ssl" method="probed" conf="10">
+<script id="rdp-ntlm-info" output="&#xa;  Target_Name: MERIDIAN&#xa;  NetBIOS_Domain_Name: MERIDIAN&#xa;  NetBIOS_Computer_Name: DC02&#xa;  DNS_Domain_Name: meridian-defense.local&#xa;  DNS_Computer_Name: DC02.meridian-defense.local&#xa;  Product_Version: 10.0.17763"/>
+</service></port>
+<port protocol="tcp" portid="53"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="domain" product="Microsoft DNS" version="10.0.17763" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="88"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="kerberos-sec" product="Microsoft Windows Kerberos" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="389"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="ldap" product="Microsoft Windows Active Directory LDAP" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="445"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="microsoft-ds" method="probed" conf="10"/></port>
+</ports>
+<os><osmatch name="Microsoft Windows Server 2019" accuracy="97"><osclass type="general purpose" vendor="Microsoft" osfamily="Windows" osgen="2019"/></osmatch></os>
+</host>
+
+<!-- Printer -->
+<host starttime="1711000440" endtime="1711000465">
+<status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.1.15" addrtype="ipv4"/>
+<address addr="3C:2A:F4:01:15:AB" addrtype="mac" vendor="HP Inc"/>
+<hostnames><hostname name="printer01.meridian-defense.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" product="HP HTTP Server" method="probed" conf="10">
+<script id="http-title" output="HP LaserJet Pro MFP M428fdn"/>
+</service></port>
+<port protocol="tcp" portid="443"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="https" product="HP HTTP Server" tunnel="ssl" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="515"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="printer" method="probed" conf="8"/></port>
+<port protocol="tcp" portid="631"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ipp" product="CUPS" version="2.4" method="probed" conf="8"/></port>
+<port protocol="tcp" portid="9100"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="jetdirect" method="probed" conf="8"/></port>
+</ports>
+<os><osmatch name="HP LaserJet Printer" accuracy="92"><osclass type="printer" vendor="HP" osfamily="Printer"/></osmatch></os>
+</host>
+
+<!-- IP Camera -->
+<host starttime="1711000470" endtime="1711000495">
+<status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.1.16" addrtype="ipv4"/>
+<address addr="C0:56:E3:01:16:CD" addrtype="mac" vendor="Hangzhou Hikvision"/>
+<hostnames><hostname name="cam-lobby01.meridian-defense.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" product="Hikvision IP camera httpd" method="probed" conf="10">
+<script id="http-title" output="HIKVISION"/>
+</service></port>
+<port protocol="tcp" portid="8080"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http-proxy" product="Hikvision IP camera httpd" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="554"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="rtsp" product="Hikvision RTSP" method="probed" conf="8"/></port>
+</ports>
+<os><osmatch name="Hikvision IP Camera" accuracy="95"><osclass type="webcam" vendor="Hikvision" osfamily="Embedded"/></osmatch></os>
+</host>
+
+<!-- Workstations -->
+<host starttime="1711000500" endtime="1711000520">
+<status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.1.20" addrtype="ipv4"/>
+<address addr="00:50:56:A1:01:14" addrtype="mac" vendor="VMware"/>
+<hostnames><hostname name="ws-jthompson.meridian-defense.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="135"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="msrpc" product="Microsoft Windows RPC" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="139"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="netbios-ssn" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="445"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="microsoft-ds" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="3389"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="ms-wbt-server" product="Microsoft Terminal Services" method="probed" conf="10"/></port>
+</ports>
+<os><osmatch name="Microsoft Windows 10" accuracy="95"><osclass type="general purpose" vendor="Microsoft" osfamily="Windows" osgen="10"/></osmatch></os>
+</host>
+
+<host starttime="1711000525" endtime="1711000545">
+<status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.1.21" addrtype="ipv4"/>
+<address addr="00:50:56:A1:01:15" addrtype="mac" vendor="VMware"/>
+<hostnames><hostname name="ws-mchen.meridian-defense.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="135"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="msrpc" product="Microsoft Windows RPC" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="445"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="microsoft-ds" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="3389"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="ms-wbt-server" product="Microsoft Terminal Services" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="5985"><state state="open" reason="syn-ack" reason_ttl="128"/><service name="wsman" product="Microsoft HTTPAPI" method="probed" conf="10"/></port>
+</ports>
+<os><osmatch name="Microsoft Windows 11" accuracy="94"><osclass type="general purpose" vendor="Microsoft" osfamily="Windows" osgen="11"/></osmatch></os>
+</host>
+
+<host starttime="1711000550" endtime="1711000570">
+<status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.1.22" addrtype="ipv4"/>
+<address addr="00:50:56:A1:01:16" addrtype="mac" vendor="VMware"/>
+<hostnames><hostname name="ws-arivera.meridian-defense.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="22"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ssh" product="OpenSSH" version="9.3p2" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="5900"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="vnc" product="Apple Remote Desktop" version="3.9" method="probed" conf="10"/></port>
+</ports>
+<os><osmatch name="Apple macOS 14 (Sonoma)" accuracy="96"><osclass type="general purpose" vendor="Apple" osfamily="macOS" osgen="14"/></osmatch></os>
+</host>
+
+<host starttime="1711000575" endtime="1711000595">
+<status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.1.23" addrtype="ipv4"/>
+<address addr="00:50:56:A1:01:17" addrtype="mac" vendor="VMware"/>
+<hostnames><hostname name="ws-kpatel.meridian-defense.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="22"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ssh" product="OpenSSH" version="9.3p2" method="probed" conf="10"/></port>
+</ports>
+<os><osmatch name="Apple macOS 14 (Sonoma)" accuracy="96"><osclass type="general purpose" vendor="Apple" osfamily="macOS" osgen="14"/></osmatch></os>
+</host>
+
+<runstats><finished time="1711000600" timestr="Thu Mar 20 08:10:00 2026" elapsed="600" summary="Nmap done at Thu Mar 20 08:10:00 2026; 254 IP addresses (20 hosts up) scanned in 600.00 seconds" exit="success"/><hosts up="20" down="234" total="254"/></runstats>
+</nmaprun>

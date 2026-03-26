@@ -1,0 +1,56 @@
+{
+  "appName": "ReconAI",
+  "deploymentTier": "testing",
+  "awsRegion": "us-east-1",
+  "testCommands": {
+    "agents": "cd apps/agents && uv run pytest tests/ --cov=. --cov-report=json -q",
+    "backend": "cd apps/functions && uv run pytest tests/ --cov=. --cov-report=json -q",
+    "frontend": "cd apps/web && npm run test:coverage",
+    "e2e": "cd apps/web && npm run test:e2e"
+  },
+  "dependencies": {
+    "sharedInfra": [],
+    "sharedLibs": [],
+    "upstreamProjects": []
+  },
+  "models": {
+    "testing": {
+      "chatAgent": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+      "enrichmentAgent": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+      "prioritizationAgent": "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+    },
+    "optimized": {
+      "chatAgent": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+      "enrichmentAgent": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+      "prioritizationAgent": "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+    },
+    "premium": {
+      "chatAgent": "us.anthropic.claude-opus-4-5-20251101-v1:0",
+      "enrichmentAgent": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+      "prioritizationAgent": "us.anthropic.claude-opus-4-5-20251101-v1:0"
+    }
+  },
+  "bedrock": {
+    "maxTokens": 8192,
+    "temperature": 0.1,
+    "embeddingModelId": "amazon.titan-embed-text-v2:0"
+  },
+  "ingestion": {
+    "comprehendEnrichment": true
+  },
+  "dataSources": [
+    { "id": "shodan", "name": "Shodan Results", "parser": "shodan_json", "description": "Shodan API exports" },
+    { "id": "nmap", "name": "Network Scans", "parser": "nmap_xml", "description": "Nmap XML output" },
+    { "id": "social", "name": "Social Media", "parser": "social_csv", "description": "Social media feed exports" },
+    { "id": "logs", "name": "Log Files", "parser": "log_text", "description": "System/application logs" },
+    { "id": "documents", "name": "Documents & Images", "parser": "document_textract", "description": "PDFs, PNGs, JPEGs, TIFFs — extracted via Textract, enriched via Comprehend" },
+    { "id": "custom", "name": "Custom Data", "parser": "text_passthrough", "description": "Free-form text uploads" }
+  ],
+  "schedules": {
+    "vectorization": "cron(0 11 * * ? *)"
+  },
+  "tickets": {
+    "autoEscalationSeverity": "critical",
+    "statuses": ["new", "triaging", "investigating", "active", "completed", "closed"]
+  }
+}

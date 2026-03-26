@@ -1,0 +1,4 @@
+# Agents layer: strands-agents core (Agent, BedrockModel, @tool)
+# NOTE: strands-agents-tools is NOT needed — agents define their own @tool functions
+# NOTE: boto3, pydantic-settings, powertools are already in the shared layer
+strands-agents>=1.0.0,<2
