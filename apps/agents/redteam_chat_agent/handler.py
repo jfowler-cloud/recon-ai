@@ -4,7 +4,7 @@ import json
 
 from aws_lambda_powertools import Logger, Tracer
 
-from redteam_chat_agent.agent import create_chat_agent
+from agent import create_chat_agent
 from shared.chat_tools import clear_collected_output, get_collected_output
 
 logger = Logger(service="recon-ai")

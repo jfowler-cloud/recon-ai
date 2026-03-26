@@ -5,7 +5,7 @@ from strands.models.bedrock import BedrockModel
 
 from shared.chat_tools import search_documents, generate_chart_config
 from shared.config import AppConfig
-from leadership_chat_agent.tools import get_operations_overview, get_analyst_workload, get_recent_activities
+from tools import get_operations_overview, get_analyst_workload, get_recent_activities
 
 _config = AppConfig()
 

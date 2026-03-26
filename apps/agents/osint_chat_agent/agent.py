@@ -5,7 +5,7 @@ from strands.models.bedrock import BedrockModel
 
 from shared.chat_tools import search_documents, generate_chart_config
 from shared.config import AppConfig
-from osint_chat_agent.tools import get_vulnerability_summary, get_ticket_summary
+from tools import get_vulnerability_summary, get_ticket_summary
 
 _config = AppConfig()
 
