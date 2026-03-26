@@ -139,9 +139,16 @@ class TestSearchDocuments:
         })
 
         import shared.chat_tools as ct
+        import os
         ct._s3 = None
+        ct._vector_cache = []
+        ct._vector_cache_ts = 0.0
         ct._config.vectors_bucket = "ra-vectors-test"
         ct._config.documents_table = "RA-Documents"
+        # Clear /tmp disk cache
+        for f in ["/tmp/vectors_cache.json", "/tmp/vectors_cache_meta.json"]:
+            if os.path.exists(f):
+                os.remove(f)
 
         # Reset DynamoDB connection to use moto
         import shared.db as db_mod
@@ -172,8 +179,14 @@ class TestSearchDocuments:
         )
 
         import shared.chat_tools as ct
+        import os
         ct._s3 = None
+        ct._vector_cache = []
+        ct._vector_cache_ts = 0.0
         ct._config.vectors_bucket = "ra-vectors-test"
+        for f in ["/tmp/vectors_cache.json", "/tmp/vectors_cache_meta.json"]:
+            if os.path.exists(f):
+                os.remove(f)
 
         result = ct.search_documents(query="test", source_types=["nmap_xml"])
         assert len(result["results"]) == 1
