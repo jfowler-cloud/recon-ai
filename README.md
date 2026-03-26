@@ -336,7 +336,25 @@ AWS_PROFILE=cdk-deploy-prod npx cdk deploy --all --require-approval never
 | 2. OSINT Dashboard + Ticketing | Complete | Ticket CRUD, dashboards, queue for red team |
 | 3. Red Team Workflow | Complete | Target management, tool registry + vectorization, prioritization |
 | 4. AI Chat Agents | Complete | 3 persona-specific chat agents, tool search, risk analysis |
-| 5. Visualization + Leadership | Planned | React Flow topology, advanced dashboards |
-| 6. Testing + PSP Registration | Planned | 95%+ coverage, E2E, PSP integration |
+| 5. Visualization + Leadership | In Progress | React Flow topology, dashboard charts, clickable metrics |
+| 6. Testing + Polish | Planned | 95%+ coverage, E2E, deploy to CloudFront |
+
+## Next Steps
+
+### Phase 5 Remaining
+- **Network Topology enhancements**: Edge connections between source nodes and targets based on data lineage, animated edges for active operations, right-click context menu for target actions
+- **Leadership dashboard charts**: Add target-vs-ticket trend line chart (time series), analyst workload bar chart from `get_analyst_workload` tool
+- **Chat session persistence**: Show session history sidebar (list_sessions API is wired but UI not built), allow resuming past conversations
+- **Deploy to CloudFront**: Run `setup-env.sh` + `deploy-frontend.sh` for production deployment after testing
+
+### Phase 6: Testing + Polish
+- **Frontend unit tests**: Increase from 10 to 95%+ coverage (Vitest + React Testing Library)
+- **E2E tests**: Update Playwright specs to cover seeded data flows, chat interactions, network topology
+- **Backend test updates**: Update tests for ConditionExpression race condition fixes, new chat history, defusedxml
+- **CDK test updates**: Add assertions for RA-Tools table, admin role, manage_tools + update_target Lambdas
+- **S3 vector caching**: Add in-memory or /tmp cache in chat agent Lambdas to avoid re-downloading all vectors per search
+- **Step Functions error handlers**: Add `addCatch()` to ingestion workflow to mark failed uploads
+- **S3 CORS restriction**: Restrict uploads bucket CORS to CloudFront domain
+- **SNS alarm subscriptions**: Wire alarm topic to email or Slack
 
 See [CLAUDE.md](CLAUDE.md) for full architecture documentation.
