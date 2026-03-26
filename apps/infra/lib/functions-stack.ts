@@ -341,8 +341,8 @@ export class FunctionsStack extends cdk.Stack {
     this.leadershipChatAgentFn.grantInvoke(this.chatHandlerFn);
 
     this.getSessionFn = makeFn('get_session', [sharedLayer], cdk.Duration.seconds(30), 256);
-    chatSessionsTable.grantReadData(this.getSessionFn);
-    chatMessagesTable.grantReadData(this.getSessionFn);
+    chatSessionsTable.grantReadWriteData(this.getSessionFn);
+    chatMessagesTable.grantReadWriteData(this.getSessionFn);
 
     this.listSessionsFn = makeFn('list_sessions', [sharedLayer], cdk.Duration.seconds(30), 256);
     chatSessionsTable.grantReadData(this.listSessionsFn);

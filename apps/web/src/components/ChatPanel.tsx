@@ -13,7 +13,7 @@ import Button from '@cloudscape-design/components/button'
 import Textarea from '@cloudscape-design/components/textarea'
 import Spinner from '@cloudscape-design/components/spinner'
 import Icon from '@cloudscape-design/components/icon'
-import { sendChatMessage, listChatSessions, getChatSession } from '@/utils/api'
+import { sendChatMessage, listChatSessions, getChatSession, deleteChatSession } from '@/utils/api'
 import { useAuth } from '@/App'
 
 // ── Types ────────────────────────────────────────────────────────────
@@ -167,10 +167,15 @@ export default function ChatPanel({ persona, title, assistantName, description, 
     setEditingSession(null)
   }, [])
 
-  const deleteSession = useCallback((sid: string) => {
+  const deleteSession = useCallback(async (sid: string) => {
     setSessions(prev => prev.filter(s => s.sessionId !== sid))
     if (sessionId === sid) startNewChat()
-  }, [sessionId, startNewChat])
+    try {
+      await deleteChatSession(userId, sid)
+    } catch {
+      // Silent — already removed from UI
+    }
+  }, [sessionId, startNewChat, userId])
 
   return (
     <div style={{ display: 'flex', height: 'calc(100vh - 160px)', gap: 0 }}>

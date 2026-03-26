@@ -233,6 +233,14 @@ export async function getChatSession(
   return invokeLambda(appConfig.getSessionFn, { userId, sessionId })
 }
 
+/** Delete a chat session and its messages. */
+export async function deleteChatSession(
+  userId: string,
+  sessionId: string,
+): Promise<Record<string, unknown>> {
+  return invokeLambda(appConfig.getSessionFn, { userId, sessionId, action: 'delete' })
+}
+
 /** List chat sessions for a user. */
 export async function listChatSessions(
   userId: string,

@@ -156,8 +156,17 @@ export default function DataUpload() {
     }
   }, [selectedFile, sourceType])
 
+  const UPLOAD_DISABLED = true // Temporarily disabled for testing
+
   return (
     <SpaceBetween size="l">
+      {UPLOAD_DISABLED && (
+        <Alert type="info" statusIconAriaLabel="Info">
+          Upload functionality is fully operational but temporarily disabled for testing purposes.
+          The ingestion pipeline (S3 presigned URL, EventBridge trigger, Step Functions workflow) is active in the backend.
+        </Alert>
+      )}
+
       {alert && (
         <Alert type={alert.type} dismissible onDismiss={() => setAlert(null)}>
           {alert.message}
@@ -169,10 +178,10 @@ export default function DataUpload() {
         <SpaceBetween size="l">
           {/* Drag-and-drop zone */}
           <div
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}
+            onDragOver={UPLOAD_DISABLED ? undefined : handleDragOver}
+            onDragLeave={UPLOAD_DISABLED ? undefined : handleDragLeave}
+            onDrop={UPLOAD_DISABLED ? undefined : handleDrop}
+            onClick={UPLOAD_DISABLED ? undefined : () => fileInputRef.current?.click()}
             style={{
               border: `2px dashed ${isDragging
                 ? 'var(--color-text-link-default, #0972d3)'
@@ -246,7 +255,7 @@ export default function DataUpload() {
             variant="primary"
             onClick={handleUpload}
             loading={uploading}
-            disabled={!selectedFile || !sourceType || uploading}
+            disabled={UPLOAD_DISABLED || !selectedFile || !sourceType || uploading}
           >
             Upload
           </Button>

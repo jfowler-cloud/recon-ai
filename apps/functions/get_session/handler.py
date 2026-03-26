@@ -45,11 +45,30 @@ def handler(event, context):
     sessions_table = dynamodb.Table(os.environ["CHAT_SESSIONS_TABLE"])
     messages_table = dynamodb.Table(os.environ["CHAT_MESSAGES_TABLE"])
 
+    action = body.get("action", "get")
+
     # Verify session ownership
     resp = sessions_table.get_item(Key={"userId": user_id, "sessionId": session_id})
     session = resp.get("Item")
     if not session:
         return {"statusCode": 404, "body": json.dumps({"error": "Session not found for this user"})}
+
+    # Delete session and its messages
+    if action == "delete":
+        # Delete all messages for this session
+        messages_resp = messages_table.query(
+            KeyConditionExpression=Key("sessionId").eq(session_id),
+            ProjectionExpression="sessionId, messageId",
+        )
+        with messages_table.batch_writer() as batch:
+            for msg in messages_resp.get("Items", []):
+                batch.delete_item(Key={"sessionId": msg["sessionId"], "messageId": msg["messageId"]})
+
+        # Delete the session
+        sessions_table.delete_item(Key={"userId": user_id, "sessionId": session_id})
+
+        logger.info("Session deleted", extra={"session_id": session_id, "user_id": user_id})
+        return {"statusCode": 200, "body": json.dumps({"deleted": True, "sessionId": session_id})}
 
     # Get all messages for this session
     messages_resp = messages_table.query(
