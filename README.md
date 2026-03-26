@@ -284,24 +284,48 @@ Set via `deploymentTier` in `config.json`.
 ## Testing
 
 ```bash
-# Backend functions (209 tests, 99% coverage)
+# Backend functions (209 tests, 98% line coverage)
 cd apps/functions && uv run pytest tests/ --cov=. --cov-report=term-missing -q
 
-# Agent modules (79 tests)
+# Agent modules (79 tests, 83% line coverage)
 cd apps/agents && uv run pytest tests/ --cov=. --cov-report=term-missing -q
 
 # CDK infrastructure (83 tests)
 cd apps/infra && npm test
 
-# Frontend unit (50 tests)
+# Frontend unit (50 tests, 44% line coverage)
 cd apps/web && npm test
 
-# Frontend E2E -- Playwright (34 tests)
+# Frontend coverage report
+cd apps/web && npm run test:coverage
+
+# Frontend E2E -- Playwright (17 screenshot tests)
 cd apps/web && npm run test:e2e
 
 # E2E deployed backend (11 tests against live AWS)
 AWS_PROFILE=cdk-deploy-prod ./scripts/test-deployed.sh
 ```
+
+### Coverage Notes
+
+| Suite | Tests | Line Coverage | Notes |
+|-------|-------|--------------|-------|
+| Backend functions | 209 | **98%** | Only uncovered: `ConditionalCheckFailedException` catch blocks (moto doesn't fully simulate DynamoDB condition failures) |
+| Agent modules | 79 | **83%** | 5 pre-existing failures from moto GSI scan behavior differences vs real DynamoDB |
+| CDK infrastructure | 83 | N/A | Assertion-based; validates resource counts, properties, outputs |
+| Frontend unit | 50 | **44% lines, 27% branches** | See below |
+| E2E screenshots | 17 | N/A | Visual regression; all 17 views across 3 personas |
+
+**Frontend coverage (44% lines):** All 17 components are render-tested with mocked Cloudscape components and API stubs. The uncovered 56% consists of:
+- **Modal interactions** (create/edit flows for targets, tickets, tools, operations) -- require simulating multi-step form fills through mocked Cloudscape Modal/Select/Input components
+- **Split panel detail views** -- triggered by table row selection events that Cloudscape's `useCollection` hook controls
+- **Context menu and right-click handlers** in NetworkTopology (React Flow events not available in jsdom)
+- **Chart click handlers and hover effects** (Recharts event callbacks)
+- **Error/retry paths** (API failure responses, empty state fallbacks)
+- **Chat send/receive flows** through the ChatPanel WebSocket-like polling pattern
+- **React Flow canvas** (1% coverage) -- dagre layout, node rendering, and edge calculations require a full DOM environment that jsdom cannot provide
+
+Deeper coverage for these would require either integration-level Playwright tests (which cover the visual paths) or a more sophisticated Cloudscape component mock layer that simulates selection events, modal lifecycle, and form submissions.
 
 ## Key Design Decisions
 

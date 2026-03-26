@@ -127,27 +127,35 @@ recon-ai/
 ## Running Tests
 
 ```bash
-# Agents
+# Agents (79 tests, 83% coverage)
 cd apps/agents && uv sync --all-extras && uv run pytest tests/ -v
 
-# Functions
+# Functions (209 tests, 98% coverage)
 cd apps/functions && uv sync --all-extras && uv run pytest tests/ -v
 
-# Frontend unit
+# Frontend unit (50 tests, 44% line coverage)
 cd apps/web && npm test
 
-# Frontend coverage
+# Frontend coverage report
 cd apps/web && npm run test:coverage
 
-# E2E
+# E2E screenshots (17 tests across 3 personas)
 cd apps/web && npm run test:e2e
 
-# CDK
+# CDK (83 tests)
 cd apps/infra && npm test
 
 # CDK synth
 cd apps/infra && npx cdk synth
 ```
+
+### Test Coverage Summary
+
+- **Backend 98%** — near-complete; uncovered lines are `ConditionalCheckFailedException` catch blocks (moto limitation)
+- **Agents 83%** — 5 pre-existing failures from moto GSI scan differences vs real DynamoDB
+- **CDK 83 tests** — assertion-based validation of all 4 stacks (resources, properties, outputs)
+- **Frontend 44% lines** — all 17 components render-tested with mocked Cloudscape + API stubs; uncovered 56% is modal interactions, split panel selection events, React Flow canvas (jsdom limitation), Recharts event handlers, and error/retry paths that require integration-level testing or richer component mocks
+- **E2E 17 screenshots** — Playwright captures all views across osint-analyst, red-team-analyst, and leadership personas
 
 ## CDK Deploy
 
