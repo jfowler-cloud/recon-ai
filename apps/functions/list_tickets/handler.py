@@ -2,7 +2,6 @@
 
 import json
 import os
-from decimal import Decimal
 
 import boto3
 from aws_lambda_powertools import Logger, Tracer
@@ -12,16 +11,6 @@ logger = Logger(service="recon-ai")
 tracer = Tracer(service="recon-ai")
 
 dynamodb = boto3.resource("dynamodb")
-
-# Map queryBy values to GSI names and partition key attribute names
-class DecimalEncoder(json.JSONEncoder):
-    """Handle Decimal types from DynamoDB."""
-
-    def default(self, o):
-        if isinstance(o, Decimal):
-            return int(o) if o == int(o) else float(o)
-        return super().default(o)
-
 
 GSI_MAP = {
     "owner": ("OwnerIndex", "assigneeId"),
@@ -66,5 +55,5 @@ def handler(event, context):
 
     return {
         "statusCode": 200,
-        "body": json.dumps({"tickets": tickets, "count": len(tickets)}, cls=DecimalEncoder),
+        "body": json.dumps({"tickets": tickets, "count": len(tickets)}, default=str),
     }

@@ -50,15 +50,16 @@ export async function invokeLambda<T>(functionName: string, payload: Record<stri
     Payload: new TextEncoder().encode(JSON.stringify(payload)),
   }))
 
+  if (response.FunctionError) {
+    const errorBody = response.Payload ? JSON.parse(new TextDecoder().decode(response.Payload)) : {}
+    throw new Error(errorBody.errorMessage || `Lambda error in ${functionName}: ${response.FunctionError}`)
+  }
+
   if (!response.Payload) {
     throw new Error(`Empty response from ${functionName}`)
   }
 
   const raw = JSON.parse(new TextDecoder().decode(response.Payload))
-
-  if (raw.FunctionError) {
-    throw new Error(raw.errorMessage || `Lambda error in ${functionName}`)
-  }
 
   const body = typeof raw.body === 'string' ? JSON.parse(raw.body) : raw
   return body as T

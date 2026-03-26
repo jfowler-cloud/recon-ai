@@ -37,8 +37,17 @@ def get_vulnerability_summary(severity: str | None = None, source_type: str | No
     recent_docs = []
 
     for doc in docs:
-        created = doc.get("expiresAt", 0)
+        created = doc.get("createdAt", 0)
+        if isinstance(created, str):
+            try:
+                created = int(created)
+            except ValueError:
+                created = 0
         importance = doc.get("importance", "standard")
+
+        # Apply time filter
+        if created < cutoff:
+            continue
 
         if severity and importance != severity:
             continue
@@ -80,6 +89,7 @@ def get_ticket_summary(status: str | None = None, ticket_type: str = "osint", da
     Returns:
         Dictionary with ticket counts and breakdown.
     """
+    cutoff = int(time.time()) - (days * 86400)
     tickets = scan_table(_config.tickets_table)
 
     by_status: dict[str, int] = {}
@@ -91,6 +101,16 @@ def get_ticket_summary(status: str | None = None, ticket_type: str = "osint", da
         if ticket_type and t_type != ticket_type:
             continue
         if status and ticket.get("status") != status:
+            continue
+
+        # Apply time filter
+        created = ticket.get("createdAt", 0)
+        if isinstance(created, str):
+            try:
+                created = int(created)
+            except ValueError:
+                created = 0
+        if created < cutoff:
             continue
 
         t_status = ticket.get("status", "unknown")

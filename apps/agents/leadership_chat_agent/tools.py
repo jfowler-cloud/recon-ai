@@ -20,6 +20,7 @@ def get_operations_overview(days: int = 30) -> dict:
     Returns:
         Dictionary with aggregated operational metrics.
     """
+    cutoff = int(time.time()) - (days * 86400)
     tickets = scan_table(_config.tickets_table)
 
     by_status: dict[str, int] = {}
@@ -28,6 +29,15 @@ def get_operations_overview(days: int = 30) -> dict:
     total = 0
 
     for ticket in tickets:
+        created = ticket.get("createdAt", 0)
+        if isinstance(created, str):
+            try:
+                created = int(created)
+            except ValueError:
+                created = 0
+        if created < cutoff:
+            continue
+
         total += 1
         status = ticket.get("status", "unknown")
         by_status[status] = by_status.get(status, 0) + 1

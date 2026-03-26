@@ -3,7 +3,6 @@
 import json
 import os
 from collections import Counter
-from decimal import Decimal
 
 import boto3
 from aws_lambda_powertools import Logger, Tracer
@@ -13,13 +12,16 @@ tracer = Tracer(service="recon-ai")
 
 dynamodb = boto3.resource("dynamodb")
 
-class DecimalEncoder(json.JSONEncoder):
-    """Handle Decimal types from DynamoDB."""
 
-    def default(self, o):
-        if isinstance(o, Decimal):
-            return int(o) if o == int(o) else float(o)
-        return super().default(o)
+def _scan_all(table) -> list[dict]:
+    """Paginated DynamoDB scan that follows LastEvaluatedKey."""
+    items = []
+    response = table.scan()
+    items.extend(response.get("Items", []))
+    while response.get("LastEvaluatedKey"):
+        response = table.scan(ExclusiveStartKey=response["LastEvaluatedKey"])
+        items.extend(response.get("Items", []))
+    return items
 
 
 VALID_PERSONAS = {"osint-analyst", "red-team-analyst", "leadership"}
@@ -46,9 +48,8 @@ def handler(event, context):
     tickets_table = dynamodb.Table(os.environ["TICKETS_TABLE"])
     targets_table = dynamodb.Table(os.environ["TARGETS_TABLE"])
 
-    # Fetch uploads
-    uploads_resp = uploads_table.scan()
-    all_uploads = uploads_resp.get("Items", [])
+    # Fetch uploads (paginated)
+    all_uploads = _scan_all(uploads_table)
 
     upload_status_counts = Counter(u.get("ingestionStatus", "unknown") for u in all_uploads)
     upload_source_counts = Counter(u.get("sourceType", "unknown") for u in all_uploads)
@@ -57,9 +58,8 @@ def handler(event, context):
     sorted_uploads = sorted(all_uploads, key=lambda u: u.get("createdAt", 0), reverse=True)
     recent_uploads = sorted_uploads[:10]
 
-    # Fetch tickets
-    tickets_resp = tickets_table.scan()
-    all_tickets = tickets_resp.get("Items", [])
+    # Fetch tickets (paginated)
+    all_tickets = _scan_all(tickets_table)
 
     # Filter by persona-relevant ticket types
     relevant_types = PERSONA_TICKET_TYPES[persona]
@@ -92,8 +92,7 @@ def handler(event, context):
 
     # Leadership gets cross-domain target stats
     if persona == "leadership":
-        targets_resp = targets_table.scan()
-        all_targets = targets_resp.get("Items", [])
+        all_targets = _scan_all(targets_table)
         target_status_counts = Counter(t.get("status", "unknown") for t in all_targets)
         dashboard["targets"] = {
             "total": len(all_targets),
@@ -104,5 +103,5 @@ def handler(event, context):
 
     return {
         "statusCode": 200,
-        "body": json.dumps(dashboard, cls=DecimalEncoder),
+        "body": json.dumps(dashboard, default=str),
     }

@@ -77,6 +77,7 @@ def handler(event, context):
         return {"statusCode": 400, "body": json.dumps({"error": "No updatable fields provided"})}
 
     updates["updatedAt"] = now
+    current_status = existing.get("status", "queued")
 
     # Build update expression
     expr_parts = []
@@ -87,14 +88,26 @@ def handler(event, context):
         expr_names[f"#f{i}"] = k
         expr_values[f":v{i}"] = v
 
-    table.update_item(
-        Key={"targetId": target_id},
-        UpdateExpression="SET " + ", ".join(expr_parts),
-        ExpressionAttributeNames=expr_names,
-        ExpressionAttributeValues=expr_values,
-    )
+    # Atomic status guard: ConditionExpression ensures status hasn't changed
+    # between our read and write, preventing race conditions.
+    condition_expr = "#currentStatus = :expectedStatus"
+    expr_names["#currentStatus"] = "status"
+    expr_values[":expectedStatus"] = current_status
+
+    try:
+        table.update_item(
+            Key={"targetId": target_id},
+            UpdateExpression="SET " + ", ".join(expr_parts),
+            ConditionExpression=condition_expr,
+            ExpressionAttributeNames=expr_names,
+            ExpressionAttributeValues=expr_values,
+        )
+    except dynamodb.meta.client.exceptions.ConditionalCheckFailedException:
+        return {
+            "statusCode": 409,
+            "body": json.dumps({"error": "Target was modified concurrently. Please retry."}),
+        }
 
     merged = {**existing, **updates}
-    # Convert Decimal to int/float for JSON serialization
     logger.info("Target updated", extra={"targetId": target_id, "updates": list(updates.keys())})
     return {"statusCode": 200, "body": json.dumps({"target": merged}, default=str)}

@@ -3,8 +3,6 @@
 import json
 import os
 import time
-from decimal import Decimal
-
 import boto3
 from aws_lambda_powertools import Logger, Tracer
 from ulid import ULID
@@ -13,16 +11,6 @@ logger = Logger(service="recon-ai")
 tracer = Tracer(service="recon-ai")
 
 dynamodb = boto3.resource("dynamodb")
-
-# Valid state transitions: current_status -> set of allowed next statuses
-class DecimalEncoder(json.JSONEncoder):
-    """Handle Decimal types from DynamoDB."""
-
-    def default(self, o):
-        if isinstance(o, Decimal):
-            return int(o) if o == int(o) else float(o)
-        return super().default(o)
-
 
 VALID_TRANSITIONS = {
     "new": {"triaging", "closed"},
@@ -60,8 +48,8 @@ def handler(event, context):
         return {"statusCode": 404, "body": json.dumps({"error": "Ticket not found"})}
 
     # Validate status transition
+    current_status = ticket["status"]
     if new_status:
-        current_status = ticket["status"]
         allowed = VALID_TRANSITIONS.get(current_status, set())
         if new_status not in allowed:
             return {
@@ -89,13 +77,26 @@ def handler(event, context):
 
     update_expr = "SET " + ", ".join(update_parts)
 
-    updated = tickets_table.update_item(
-        Key={"ticketId": ticket_id},
-        UpdateExpression=update_expr,
-        ExpressionAttributeNames=attr_names,
-        ExpressionAttributeValues=attr_values,
-        ReturnValues="ALL_NEW",
-    )
+    # Atomic status guard: ConditionExpression ensures the status hasn't changed
+    # between our read and write, preventing race conditions.
+    condition_expr = "#currentStatus = :expectedStatus"
+    attr_names["#currentStatus"] = "status"
+    attr_values[":expectedStatus"] = current_status
+
+    try:
+        updated = tickets_table.update_item(
+            Key={"ticketId": ticket_id},
+            UpdateExpression=update_expr,
+            ConditionExpression=condition_expr,
+            ExpressionAttributeNames=attr_names,
+            ExpressionAttributeValues=attr_values,
+            ReturnValues="ALL_NEW",
+        )
+    except dynamodb.meta.client.exceptions.ConditionalCheckFailedException:
+        return {
+            "statusCode": 409,
+            "body": json.dumps({"error": "Ticket was modified concurrently. Please retry."}),
+        }
 
     # Append note if provided
     if note:
@@ -116,5 +117,5 @@ def handler(event, context):
 
     return {
         "statusCode": 200,
-        "body": json.dumps({"ticket": updated["Attributes"]}, cls=DecimalEncoder),
+        "body": json.dumps({"ticket": updated["Attributes"]}, default=str),
     }

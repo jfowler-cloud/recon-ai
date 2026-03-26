@@ -288,7 +288,7 @@ def shodan_json(content: bytes, upload_id: str, s3_key: str) -> list[dict]:
 
 def nmap_xml(content: bytes, upload_id: str, s3_key: str) -> list[dict]:
     """Parse Nmap XML output."""
-    import xml.etree.ElementTree as ET
+    import defusedxml.ElementTree as ET
 
     documents = []
     try:

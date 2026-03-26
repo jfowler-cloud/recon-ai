@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import time
 
 import boto3
@@ -27,6 +28,12 @@ def handler(event, context):
 
     if not file_name:
         return {"statusCode": 400, "body": json.dumps({"error": "fileName is required"})}
+
+    # Sanitize filename: strip path separators, reject traversal attempts
+    file_name = os.path.basename(file_name)
+    file_name = re.sub(r'[^\w\s\-.]', '_', file_name)
+    if not file_name or file_name.startswith('.'):
+        return {"statusCode": 400, "body": json.dumps({"error": "Invalid fileName"})}
 
     # Normalize short source names to parser names for consistency
     source_name_map = {

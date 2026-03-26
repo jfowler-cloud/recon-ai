@@ -299,41 +299,20 @@ AWS_PROFILE=cdk-deploy-prod npx cdk deploy --all --require-approval never
 
 ## Known Issues & Improvement Areas
 
-### Critical (P0)
-
-| Issue | Location | Description |
-|-------|----------|-------------|
-| Race condition in ticket status transitions | `update_ticket/handler.py` | Read-then-write without `ConditionExpression` allows concurrent requests to bypass state machine validation |
-| Race condition in target status transitions | `update_target/handler.py` | Same pattern as above |
-| Unpaginated DynamoDB scans in dashboard | `get_dashboard/handler.py` | Single `scan()` call returns max 1MB; silently returns incomplete data at scale |
-| `FunctionError` check on wrong object | `apps/web/src/utils/api.ts:59` | Checks `raw.FunctionError` instead of `response.FunctionError`; Lambda errors silently treated as success |
-| Hardcoded `'current-user'` analyst ID | `DataUpload.tsx:137` | All uploads attributed to fake user instead of actual Cognito identity |
-
 ### High (P1)
 
 | Issue | Location | Description |
 |-------|----------|-------------|
-| `chat_handler` uses non-ULID IDs | `chat_handler/handler.py:26-29` | Custom hex+random IDs break DynamoDB sort order; project already depends on `python-ulid` |
-| No conversation history in agent calls | `chat_handler/handler.py:93` | Only current message sent to agent; no multi-turn context |
-| Unused `days` parameter in tools | `osint_chat_agent/tools.py`, `leadership_chat_agent/tools.py` | `get_vulnerability_summary`, `get_ticket_summary`, `get_operations_overview` accept `days` but never filter by time |
-| `get_vulnerability_summary` reads `expiresAt` as creation time | `osint_chat_agent/tools.py:40` | Uses TTL field instead of `createdAt` |
-| S3 key path traversal via `fileName` | `upload_data/handler.py:43` | No sanitization on user-provided filename |
-| XML bomb risk in nmap parser | `parse_upload/adapters.py:295` | Uses `xml.etree.ElementTree` without defusedxml; vulnerable to billion-laughs DoS |
 | S3 vectors fully re-downloaded per search | `shared/chat_tools.py:43-61` | Every `search_documents` call downloads all S3 vector files; no caching |
 | No Step Functions error handlers | `workflow-stack.ts:92-95` | No `addCatch()` on ingestion workflow; failures leave uploads stuck in "processing" |
 | S3 CORS allows all origins | `database-stack.ts:201` | Uploads bucket `allowedOrigins: ['*']`; should be restricted |
 
-### Medium (DRY / Code Quality)
+### Medium (Code Quality)
 
 | Issue | Location | Description |
 |-------|----------|-------------|
-| `DecimalEncoder` duplicated 3x | `update_ticket`, `list_tickets`, `get_dashboard` | Extract to shared module |
 | Three identical chat agent handlers | `osint/redteam/leadership_chat_agent/handler.py` | Same code except import path; use a handler factory |
-| `MetricCard.tsx` is dead code | `src/components/MetricCard.tsx` | Each dashboard defines its own local MetricCard |
-| `OutputPanel.tsx` is dead code | `src/components/OutputPanel.tsx` | No component imports it |
 | `formatters.ts` utilities mostly unused | `src/utils/formatters.ts` | Components define inline versions instead |
-| `react-router-dom` unused dependency | `apps/web/package.json` | Navigation uses state-based view switching |
-| Inconsistent Decimal serialization | Multiple handlers | Some use `default=str` (returns string), others `DecimalEncoder` (returns int) |
 | No SNS alarm topic subscriptions | `auth-stack.ts` | Alarm topic created but nobody receives alerts |
 | `setup-env.sh` incomplete | `scripts/setup-env.sh` | Only fetches 10 of 24 Lambda function names |
 | Hardcoded DynamoDB table names in frontend | `api.ts` | Should come from env config |
@@ -342,7 +321,6 @@ AWS_PROFILE=cdk-deploy-prod npx cdk deploy --all --require-approval never
 
 | Issue | Description |
 |-------|-------------|
-| No WAF on CloudFront | Security-focused OSINT portal has no web application firewall |
 | No S3 bucket versioning | Upload data not recoverable if overwritten/deleted |
 | No Lambda reserved concurrency | Runaway invocations could exhaust account limits |
 | No DLQ on Lambda/Step Functions | Failed invocations silently lost |

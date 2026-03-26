@@ -11,6 +11,7 @@ import Table from '@cloudscape-design/components/table'
 import Box from '@cloudscape-design/components/box'
 import StatusIndicator from '@cloudscape-design/components/status-indicator'
 import Spinner from '@cloudscape-design/components/spinner'
+import { fetchUserAttributes } from 'aws-amplify/auth'
 import { getPresignedUploadUrl, uploadFileToS3, listUploads } from '@/utils/api'
 import type { Upload } from '@/types'
 
@@ -130,10 +131,19 @@ export default function DataUpload() {
     try {
       // Step 1: Get presigned URL from Lambda
       setProgress(10)
+      // Get actual Cognito user identity
+      let analystId = 'unknown'
+      try {
+        const attrs = await fetchUserAttributes()
+        analystId = attrs.sub ?? attrs.email ?? 'unknown'
+      } catch {
+        // Fall back if attributes unavailable
+      }
+
       const { uploadUrl, uploadId } = await getPresignedUploadUrl(
         selectedFile.name,
         sourceType.value ?? 'custom-text',
-        'current-user', // Will be replaced by actual user ID from auth context
+        analystId,
       )
 
       // Step 2: Upload file to S3
@@ -144,7 +154,7 @@ export default function DataUpload() {
       // Add the new upload to the list
       const newUpload: Upload = {
         uploadId,
-        analystId: 'current-user',
+        analystId,
         fileName: selectedFile.name,
         sourceType: sourceType.label ?? sourceType.value ?? '',
         ingestionStatus: 'processing',

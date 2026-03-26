@@ -2,12 +2,12 @@
 
 import json
 import os
-import random
-import string
 import time
 
 import boto3
 from aws_lambda_powertools import Logger, Tracer
+from boto3.dynamodb.conditions import Key
+from ulid import ULID
 
 logger = Logger(service="recon-ai")
 tracer = Tracer(service="recon-ai")
@@ -21,12 +21,7 @@ PERSONA_FUNCTIONS = {
     "leadership": os.environ.get("LEADERSHIP_AGENT_FN_NAME", "ra-leadership_chat_agent"),
 }
 
-
-def generate_ulid() -> str:
-    """Generate a ULID-like ID."""
-    ts = hex(int(time.time() * 1000))[2:]
-    rand = "".join(random.choices(string.ascii_lowercase + string.digits, k=10))
-    return f"{ts}{rand}"
+MAX_HISTORY_MESSAGES = 20
 
 
 @tracer.capture_lambda_handler
@@ -36,7 +31,7 @@ def handler(event, context):
     body = json.loads(event.get("body", "{}")) if isinstance(event.get("body"), str) else event
 
     user_id = body.get("userId", "")
-    session_id = body.get("sessionId") or generate_ulid()
+    session_id = body.get("sessionId") or str(ULID())
     message = body.get("message", "").strip()
     persona = body.get("persona", "osint")
 
@@ -70,7 +65,7 @@ def handler(event, context):
     )
 
     # Store user message
-    user_msg_id = generate_ulid()
+    user_msg_id = str(ULID())
     messages_table.put_item(Item={
         "sessionId": session_id,
         "messageId": user_msg_id,
@@ -79,6 +74,19 @@ def handler(event, context):
         "createdAt": now,
         "expiresAt": ttl,
     })
+
+    # Build conversation history for multi-turn context
+    history = []
+    try:
+        history_resp = messages_table.query(
+            KeyConditionExpression=Key("sessionId").eq(session_id),
+            ScanIndexForward=True,
+            Limit=MAX_HISTORY_MESSAGES,
+        )
+        for msg in history_resp.get("Items", []):
+            history.append({"role": msg.get("role", "user"), "content": msg.get("content", "")})
+    except Exception:
+        logger.warning("Failed to fetch conversation history, proceeding without it")
 
     # Invoke persona-specific agent Lambda
     response_text = ""
@@ -90,7 +98,7 @@ def handler(event, context):
         agent_response = lambda_client.invoke(
             FunctionName=agent_fn_name,
             InvocationType="RequestResponse",
-            Payload=json.dumps({"message": message}),
+            Payload=json.dumps({"message": message, "history": history}),
         )
 
         payload = json.loads(agent_response["Payload"].read())
@@ -107,7 +115,7 @@ def handler(event, context):
         response_text = "I encountered an error processing your request. Please try again."
 
     # Store assistant message
-    assistant_msg_id = generate_ulid()
+    assistant_msg_id = str(ULID())
     assistant_item = {
         "sessionId": session_id,
         "messageId": assistant_msg_id,
