@@ -4,7 +4,7 @@
 ![Python 3.13+](https://img.shields.io/badge/python-3.13%2B-blue)
 ![Node 22](https://img.shields.io/badge/node-22-green)
 ![CDK v2](https://img.shields.io/badge/CDK-v2-orange)
-![Tests 364+](https://img.shields.io/badge/tests-364%2B-brightgreen)
+![Tests 374+](https://img.shields.io/badge/tests-374%2B-brightgreen)
 
 OSINT Intelligence Portal -- unified platform for OSINT analysts, red team operators, and leadership. Data flows through smart parsing pipelines into vectorized storage, enabling AI-powered search, tool-aware target prioritization, and persona-specific chat agents with risk analysis.
 
@@ -100,7 +100,7 @@ See the interactive [Architecture Overview](docs/architecture.html) for the full
 | **Orchestration** | Step Functions, EventBridge | 3 workflows: ingestion, enrichment, prioritization |
 | **Infra** | CDK v2 TypeScript | 4 stacks, Jest assertion tests |
 | **Hosting** | S3 + CloudFront | `deploy-frontend.sh` for updates |
-| **Testing** | pytest + moto, Vitest, Playwright, Jest | 199 backend, 79 agent, 83 CDK, 10 unit, 34 E2E |
+| **Testing** | pytest + moto, Vitest, Playwright, Jest | 209 backend, 79 agent, 83 CDK, 10 unit, 34 E2E |
 | **Linting** | ruff (Python), TypeScript strict mode | Line length 120, target py313 |
 
 ## Prerequisites
@@ -284,7 +284,7 @@ Set via `deploymentTier` in `config.json`.
 ## Testing
 
 ```bash
-# Backend functions (199 tests, 99% coverage)
+# Backend functions (209 tests, 99% coverage)
 cd apps/functions && uv run pytest tests/ --cov=. --cov-report=term-missing -q
 
 # Agent modules (79 tests)
@@ -370,8 +370,8 @@ AWS_PROFILE=cdk-deploy-prod npx cdk deploy --all --require-approval never
 | 2. OSINT Dashboard + Ticketing | Complete | Ticket CRUD, dashboards, queue for red team |
 | 3. Red Team Workflow | Complete | Target management, tool registry + vectorization, prioritization |
 | 4. AI Chat Agents | Complete | 3 persona-specific chat agents, tool search, risk analysis |
-| 5. Visualization + Leadership | Complete | React Flow topology (dagre, custom nodes, context menu), Tool Registry UI, Target Overview, dashboard charts, clickable metrics |
-| 6. Testing + Polish | Planned | 95%+ coverage, E2E, deploy to CloudFront |
+| 5. Visualization + Leadership | Complete | React Flow topology (dagre, custom nodes, context menu), Tool Registry UI, Target Overview, dashboard charts, chat session persistence |
+| 6. Testing + Polish | In Progress | CDK +8 tests, backend +10 tests, defusedxml XXE, ConditionExpression, chat history |
 
 ## Next Steps
 
@@ -381,7 +381,6 @@ AWS_PROFILE=cdk-deploy-prod npx cdk deploy --all --require-approval never
 ### Phase 6: Testing + Polish
 - **Frontend unit tests**: Increase from 10 to 95%+ coverage (Vitest + React Testing Library)
 - **E2E tests**: Update Playwright specs to cover seeded data flows, chat interactions
-- **Backend test updates**: Update tests for ConditionExpression race condition fixes, new chat history, defusedxml
 - **SNS alarm subscriptions**: Wire alarm topic to email or Slack
 
 See [CLAUDE.md](CLAUDE.md) for full architecture documentation.
