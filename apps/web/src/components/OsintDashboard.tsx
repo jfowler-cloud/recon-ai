@@ -237,7 +237,7 @@ export default function OsintDashboard() {
             { id: 'filename', header: 'Filename', cell: item => item.fileName, width: 320 },
             { id: 'sourceType', header: 'Source Type', cell: item => item.sourceType },
             { id: 'status', header: 'Status', cell: item => <UploadStatusCell status={item.ingestionStatus} /> },
-            { id: 'uploadedAt', header: 'Uploaded', cell: item => new Date(item.createdAt).toLocaleString() },
+            { id: 'uploadedAt', header: 'Uploaded', cell: item => new Date(Number(item.createdAt) * 1000).toLocaleString() },
           ]}
           variant="embedded"
           empty={<Box textAlign="center" color="text-body-secondary">No recent uploads</Box>}
