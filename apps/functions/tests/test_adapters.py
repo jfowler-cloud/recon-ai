@@ -385,6 +385,39 @@ def test_nmap_service_version_in_text():
     assert "2.4.52" in docs[0]["text"]
 
 
+def test_nmap_xxe_billion_laughs_rejected():
+    """defusedxml rejects XML bomb (billion laughs) attacks."""
+    xxe_payload = b"""<?xml version="1.0"?>
+    <!DOCTYPE lolz [
+      <!ENTITY lol "lol">
+      <!ENTITY lol2 "&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;">
+      <!ENTITY lol3 "&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;">
+    ]>
+    <nmaprun>&lol3;</nmaprun>"""
+
+    # defusedxml should reject this and fall back to text_passthrough
+    docs = nmap_xml(xxe_payload, "u1", "malicious.xml")
+    # Should not crash; falls back to text passthrough
+    assert len(docs) >= 1
+    # Should NOT contain expanded entity (would be millions of "lol")
+    assert len(docs[0]["text"]) < 10000
+
+
+def test_nmap_external_entity_rejected():
+    """defusedxml rejects external entity references."""
+    xxe_payload = b"""<?xml version="1.0"?>
+    <!DOCTYPE foo [
+      <!ENTITY xxe SYSTEM "file:///etc/passwd">
+    ]>
+    <nmaprun><host><address addr="&xxe;"/></host></nmaprun>"""
+
+    docs = nmap_xml(xxe_payload, "u1", "xxe.xml")
+    # Should fall back to text_passthrough, not leak /etc/passwd
+    assert len(docs) >= 1
+    for doc in docs:
+        assert "root:" not in doc.get("text", "")
+
+
 # ---- social_csv ----
 
 def test_social_basic_csv():

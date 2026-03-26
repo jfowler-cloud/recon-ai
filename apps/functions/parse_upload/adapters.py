@@ -293,7 +293,8 @@ def nmap_xml(content: bytes, upload_id: str, s3_key: str) -> list[dict]:
     documents = []
     try:
         root = ET.fromstring(content)
-    except ET.ParseError:
+    except Exception:
+        # Catches ParseError, EntitiesForbidden (XXE), ExternalReferenceForbidden, etc.
         return text_passthrough(content, upload_id, s3_key)
 
     for host in root.findall(".//host"):

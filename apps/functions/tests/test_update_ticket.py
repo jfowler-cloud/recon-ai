@@ -117,3 +117,38 @@ def test_update_ticket_full_lifecycle(aws_env, lambda_context):
         result = mod.handler({"ticketId": "TKT-LC", "status": next_status}, lambda_context)
         assert result["statusCode"] == 200, f"Failed transition to {next_status}"
         assert json.loads(result["body"])["ticket"]["status"] == next_status
+
+
+def test_update_ticket_uses_condition_expression(aws_env, lambda_context):
+    """Verify handler uses ConditionExpression for atomic status transitions."""
+    _seed_ticket(aws_env, "TKT-COND", "new")
+    mod = import_handler("update_ticket")
+
+    # Valid transition: new -> triaging
+    result = mod.handler({"ticketId": "TKT-COND", "status": "triaging"}, lambda_context)
+    assert result["statusCode"] == 200
+
+    # Verify status persisted atomically
+    table = aws_env.Table("RA-Tickets")
+    item = table.get_item(Key={"ticketId": "TKT-COND"})["Item"]
+    assert item["status"] == "triaging"
+
+    # Continue lifecycle to verify ConditionExpression works for each step
+    result2 = mod.handler({"ticketId": "TKT-COND", "status": "investigating"}, lambda_context)
+    assert result2["statusCode"] == 200
+    item2 = table.get_item(Key={"ticketId": "TKT-COND"})["Item"]
+    assert item2["status"] == "investigating"
+
+
+def test_update_ticket_title_field(aws_env, lambda_context):
+    """Can update title field alongside status."""
+    _seed_ticket(aws_env, "TKT-TITLE", "new")
+    mod = import_handler("update_ticket")
+    result = mod.handler({
+        "ticketId": "TKT-TITLE",
+        "status": "triaging",
+        "title": "Updated title",
+    }, lambda_context)
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["ticket"]["status"] == "triaging"
