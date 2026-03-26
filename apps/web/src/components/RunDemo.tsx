@@ -119,6 +119,7 @@ export default function RunDemo({ visible, onDismiss, userId }: Props) {
           ...ticket,
           assigneeId: userId,
           severity: ticket.severity as 'critical' | 'high' | 'medium' | 'low',
+          ticketType: ticket.ticketType as 'osint-investigation' | 'red-team-operation' | 'escalation',
         })
         setStep(stepIdx, { status: 'success', detail: result.ticketId })
         stepIdx++

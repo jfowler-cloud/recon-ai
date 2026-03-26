@@ -135,7 +135,7 @@ function E2EApp() {
   const [navigationOpen, setNavigationOpen] = useState(true)
 
   return (
-    <AuthContext.Provider value={{ userId: e2eUser.userId, groups: e2eUser.groups, persona, isDarkMode: true }}>
+    <AuthContext.Provider value={{ userId: e2eUser.userId, groups: e2eUser.groups, persona, isAdmin: false, isDarkMode: true, navigate: () => {} }}>
       <div id="top-nav" style={{ position: 'sticky', top: 0, zIndex: 1002 }}>
         <TopNavigation
           identity={{ href: '#', title: 'Recon AI' }}

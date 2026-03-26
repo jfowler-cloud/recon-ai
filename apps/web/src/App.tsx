@@ -24,11 +24,12 @@ import LeadershipDashboard from './components/LeadershipDashboard'
 import GoalManagement from './components/GoalManagement'
 import RunDemo from './components/RunDemo'
 import LeadershipChat from './components/LeadershipChat'
+import NetworkTopology from './components/NetworkTopology'
 import './index.css'
 
 type Persona = 'osint-analyst' | 'red-team-analyst' | 'leadership'
-type ViewType = 'osint-dashboard' | 'osint-upload' | 'osint-investigations' | 'osint-chat'
-  | 'redteam-dashboard' | 'redteam-targets' | 'redteam-operations' | 'redteam-chat'
+export type ViewType = 'osint-dashboard' | 'osint-upload' | 'osint-investigations' | 'osint-chat' | 'osint-topology'
+  | 'redteam-dashboard' | 'redteam-targets' | 'redteam-operations' | 'redteam-chat' | 'redteam-topology'
   | 'leadership-dashboard' | 'leadership-goals' | 'leadership-chat'
 
 interface AuthContextType {
@@ -37,9 +38,10 @@ interface AuthContextType {
   persona: Persona
   isAdmin: boolean
   isDarkMode: boolean
+  navigate: (view: ViewType) => void
 }
 export const AuthContext = createContext<AuthContextType>({
-  userId: '', groups: [], persona: 'osint-analyst', isAdmin: false, isDarkMode: true,
+  userId: '', groups: [], persona: 'osint-analyst', isAdmin: false, isDarkMode: true, navigate: () => {},
 })
 export function useAuth() { return useContext(AuthContext) }
 
@@ -92,6 +94,7 @@ function buildNavItems(persona: Persona): SideNavigationProps.Item[] {
         { type: 'link', text: 'Upload Data', href: '#osint-upload' },
         { type: 'link', text: 'Investigations', href: '#osint-investigations' },
         { type: 'link', text: 'OSINT Chat', href: '#osint-chat' },
+        { type: 'link', text: 'Network Topology', href: '#osint-topology' },
       ],
     })
   }
@@ -105,6 +108,7 @@ function buildNavItems(persona: Persona): SideNavigationProps.Item[] {
         { type: 'link', text: 'Target Queue', href: '#redteam-targets' },
         { type: 'link', text: 'Operations', href: '#redteam-operations' },
         { type: 'link', text: 'Red Team Chat', href: '#redteam-chat' },
+        { type: 'link', text: 'Network Topology', href: '#redteam-topology' },
       ],
     })
   }
@@ -149,6 +153,8 @@ function renderView(view: ViewType) {
       return <OsintInvestigations />
     case 'osint-chat':
       return <OsintChat />
+    case 'osint-topology':
+      return <NetworkTopology />
     case 'redteam-dashboard':
       return <RedTeamDashboard />
     case 'redteam-targets':
@@ -157,6 +163,8 @@ function renderView(view: ViewType) {
       return <RedTeamOperations />
     case 'redteam-chat':
       return <RedTeamChat />
+    case 'redteam-topology':
+      return <NetworkTopology />
     case 'leadership-dashboard':
       return <LeadershipDashboard />
     case 'leadership-goals':
@@ -212,7 +220,7 @@ function AuthenticatedApp({ signOut, user, darkMode, toggleTheme, currentView, s
   ]
 
   return (
-    <AuthContext.Provider value={{ userId, groups, persona: isAdmin ? 'leadership' : persona, isAdmin, isDarkMode: darkMode }}>
+    <AuthContext.Provider value={{ userId, groups, persona: isAdmin ? 'leadership' : persona, isAdmin, isDarkMode: darkMode, navigate: setCurrentView }}>
       <RunDemo visible={demoVisible} onDismiss={() => setDemoVisible(false)} userId={userId} />
       {isAdmin && (
         <div style={{

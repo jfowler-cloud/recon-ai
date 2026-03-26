@@ -8,7 +8,8 @@ import StatusIndicator from '@cloudscape-design/components/status-indicator'
 import Table from '@cloudscape-design/components/table'
 import Icon from '@cloudscape-design/components/icon'
 import Spinner from '@cloudscape-design/components/spinner'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts'
+import { useAuth } from '@/App'
 import { getDashboard, listUploads } from '@/utils/api'
 import type { Upload } from '@/types'
 
@@ -31,31 +32,40 @@ const DEFAULT_METRICS = {
 
 const DEFAULT_SEVERITY_DATA: { severity: string; count: number; color: string }[] = []
 
+const SOURCE_TYPE_COLORS = ['#e8001c', '#0972d3', '#f89256', '#29a368', '#8c8c8c', '#a78bfa']
+
 // ── Metric card component ────────────────────────────────────────────
 
-function MetricCard({ label, value, icon, statusType }: {
+function MetricCard({ label, value, icon, statusType, onClick, linkText }: {
   label: string
   value: number | string
   icon: string
   statusType: 'error' | 'warning' | 'info' | 'success'
+  onClick?: () => void
+  linkText?: string
 }) {
   return (
-    <Container>
-      <SpaceBetween size="xs">
-        <Box variant="awsui-key-label">
+    <div onClick={onClick} className={onClick ? 'metric-card-link' : undefined}>
+      <Container>
+        <SpaceBetween size="xs">
+          <Box variant="awsui-key-label">
+            <SpaceBetween direction="horizontal" size="xs">
+              <Icon name={icon as Parameters<typeof Icon>[0]['name']} />
+              <span>{label}</span>
+            </SpaceBetween>
+          </Box>
+          <Box variant="awsui-value-large">{value}</Box>
           <SpaceBetween direction="horizontal" size="xs">
-            <Icon name={icon as Parameters<typeof Icon>[0]['name']} />
-            <span>{label}</span>
+            <StatusIndicator type={statusType}>
+              {statusType === 'error' ? 'Requires attention' :
+               statusType === 'warning' ? 'In progress' :
+               statusType === 'info' ? 'Monitoring' : 'On track'}
+            </StatusIndicator>
+            {linkText && <span className="metric-link-hint" style={{ color: '#0972d3' }}>{linkText} →</span>}
           </SpaceBetween>
-        </Box>
-        <Box variant="awsui-value-large">{value}</Box>
-        <StatusIndicator type={statusType}>
-          {statusType === 'error' ? 'Requires attention' :
-           statusType === 'warning' ? 'In progress' :
-           statusType === 'info' ? 'Monitoring' : 'On track'}
-        </StatusIndicator>
-      </SpaceBetween>
-    </Container>
+        </SpaceBetween>
+      </Container>
+    </div>
   )
 }
 
@@ -94,9 +104,11 @@ function ChartTooltip({ active, payload, label }: {
 // ── Main component ───────────────────────────────────────────────────
 
 export default function OsintDashboard() {
+  const { navigate } = useAuth()
   const [metrics, setMetrics] = useState(DEFAULT_METRICS)
   const [uploads, setUploads] = useState<Upload[]>([])
   const [severityData, setSeverityData] = useState(DEFAULT_SEVERITY_DATA)
+  const [sourceTypeData, setSourceTypeData] = useState<{ name: string; value: number }[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -135,6 +147,17 @@ export default function OsintDashboard() {
                 severity: severity.charAt(0).toUpperCase() + severity.slice(1),
                 count,
                 color: SEVERITY_COLORS[severity] ?? '#879596',
+              }))
+            )
+          }
+
+          // Build source type pie chart data
+          const bySourceType = (d.uploads as Record<string, unknown>)?.bySourceType as Record<string, number> | undefined
+          if (bySourceType) {
+            setSourceTypeData(
+              Object.entries(bySourceType).map(([name, value]) => ({
+                name: name.charAt(0).toUpperCase() + name.slice(1),
+                value,
               }))
             )
           }
@@ -177,24 +200,32 @@ export default function OsintDashboard() {
           label="Uploads Today"
           value={metrics.uploadsToday}
           statusType="info"
+          onClick={() => navigate('osint-upload')}
+          linkText="View pending"
         />
         <MetricCard
           icon="search"
           label="Active Investigations"
           value={metrics.activeInvestigations}
           statusType="warning"
+          onClick={() => navigate('osint-investigations')}
+          linkText="View investigations"
         />
         <MetricCard
           icon="status-negative"
           label="Critical Findings"
           value={metrics.criticalFindings}
           statusType="error"
+          onClick={() => navigate('osint-investigations')}
+          linkText="View findings"
         />
         <MetricCard
           icon="status-pending"
           label="Pending Ingestion"
           value={metrics.pendingIngestion}
           statusType="success"
+          onClick={() => navigate('osint-upload')}
+          linkText="View uploads"
         />
       </ColumnLayout>
 
@@ -213,34 +244,60 @@ export default function OsintDashboard() {
         />
       </Container>
 
-      {/* Threat severity distribution */}
-      <Container header={<Header variant="h2">Threat Severity Distribution</Header>}>
-        <div style={{ width: '100%', height: 300 }}>
-          <ResponsiveContainer>
-            <BarChart data={severityData} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="var(--color-border-divider-default, #414d5c)"
-              />
-              <XAxis
-                dataKey="severity"
-                tick={{ fill: 'var(--color-text-body-secondary, #b4b8bf)', fontSize: 12 }}
-                axisLine={{ stroke: 'var(--color-border-divider-default, #414d5c)' }}
-              />
-              <YAxis
-                tick={{ fill: 'var(--color-text-body-secondary, #b4b8bf)', fontSize: 12 }}
-                axisLine={{ stroke: 'var(--color-border-divider-default, #414d5c)' }}
-              />
-              <Tooltip content={<ChartTooltip />} />
-              <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                {severityData.map((entry, index) => (
-                  <Cell key={index} fill={entry.color} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </Container>
+      {/* Charts: Severity + Source Type side by side */}
+      <ColumnLayout columns={2}>
+        <Container header={<Header variant="h2">Threat Severity Distribution</Header>}>
+          <div style={{ width: '100%', height: 300 }}>
+            <ResponsiveContainer>
+              <BarChart data={severityData} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="var(--color-border-divider-default, #414d5c)"
+                />
+                <XAxis
+                  dataKey="severity"
+                  tick={{ fill: 'var(--color-text-body-secondary, #b4b8bf)', fontSize: 12 }}
+                  axisLine={{ stroke: 'var(--color-border-divider-default, #414d5c)' }}
+                />
+                <YAxis
+                  tick={{ fill: 'var(--color-text-body-secondary, #b4b8bf)', fontSize: 12 }}
+                  axisLine={{ stroke: 'var(--color-border-divider-default, #414d5c)' }}
+                />
+                <Tooltip content={<ChartTooltip />} />
+                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                  {severityData.map((entry, index) => (
+                    <Cell key={index} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Container>
+
+        <Container header={<Header variant="h2">Uploads by Source Type</Header>}>
+          <div style={{ width: '100%', height: 300 }}>
+            <ResponsiveContainer>
+              <PieChart>
+                <Pie
+                  data={sourceTypeData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  dataKey="value"
+                  nameKey="name"
+                  label={({ name, value }) => `${name}: ${value}`}
+                >
+                  {sourceTypeData.map((_entry, index) => (
+                    <Cell key={`src-${index}`} fill={SOURCE_TYPE_COLORS[index % SOURCE_TYPE_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </Container>
+      </ColumnLayout>
     </SpaceBetween>
   )
 }

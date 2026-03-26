@@ -120,6 +120,25 @@ html, body, #root {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
 }
 
+/* Clickable metric cards */
+.metric-card-link {
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border-radius: 12px;
+}
+.metric-card-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+.metric-card-link .metric-link-hint {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  font-size: 11px;
+}
+.metric-card-link:hover .metric-link-hint {
+  opacity: 1;
+}
+
 /* Fix Cloudscape SplitPanel preferences confirm button rendering empty */
 button[class*="awsui_button-no-text"][type="submit"] {
   min-width: 80px !important;

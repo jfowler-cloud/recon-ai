@@ -7,7 +7,7 @@ import SpaceBetween from '@cloudscape-design/components/space-between'
 import Badge from '@cloudscape-design/components/badge'
 import ContentLayout from '@cloudscape-design/components/content-layout'
 import Spinner from '@cloudscape-design/components/spinner'
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
 import { useAuth } from '@/App'
 import { getDashboard } from '@/utils/api'
 
@@ -30,16 +30,20 @@ const DEFAULT_METRICS = {
 }
 
 const PIE_COLORS = ['#e8001c', '#0972d3', '#f89256', '#29a368', '#8c8c8c']
+const TYPE_COLORS = ['#e8001c', '#0972d3', '#f89256']
 
-function MetricCard({ title, value, description }: { title: string; value: string | number; description?: string }) {
+function MetricCard({ title, value, description, onClick, linkText }: { title: string; value: string | number; description?: string; onClick?: () => void; linkText?: string }) {
   return (
-    <Container>
-      <SpaceBetween size="xxs">
-        <Box variant="small" color="text-body-secondary">{title}</Box>
-        <Box variant="h1" tagOverride="div">{value}</Box>
-        {description && <Box variant="small" color="text-body-secondary">{description}</Box>}
-      </SpaceBetween>
-    </Container>
+    <div onClick={onClick} className={onClick ? 'metric-card-link' : undefined}>
+      <Container>
+        <SpaceBetween size="xxs">
+          <Box variant="small" color="text-body-secondary">{title}</Box>
+          <Box variant="h1" tagOverride="div">{value}</Box>
+          {description && <Box variant="small" color="text-body-secondary">{description}</Box>}
+          {linkText && <span className="metric-link-hint" style={{ color: '#0972d3', fontSize: 12 }}>{linkText} →</span>}
+        </SpaceBetween>
+      </Container>
+    </div>
   )
 }
 
@@ -53,10 +57,11 @@ function formatRelativeTime(timestamp: number): string {
 }
 
 export default function LeadershipDashboard() {
-  const { isDarkMode } = useAuth()
+  const { isDarkMode, navigate } = useAuth()
   const [metrics, setMetrics] = useState(DEFAULT_METRICS)
   const [activity, setActivity] = useState<ActivityItem[]>([])
   const [statusDistribution, setStatusDistribution] = useState<{ name: string; value: number }[]>([])
+  const [typeData, setTypeData] = useState<{ type: string; count: number }[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -101,6 +106,17 @@ export default function LeadershipDashboard() {
             })))
           }
 
+          // Build tickets by type chart data
+          const byType = tickets?.byType as Record<string, number> | undefined
+          if (byType) {
+            setTypeData(
+              Object.entries(byType).map(([type, count]) => ({
+                type: type.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+                count,
+              }))
+            )
+          }
+
           // Build status distribution from byStatus
           if (byStatus) {
             setStatusDistribution(
@@ -134,10 +150,10 @@ export default function LeadershipDashboard() {
     <ContentLayout header={<Header variant="h1">Leadership Dashboard</Header>}>
       <SpaceBetween size="l">
         <ColumnLayout columns={4}>
-          <MetricCard title="OSINT Investigations" value={metrics.osintInvestigations} description={metrics.osintDescription} />
-          <MetricCard title="Red Team Operations" value={metrics.redTeamOperations} description={metrics.rtDescription} />
-          <MetricCard title="Critical Findings" value={metrics.criticalFindings} description={metrics.criticalDescription} />
-          <MetricCard title="Team Utilization" value={metrics.teamUtilization} description={metrics.teamDescription} />
+          <MetricCard title="OSINT Investigations" value={metrics.osintInvestigations} description={metrics.osintDescription} onClick={() => navigate('osint-investigations')} linkText="View investigations" />
+          <MetricCard title="Red Team Operations" value={metrics.redTeamOperations} description={metrics.rtDescription} onClick={() => navigate('redteam-operations')} linkText="View operations" />
+          <MetricCard title="Critical Findings" value={metrics.criticalFindings} description={metrics.criticalDescription} onClick={() => navigate('osint-investigations')} linkText="View findings" />
+          <MetricCard title="Team Utilization" value={metrics.teamUtilization} description={metrics.teamDescription} onClick={() => navigate('leadership-goals')} linkText="View goals" />
         </ColumnLayout>
 
         <ColumnLayout columns={2}>
@@ -177,6 +193,34 @@ export default function LeadershipDashboard() {
             </ResponsiveContainer>
           </Container>
         </ColumnLayout>
+
+        <Container header={<Header variant="h2">Tickets by Type</Header>}>
+          <div style={{ width: '100%', height: 300 }}>
+            <ResponsiveContainer>
+              <BarChart data={typeData} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="var(--color-border-divider-default, #414d5c)"
+                />
+                <XAxis
+                  dataKey="type"
+                  tick={{ fill: 'var(--color-text-body-secondary, #b4b8bf)', fontSize: 12 }}
+                  axisLine={{ stroke: 'var(--color-border-divider-default, #414d5c)' }}
+                />
+                <YAxis
+                  tick={{ fill: 'var(--color-text-body-secondary, #b4b8bf)', fontSize: 12 }}
+                  axisLine={{ stroke: 'var(--color-border-divider-default, #414d5c)' }}
+                />
+                <Tooltip />
+                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                  {typeData.map((_entry, index) => (
+                    <Cell key={index} fill={TYPE_COLORS[index % TYPE_COLORS.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Container>
       </SpaceBetween>
     </ContentLayout>
   )

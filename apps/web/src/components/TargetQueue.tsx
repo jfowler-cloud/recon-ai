@@ -65,7 +65,7 @@ function TargetDetail({ target, onStatusChange, onAssign }: {
   onAssign: (assignee: string) => void
 }) {
   const [assignInput, setAssignInput] = useState(target.assigneeId ?? '')
-  const raw = target as Record<string, unknown>
+  const raw = target as unknown as Record<string, unknown>
 
   return (
     <SpaceBetween size="m">
@@ -96,14 +96,14 @@ function TargetDetail({ target, onStatusChange, onAssign }: {
         </div>
       )}
 
-      {raw.plainTextGoal && (
+      {!!raw.plainTextGoal && (
         <div>
           <Box variant="small" color="text-body-secondary">ORIGINAL GOAL</Box>
           <Box variant="p">{String(raw.plainTextGoal)}</Box>
         </div>
       )}
 
-      {raw.goalAlignment && (
+      {!!raw.goalAlignment && (
         <div>
           <Box variant="small" color="text-body-secondary">GOAL ALIGNMENT</Box>
           <Box variant="p">
@@ -112,7 +112,7 @@ function TargetDetail({ target, onStatusChange, onAssign }: {
         </div>
       )}
 
-      {raw.alignmentTags && Array.isArray(raw.alignmentTags) && (raw.alignmentTags as string[]).length > 0 && (
+      {!!raw.alignmentTags && Array.isArray(raw.alignmentTags) && (raw.alignmentTags as string[]).length > 0 && (
         <div>
           <Box variant="small" color="text-body-secondary">ALIGNMENT TAGS</Box>
           <SpaceBetween size="xxs" direction="horizontal">
@@ -386,7 +386,7 @@ export default function TargetQueue() {
         onSplitPanelToggle={({ detail }) => setSplitOpen(detail.open)}
         splitPanelPreferences={{ position: splitPosition }}
         onSplitPanelPreferencesChange={({ detail }) => setSplitPosition(detail.position)}
-        ariaLabels={{ splitPanelPreferencesConfirm: 'Confirm', splitPanelPreferencesCancel: 'Cancel' }}
+        ariaLabels={{} as Record<string, string>}
         navigationHide
         toolsHide
         headerSelector="#top-nav"

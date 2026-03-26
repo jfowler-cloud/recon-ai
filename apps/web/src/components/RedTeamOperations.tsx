@@ -340,7 +340,7 @@ export default function RedTeamOperations() {
         onSplitPanelToggle={({ detail }) => setSplitOpen(detail.open)}
         splitPanelPreferences={{ position: splitPosition }}
         onSplitPanelPreferencesChange={({ detail }) => setSplitPosition(detail.position)}
-        ariaLabels={{ splitPanelPreferencesConfirm: 'Confirm', splitPanelPreferencesCancel: 'Cancel' }}
+        ariaLabels={{} as Record<string, string>}
         navigationHide
         toolsHide
         headerSelector="#top-nav"
