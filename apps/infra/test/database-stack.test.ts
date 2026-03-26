@@ -21,8 +21,8 @@ describe('DatabaseStack', () => {
     template = buildTemplate()
   })
 
-  it('creates exactly 12 DynamoDB tables', () => {
-    template.resourceCountIs('AWS::DynamoDB::Table', 12)
+  it('creates exactly 13 DynamoDB tables', () => {
+    template.resourceCountIs('AWS::DynamoDB::Table', 13)
   })
 
   it('all tables use PAY_PER_REQUEST billing', () => {
@@ -174,13 +174,13 @@ describe('DatabaseStack', () => {
   })
 
   // Alarms
-  it('creates 12 DynamoDB throttle alarms', () => {
+  it('creates 13 DynamoDB throttle alarms', () => {
     const alarms = template.findResources('AWS::CloudWatch::Alarm', {
       Properties: {
         AlarmName: Match.stringLikeRegexp('^RA-.*-DynamoThrottle$'),
       },
     })
-    expect(Object.keys(alarms).length).toBe(12)
+    expect(Object.keys(alarms).length).toBe(13)
   })
 
   it('creates CloudFront error alarms', () => {

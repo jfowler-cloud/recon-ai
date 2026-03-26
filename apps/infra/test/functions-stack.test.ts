@@ -53,6 +53,7 @@ function buildTemplate() {
   const chatMessagesTable = makeTable('ChatMessages', 'sessionId', 'messageId')
   const configTable = makeTable('Config', 'configKey')
   const scoringHistoryTable = makeTable('ScoringHistory', 'runId')
+  const toolsTable = makeTable('Tools', 'toolId')
 
   const uploadsBucket = new s3.Bucket(depStack, 'UploadsBucket')
   const vectorsBucket = new s3.Bucket(depStack, 'VectorsBucket')
@@ -66,7 +67,7 @@ function buildTemplate() {
     alarmTopic,
     dataSourcesTable, uploadsTable, documentsTable,
     ticketsTable, ticketNotesTable, targetsTable,
-    leadershipContextTable, toolActionsTable,
+    leadershipContextTable, toolActionsTable, toolsTable,
     chatSessionsTable, chatMessagesTable,
     configTable, scoringHistoryTable,
     uploadsBucket, vectorsBucket,
@@ -82,12 +83,14 @@ describe('FunctionsStack', () => {
     template = buildTemplate()
   })
 
-  it('creates Phase 1-3 Lambda functions (plus CDK framework helper)', () => {
+  it('creates all Lambda functions', () => {
     const fns = template.findResources('AWS::Lambda::Function', {
       Properties: { Runtime: 'python3.13' },
     })
-    // Phase 1: 6, Phase 2: 5, Phase 3: 3 functions + 2 agents = 16
-    expect(Object.keys(fns).length).toBe(16)
+    // Phase 1: 6, Phase 2: 5, Phase 3: 5 (create_target, update_context, record_tool_action, manage_tools, update_target)
+    // Phase 3 agents: 2 (enrichment, prioritization)
+    // Phase 4: 6 (chat_handler, get_session, list_sessions, 3 chat agents)
+    expect(Object.keys(fns).length).toBe(24)
   })
 
   it('all handler functions use Python 3.13', () => {
@@ -183,7 +186,7 @@ describe('FunctionsStack', () => {
 
   it('creates enrichment agent function', () => {
     template.hasResourceProperties('AWS::Lambda::Function', {
-      FunctionName: 'ra-enrichment_agent',
+      FunctionName: 'ra-target_enrichment',
       Timeout: 120,
       MemorySize: 512,
     })
@@ -191,7 +194,7 @@ describe('FunctionsStack', () => {
 
   it('creates prioritization agent function', () => {
     template.hasResourceProperties('AWS::Lambda::Function', {
-      FunctionName: 'ra-prioritization_agent',
+      FunctionName: 'ra-prioritization',
       Timeout: 300,
       MemorySize: 512,
     })
@@ -199,7 +202,7 @@ describe('FunctionsStack', () => {
 
   it('enrichment agent has ENRICHMENT_MODEL_ID env var', () => {
     template.hasResourceProperties('AWS::Lambda::Function', {
-      FunctionName: 'ra-enrichment_agent',
+      FunctionName: 'ra-target_enrichment',
       Environment: {
         Variables: Match.objectLike({
           ENRICHMENT_MODEL_ID: 'us.anthropic.claude-haiku-4-5-20251001-v1:0',
@@ -210,7 +213,7 @@ describe('FunctionsStack', () => {
 
   it('prioritization agent has PRIORITIZATION_MODEL_ID env var', () => {
     template.hasResourceProperties('AWS::Lambda::Function', {
-      FunctionName: 'ra-prioritization_agent',
+      FunctionName: 'ra-prioritization',
       Environment: {
         Variables: Match.objectLike({
           PRIORITIZATION_MODEL_ID: 'us.anthropic.claude-haiku-4-5-20251001-v1:0',
@@ -265,17 +268,17 @@ describe('FunctionsStack', () => {
     template.resourceCountIs('AWS::CloudFormation::CustomResource', 1)
   })
 
-  it('creates error and duration alarms for each function (32 total)', () => {
+  it('creates error and duration alarms for each function (48 total)', () => {
     const alarms = template.findResources('AWS::CloudWatch::Alarm', {
       Properties: {
         AlarmName: Match.stringLikeRegexp('^RA-'),
       },
     })
-    // 16 functions x 2 alarms each = 32
-    expect(Object.keys(alarms).length).toBe(32)
+    // 24 functions x 2 alarms each = 48
+    expect(Object.keys(alarms).length).toBe(48)
   })
 
-  it('outputs function names including Phase 3', () => {
+  it('outputs function names including Phase 3 and 4', () => {
     const outputs = template.findOutputs('*')
     const outputKeys = Object.keys(outputs)
     expect(outputKeys.some(k => k.startsWith('UploadDataFnName'))).toBe(true)
@@ -288,5 +291,11 @@ describe('FunctionsStack', () => {
     expect(outputKeys.some(k => k.startsWith('RecordToolActionFnName'))).toBe(true)
     expect(outputKeys.some(k => k.startsWith('EnrichmentAgentFnName'))).toBe(true)
     expect(outputKeys.some(k => k.startsWith('PrioritizationAgentFnName'))).toBe(true)
+    expect(outputKeys.some(k => k.startsWith('ChatHandlerFnName'))).toBe(true)
+    expect(outputKeys.some(k => k.startsWith('GetSessionFnName'))).toBe(true)
+    expect(outputKeys.some(k => k.startsWith('ListSessionsFnName'))).toBe(true)
+    expect(outputKeys.some(k => k.startsWith('OsintChatAgentFnName'))).toBe(true)
+    expect(outputKeys.some(k => k.startsWith('RedteamChatAgentFnName'))).toBe(true)
+    expect(outputKeys.some(k => k.startsWith('LeadershipChatAgentFnName'))).toBe(true)
   })
 })

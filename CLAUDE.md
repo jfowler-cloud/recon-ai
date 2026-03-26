@@ -33,20 +33,18 @@ recon-ai/
 │   │   ├── queue_for_redteam/      # [Phase 2] OSINT finding → red team target
 │   │   ├── update_context/         # [Phase 3] Save leadership goals, trigger re-prioritization
 │   │   ├── manage_tools/           # [Phase 3] CRUD for RA-Tools + vectorize risk/success profiles
-│   │   ├── update_target/          # [Phase 3] Status transitions, manual edits
 │   │   ├── record_tool_action/     # [Phase 3] Write RA-ToolActions entry
 │   │   ├── chat_handler/           # [Phase 4] Invoke persona-specific Strands agent (fire-and-poll)
 │   │   ├── get_session/            # [Phase 4] Retrieve chat session + messages
 │   │   ├── list_sessions/          # [Phase 4] List user's past sessions
 │   │   ├── get_dashboard/          # [Phase 2] Aggregated dashboard data per persona
 │   │   ├── tests/
-│   │   ├── layers/shared/          # Lambda layer requirements
 │   │   └── pyproject.toml
 │   ├── infra/                      # CDK v2 TypeScript
 │   │   ├── bin/recon-ai.ts         # App bootstrap, reads config.json
 │   │   ├── lib/
 │   │   │   ├── auth-stack.ts       # Cognito User Pool + Identity Pool + 3 groups
-│   │   │   ├── database-stack.ts   # 12 DynamoDB tables, S3 buckets, CloudFront
+│   │   │   ├── database-stack.ts   # 13 DynamoDB tables, S3 buckets, CloudFront
 │   │   │   ├── functions-stack.ts  # Lambda layers, functions, IAM, alarms
 │   │   │   └── workflow-stack.ts   # Step Functions, EventBridge, Cognito roles
 │   │   ├── test/
@@ -76,7 +74,7 @@ recon-ai/
 - **AI**: Claude via Amazon Bedrock (tiered: Haiku 4.5 / Sonnet 4.5 / Opus 4.5), Titan Embeddings v2
 - **Database**: DynamoDB (13 tables, RA- prefix), S3 (uploads, vectors, hosting)
 - **Auth**: Cognito User Pool + Identity Pool (3 groups: osint-analyst, red-team-analyst, leadership)
-- **Infra**: CDK v2 TypeScript (4 stacks: RA-Auth, RA-Database[13 tables], RA-Functions, RA-Workflow)
+- **Infra**: CDK v2 TypeScript (4 stacks: RA-Auth, RA-Database [13 tables], RA-Functions [24 Lambdas], RA-Workflow)
 - **Hosting**: S3 + CloudFront
 - **Testing**: Vitest + Playwright (frontend), pytest + moto (backend), Jest (CDK)
 - **Linting**: ruff (Python, line-length=120, target py313), TypeScript strict mode

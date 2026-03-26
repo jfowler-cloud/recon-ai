@@ -1,8 +1,28 @@
 # Recon AI
 
 [![License: Unlicense](https://img.shields.io/badge/License-Unlicense-blue.svg)](LICENSE)
+![Python 3.13+](https://img.shields.io/badge/python-3.13%2B-blue)
+![Node 22](https://img.shields.io/badge/node-22-green)
+![CDK v2](https://img.shields.io/badge/CDK-v2-orange)
+![Tests 356+](https://img.shields.io/badge/tests-356%2B-brightgreen)
 
 OSINT Intelligence Portal -- unified platform for OSINT analysts, red team operators, and leadership. Data flows through smart parsing pipelines into vectorized storage, enabling AI-powered search, tool-aware target prioritization, and persona-specific chat agents with risk analysis.
+
+## Table of Contents
+
+- [Architecture Overview](#architecture-overview)
+- [How It Works](#how-it-works)
+- [Tech Stack](#tech-stack)
+- [Prerequisites](#prerequisites)
+- [Quick Start](#quick-start)
+- [Testing](#testing)
+- [DynamoDB Tables](#dynamodb-tables-13)
+- [Lambda Functions](#lambda-functions-19)
+- [Agents](#agents-5)
+- [Deployment Tiers](#deployment-tiers)
+- [Key Design Decisions](#key-design-decisions)
+- [Known Issues & Improvement Areas](#known-issues--improvement-areas)
+- [Project Status](#project-status)
 
 ## Architecture Overview
 
@@ -36,51 +56,33 @@ See the interactive [Architecture Overview](docs/architecture.html) for the full
 | **Orchestration** | Step Functions, EventBridge | 3 workflows: ingestion, enrichment, prioritization |
 | **Infra** | CDK v2 TypeScript | 4 stacks, Jest assertion tests |
 | **Hosting** | S3 + CloudFront | `deploy-frontend.sh` for updates |
-| **Testing** | pytest + moto, Vitest, Playwright, Jest | 199 backend, 44 agent, 66 CDK, 13 unit, 34 E2E |
+| **Testing** | pytest + moto, Vitest, Playwright, Jest | 199 backend, 79 agent, 75 CDK, 10 unit, 34 E2E |
 | **Linting** | ruff (Python), TypeScript strict mode | Line length 120, target py313 |
+
+## Prerequisites
+
+- **Node.js 22+** and npm
+- **Python 3.13+** and [uv](https://docs.astral.sh/uv/)
+- **AWS CLI v2** configured with a profile that has CDK deploy permissions
+- **AWS CDK CLI** (`npm install -g aws-cdk`)
+- **jq** (for scripts)
+- **Docker** (for CDK Lambda layer bundling during `cdk deploy`)
 
 ## Quick Start
 
 ```bash
-# CDK infrastructure
+# 1. CDK infrastructure
 cd apps/infra && npm install
 AWS_PROFILE=cdk-deploy-prod npx cdk deploy --all --require-approval never
 
-# Populate frontend env vars from CloudFormation outputs
+# 2. Populate frontend env vars from CloudFormation outputs
 ./scripts/setup-env.sh
 
-# Frontend dev server
+# 3. Frontend dev server
 ./dev.sh
 ```
 
-Create users in Cognito: `osint-analyst`, `red-team-analyst`, `leadership` groups.
-
-## Architecture
-
-```
-Upload -> S3 -> EventBridge -> Step Functions -> Detect -> Parse -> Embed -> DynamoDB + S3 Vectors
-                                                  |
-                                    Adapters: Shodan JSON, Nmap XML, CSV,
-                                    Log Text, Textract (PDF/image), Passthrough
-                                                  |
-                                    Optional: Comprehend enrichment
-                                    (entities, sentiment, key phrases)
-
-Target Goal -> create_target -> Enrichment Agent (Claude) -> RA-Targets
-                                                               |
-Leadership Goals -> update_context -> Prioritization Agent ----+
-                                      (tool-aware scoring)     |
-                                                               v
-Tool Registry -> manage_tools -> Titan v2 Embed ---------> S3 Vectors
-                 (risk + success profiles)                     |
-                                                               v
-                                                    Red Team Chat Agent
-                                                    (search_tools, risk analysis)
-
-Frontend (Cloudscape) -> DynamoDB + Lambda (direct SDK via Cognito)
-```
-
-No API Gateway. Frontend calls DynamoDB + Lambda directly via Cognito identity pool credentials.
+Create users in Cognito and assign to groups: `osint-analyst`, `red-team-analyst`, `leadership`.
 
 ## DynamoDB Tables (13)
 
@@ -108,7 +110,7 @@ All tables: on-demand billing, PITR enabled, AWS-managed encryption.
 |----------|---------|
 | RA-Auth | Cognito User Pool + Identity Pool + 3 groups |
 | RA-Database | 13 DynamoDB tables, S3 buckets (uploads, vectors, hosting), CloudFront |
-| RA-Functions | 19 Lambda functions + shared layers + IAM + CloudWatch alarms |
+| RA-Functions | 24 Lambda functions (19 handlers + 5 agents) + shared layers + IAM + CloudWatch alarms |
 | RA-Workflow | 3 Step Functions, EventBridge trigger, Cognito identity pool role bindings |
 
 ## Lambda Functions (19)
@@ -235,20 +237,20 @@ Set via `deploymentTier` in `config.json`.
 # Backend functions (199 tests, 99% coverage)
 cd apps/functions && uv run pytest tests/ --cov=. --cov-report=term-missing -q
 
-# Agent shared modules (44 tests, 100% coverage)
-cd apps/agents && uv run pytest tests/ --cov=shared --cov-report=term-missing -q
+# Agent modules (79 tests)
+cd apps/agents && uv run pytest tests/ --cov=. --cov-report=term-missing -q
 
-# CDK infrastructure (66 tests)
+# CDK infrastructure (75 tests)
 cd apps/infra && npm test
 
-# Frontend unit (13 tests)
+# Frontend unit (10 tests)
 cd apps/web && npm test
 
 # Frontend E2E -- Playwright (34 tests)
 cd apps/web && npm run test:e2e
 
 # E2E deployed backend (11 tests against live AWS)
-./scripts/test-deployed.sh
+AWS_PROFILE=cdk-deploy-prod ./scripts/test-deployed.sh
 ```
 
 ## Key Design Decisions
@@ -294,6 +296,59 @@ AWS_PROFILE=cdk-deploy-prod npx cdk deploy --all --require-approval never
 # Deploy frontend to S3 + CloudFront
 ./deploy-frontend.sh
 ```
+
+## Known Issues & Improvement Areas
+
+### Critical (P0)
+
+| Issue | Location | Description |
+|-------|----------|-------------|
+| Race condition in ticket status transitions | `update_ticket/handler.py` | Read-then-write without `ConditionExpression` allows concurrent requests to bypass state machine validation |
+| Race condition in target status transitions | `update_target/handler.py` | Same pattern as above |
+| Unpaginated DynamoDB scans in dashboard | `get_dashboard/handler.py` | Single `scan()` call returns max 1MB; silently returns incomplete data at scale |
+| `FunctionError` check on wrong object | `apps/web/src/utils/api.ts:59` | Checks `raw.FunctionError` instead of `response.FunctionError`; Lambda errors silently treated as success |
+| Hardcoded `'current-user'` analyst ID | `DataUpload.tsx:137` | All uploads attributed to fake user instead of actual Cognito identity |
+
+### High (P1)
+
+| Issue | Location | Description |
+|-------|----------|-------------|
+| `chat_handler` uses non-ULID IDs | `chat_handler/handler.py:26-29` | Custom hex+random IDs break DynamoDB sort order; project already depends on `python-ulid` |
+| No conversation history in agent calls | `chat_handler/handler.py:93` | Only current message sent to agent; no multi-turn context |
+| Unused `days` parameter in tools | `osint_chat_agent/tools.py`, `leadership_chat_agent/tools.py` | `get_vulnerability_summary`, `get_ticket_summary`, `get_operations_overview` accept `days` but never filter by time |
+| `get_vulnerability_summary` reads `expiresAt` as creation time | `osint_chat_agent/tools.py:40` | Uses TTL field instead of `createdAt` |
+| S3 key path traversal via `fileName` | `upload_data/handler.py:43` | No sanitization on user-provided filename |
+| XML bomb risk in nmap parser | `parse_upload/adapters.py:295` | Uses `xml.etree.ElementTree` without defusedxml; vulnerable to billion-laughs DoS |
+| S3 vectors fully re-downloaded per search | `shared/chat_tools.py:43-61` | Every `search_documents` call downloads all S3 vector files; no caching |
+| No Step Functions error handlers | `workflow-stack.ts:92-95` | No `addCatch()` on ingestion workflow; failures leave uploads stuck in "processing" |
+| S3 CORS allows all origins | `database-stack.ts:201` | Uploads bucket `allowedOrigins: ['*']`; should be restricted |
+
+### Medium (DRY / Code Quality)
+
+| Issue | Location | Description |
+|-------|----------|-------------|
+| `DecimalEncoder` duplicated 3x | `update_ticket`, `list_tickets`, `get_dashboard` | Extract to shared module |
+| Three identical chat agent handlers | `osint/redteam/leadership_chat_agent/handler.py` | Same code except import path; use a handler factory |
+| `MetricCard.tsx` is dead code | `src/components/MetricCard.tsx` | Each dashboard defines its own local MetricCard |
+| `OutputPanel.tsx` is dead code | `src/components/OutputPanel.tsx` | No component imports it |
+| `formatters.ts` utilities mostly unused | `src/utils/formatters.ts` | Components define inline versions instead |
+| `react-router-dom` unused dependency | `apps/web/package.json` | Navigation uses state-based view switching |
+| Inconsistent Decimal serialization | Multiple handlers | Some use `default=str` (returns string), others `DecimalEncoder` (returns int) |
+| No SNS alarm topic subscriptions | `auth-stack.ts` | Alarm topic created but nobody receives alerts |
+| `setup-env.sh` incomplete | `scripts/setup-env.sh` | Only fetches 10 of 24 Lambda function names |
+| Hardcoded DynamoDB table names in frontend | `api.ts` | Should come from env config |
+
+### Infrastructure
+
+| Issue | Description |
+|-------|-------------|
+| No WAF on CloudFront | Security-focused OSINT portal has no web application firewall |
+| No S3 bucket versioning | Upload data not recoverable if overwritten/deleted |
+| No Lambda reserved concurrency | Runaway invocations could exhaust account limits |
+| No DLQ on Lambda/Step Functions | Failed invocations silently lost |
+| Hardcoded table names in CDK | Prevents multi-environment deployments to same account |
+| No CloudFront security headers | Missing CSP, HSTS, X-Content-Type-Options |
+| `--require-approval never` in deploy scripts | Skips IAM change review for all deployments |
 
 ## Project Status
 

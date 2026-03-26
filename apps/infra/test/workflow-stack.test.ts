@@ -54,6 +54,7 @@ function buildTemplate() {
     chatMessagesTable: db.chatMessagesTable,
     configTable: db.configTable,
     scoringHistoryTable: db.scoringHistoryTable,
+    toolsTable: db.toolsTable,
     uploadsBucket: db.uploadsBucket,
     vectorsBucket: db.vectorsBucket,
   })
