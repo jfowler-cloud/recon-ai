@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext } from 'react'
+import { useState, useEffect, useCallback, createContext, useContext } from 'react'
 import { Authenticator, useTheme, View, Text, Heading } from '@aws-amplify/ui-react'
 import { fetchAuthSession } from 'aws-amplify/auth'
 import '@aws-amplify/ui-react/styles.css'
@@ -12,6 +12,7 @@ import Header from '@cloudscape-design/components/header'
 import Container from '@cloudscape-design/components/container'
 import SpaceBetween from '@cloudscape-design/components/space-between'
 import Box from '@cloudscape-design/components/box'
+import Flashbar, { FlashbarProps } from '@cloudscape-design/components/flashbar'
 import OsintDashboard from './components/OsintDashboard'
 import DataUpload from './components/DataUpload'
 import OsintInvestigations from './components/OsintInvestigations'
@@ -27,13 +28,16 @@ import LeadershipChat from './components/LeadershipChat'
 import NetworkTopology from './components/NetworkTopology'
 import ToolRegistry from './components/ToolRegistry'
 import TargetOverview from './components/TargetOverview'
+import AuditLog from './components/AuditLog'
 import './index.css'
 
 type Persona = 'osint-analyst' | 'red-team-analyst' | 'leadership'
 export type ViewType = 'osint-dashboard' | 'osint-upload' | 'osint-investigations' | 'osint-chat' | 'osint-topology'
   | 'redteam-dashboard' | 'redteam-targets' | 'redteam-operations' | 'redteam-chat' | 'redteam-topology' | 'redteam-tools'
   | 'leadership-dashboard' | 'leadership-goals' | 'leadership-chat' | 'leadership-targets' | 'leadership-tools' | 'leadership-topology'
+  | 'audit-log'
 
+export type ToastType = 'success' | 'error' | 'info' | 'warning'
 interface AuthContextType {
   userId: string
   groups: string[]
@@ -41,9 +45,10 @@ interface AuthContextType {
   isAdmin: boolean
   isDarkMode: boolean
   navigate: (view: ViewType) => void
+  toast: (type: ToastType, content: string) => void
 }
 export const AuthContext = createContext<AuthContextType>({
-  userId: '', groups: [], persona: 'osint-analyst', isAdmin: false, isDarkMode: true, navigate: () => {},
+  userId: '', groups: [], persona: 'osint-analyst', isAdmin: false, isDarkMode: true, navigate: () => {}, toast: () => {},
 })
 export function useAuth() { return useContext(AuthContext) }
 
@@ -185,6 +190,8 @@ function renderView(view: ViewType) {
       return <NetworkTopology />
     case 'leadership-chat':
       return <LeadershipChat />
+    case 'audit-log':
+      return <AuditLog />
     default:
       return <PlaceholderView title="Recon AI" description="Select a section from the navigation." />
   }
@@ -205,6 +212,19 @@ function AuthenticatedApp({ signOut, user, darkMode, toggleTheme, currentView, s
   const userId = user?.signInDetails?.loginId ?? user?.username ?? ''
   const [groups, setGroups] = useState<string[]>([])
   const [demoVisible, setDemoVisible] = useState(false)
+  const [toasts, setToasts] = useState<FlashbarProps.MessageDefinition[]>([])
+
+  const toast = useCallback((type: ToastType, content: string) => {
+    const id = `toast-${Date.now()}`
+    setToasts(prev => [...prev, {
+      type,
+      content,
+      id,
+      dismissible: true,
+      onDismiss: () => setToasts(prev => prev.filter(t => t.id !== id)),
+    }])
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 5000)
+  }, [])
 
   useEffect(() => {
     fetchAuthSession().then(session => {
@@ -215,11 +235,43 @@ function AuthenticatedApp({ signOut, user, darkMode, toggleTheme, currentView, s
 
   const persona = getPersona(groups)
   const isAdmin = groups.includes('admin')
-  const navItems = buildNavItems(isAdmin ? 'leadership' : persona) // admin sees all nav sections
+  const navItems = buildNavItems(isAdmin ? 'leadership' : persona)
+
+  // Add admin-only audit log to nav
+  if (isAdmin) {
+    navItems.push({
+      type: 'section', text: 'Admin',
+      items: [
+        { type: 'link', text: 'Audit Log', href: '#audit-log' },
+      ],
+    })
+  }
 
   useEffect(() => {
     if (groups.length > 0) setCurrentView(getDefaultView(isAdmin ? 'leadership' : persona))
   }, [persona, isAdmin, groups, setCurrentView])
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+K or Cmd+K — focus search/filter
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault()
+        const filter = document.querySelector<HTMLInputElement>('[data-testid="text-filter"], input[placeholder*="Filter"]')
+        filter?.focus()
+      }
+      // Escape — close modals
+      if (e.key === 'Escape') {
+        const modal = document.querySelector('[class*="awsui_dialog"]')
+        if (modal) {
+          const dismiss = modal.querySelector<HTMLButtonElement>('[class*="dismiss"], [aria-label="Close"]')
+          dismiss?.click()
+        }
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   const utilities: Parameters<typeof TopNavigation>[0]['utilities'] = [
     ...(isAdmin ? [{ type: 'button' as const, text: 'Seed Demo', onClick: () => setDemoVisible(true) }] : []),
@@ -234,8 +286,14 @@ function AuthenticatedApp({ signOut, user, darkMode, toggleTheme, currentView, s
   ]
 
   return (
-    <AuthContext.Provider value={{ userId, groups, persona: isAdmin ? 'leadership' : persona, isAdmin, isDarkMode: darkMode, navigate: setCurrentView }}>
+    <AuthContext.Provider value={{ userId, groups, persona: isAdmin ? 'leadership' : persona, isAdmin, isDarkMode: darkMode, navigate: setCurrentView, toast }}>
       <RunDemo visible={demoVisible} onDismiss={() => setDemoVisible(false)} userId={userId} />
+      {/* Notification toasts */}
+      {toasts.length > 0 && (
+        <div className="toast-container">
+          <Flashbar items={toasts} />
+        </div>
+      )}
       {isAdmin && (
         <div style={{
           background: 'linear-gradient(90deg, #e8001c, #d91515)',

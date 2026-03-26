@@ -32,6 +32,7 @@ import LeadershipChat from '../components/LeadershipChat'
 import NetworkTopology from '../components/NetworkTopology'
 import ToolRegistry from '../components/ToolRegistry'
 import TargetOverview from '../components/TargetOverview'
+import AuditLog from '../components/AuditLog'
 import '../index.css'
 
 Amplify.configure(amplifyConfig)
@@ -47,6 +48,7 @@ type Persona = 'osint-analyst' | 'red-team-analyst' | 'leadership'
 type ViewType = 'osint-dashboard' | 'osint-upload' | 'osint-investigations' | 'osint-chat' | 'osint-topology'
   | 'redteam-dashboard' | 'redteam-targets' | 'redteam-operations' | 'redteam-chat' | 'redteam-topology' | 'redteam-tools'
   | 'leadership-dashboard' | 'leadership-goals' | 'leadership-chat' | 'leadership-targets' | 'leadership-tools' | 'leadership-topology'
+  | 'audit-log'
 
 function getPersona(groups: string[]): Persona {
   if (groups.includes('leadership')) return 'leadership'
@@ -137,6 +139,7 @@ function renderView(view: ViewType) {
     case 'leadership-tools': return <ToolRegistry />
     case 'leadership-chat': return <LeadershipChat />
     case 'leadership-topology': return <NetworkTopology />
+    case 'audit-log': return <AuditLog />
     default: return <PlaceholderView title="Recon AI" description="Select a section from the navigation." />
   }
 }
@@ -150,7 +153,7 @@ function E2EApp() {
   const [navigationOpen, setNavigationOpen] = useState(true)
 
   return (
-    <AuthContext.Provider value={{ userId: e2eUser.userId, groups: e2eUser.groups, persona, isAdmin: false, isDarkMode: true, navigate: () => {} }}>
+    <AuthContext.Provider value={{ userId: e2eUser.userId, groups: e2eUser.groups, persona, isAdmin: false, isDarkMode: true, navigate: () => {}, toast: () => {} }}>
       <div id="top-nav" style={{ position: 'sticky', top: 0, zIndex: 1002 }}>
         <TopNavigation
           identity={{ href: '#', title: 'Recon AI' }}

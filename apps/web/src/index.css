@@ -193,3 +193,155 @@ button[class*="awsui_button-no-text"][type="submit"]::after {
 .ra-light .chat-markdown hr { border-top-color: rgba(0,0,0,0.15); }
 .ra-light .chat-markdown th, .ra-light .chat-markdown td { border-color: rgba(0,0,0,0.15); }
 .ra-light .chat-markdown th { background: rgba(0,0,0,0.04); }
+
+/* ── Light mode polish ───────────────────────────────────────────── */
+body.ra-light [data-amplify-authenticator] {
+  --amplify-colors-background-primary: #f9fafb;
+  --amplify-colors-background-secondary: #ffffff;
+  --amplify-colors-font-primary: #0f141a;
+  --amplify-colors-font-secondary: #5f6b7a;
+  --amplify-colors-border-primary: #d1d5db;
+  --amplify-colors-border-secondary: #e5e7eb;
+  --amplify-components-authenticator-router-background-color: #ffffff;
+  --amplify-components-authenticator-router-border-color: #e5e7eb;
+  --amplify-components-fieldcontrol-border-color: #d1d5db;
+  --amplify-components-fieldcontrol-color: #0f141a;
+  --amplify-components-tabs-item-color: #5f6b7a;
+  background-color: #f9fafb;
+}
+body.ra-light [data-amplify-authenticator] [data-amplify-router] {
+  background-color: #ffffff;
+  border-color: #e5e7eb;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+body.ra-light [data-amplify-authenticator] input {
+  background-color: #f9fafb !important;
+  color: #0f141a !important;
+  border-color: #d1d5db !important;
+}
+body.ra-light [data-amplify-authenticator] label {
+  color: #5f6b7a !important;
+}
+body.ra-light .metric-card-link:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ── Empty state illustrations ───────────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  gap: 16px;
+}
+.empty-state-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  opacity: 0.6;
+}
+.ra-dark .empty-state-icon { background: rgba(255,255,255,0.05); }
+.ra-light .empty-state-icon { background: rgba(0,0,0,0.04); }
+.empty-state-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+.empty-state-description {
+  font-size: 13px;
+  opacity: 0.7;
+  max-width: 360px;
+  line-height: 1.5;
+}
+
+/* ── Responsive / mobile ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Stack metric cards vertically */
+  [class*="awsui_column-layout"] {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  /* Full-width charts */
+  [data-testid="chart"],
+  .recharts-responsive-container {
+    min-height: 200px !important;
+  }
+  /* Collapse chat sidebar */
+  .chat-sidebar { display: none !important; }
+  /* Stack split panels below */
+  [class*="awsui_split-panel"] {
+    max-width: 100% !important;
+  }
+}
+@media (max-width: 480px) {
+  [class*="awsui_identity"] [class*="awsui_title"] {
+    font-size: 14px !important;
+  }
+  .metric-card-link { margin-bottom: 8px; }
+}
+
+/* ── Notification toast ──────────────────────────────────────────── */
+.toast-container {
+  position: fixed;
+  top: 60px;
+  right: 16px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 420px;
+}
+.toast-item {
+  animation: toast-slide-in 0.3s ease;
+}
+@keyframes toast-slide-in {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* ── Keyboard shortcut hints ─────────────────────────────────────── */
+.kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.ra-dark .kbd { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #b4b8bf; }
+.ra-light .kbd { background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.12); color: #5f6b7a; }
+
+/* ── Audit log styles ────────────────────────────────────────────── */
+.audit-entry {
+  display: flex;
+  gap: 12px;
+  padding: 8px 0;
+  font-size: 13px;
+  align-items: flex-start;
+}
+.audit-entry + .audit-entry {
+  border-top-width: 1px;
+  border-top-style: solid;
+}
+.ra-dark .audit-entry + .audit-entry { border-top-color: #2d3139; }
+.ra-light .audit-entry + .audit-entry { border-top-color: #e9ebed; }
+.audit-timestamp {
+  flex-shrink: 0;
+  width: 120px;
+  font-size: 12px;
+  opacity: 0.6;
+}
+.audit-action {
+  font-weight: 600;
+  min-width: 100px;
+}
+.audit-detail {
+  flex: 1;
+  opacity: 0.8;
+}

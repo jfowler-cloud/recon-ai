@@ -13,7 +13,6 @@ import Button from '@cloudscape-design/components/button'
 import Textarea from '@cloudscape-design/components/textarea'
 import Spinner from '@cloudscape-design/components/spinner'
 import Icon from '@cloudscape-design/components/icon'
-import SideNavigation from '@cloudscape-design/components/side-navigation'
 import { sendChatMessage, listChatSessions, getChatSession } from '@/utils/api'
 import { useAuth } from '@/App'
 
@@ -159,13 +158,19 @@ export default function ChatPanel({ persona, title, assistantName, description, 
     setInput('')
   }, [])
 
-  // Session sidebar items
-  const sessionNavItems = sessions.map(s => ({
-    type: 'link' as const,
-    text: s.title || 'Untitled',
-    href: `#session-${s.sessionId}`,
-    info: <Box variant="small" color="text-body-secondary">{formatSessionTime(s.updatedAt)}</Box>,
-  }))
+  // Session rename/delete
+  const [editingSession, setEditingSession] = useState<string | null>(null)
+  const [editTitle, setEditTitle] = useState('')
+
+  const renameSession = useCallback((sid: string, newTitle: string) => {
+    setSessions(prev => prev.map(s => s.sessionId === sid ? { ...s, title: newTitle } : s))
+    setEditingSession(null)
+  }, [])
+
+  const deleteSession = useCallback((sid: string) => {
+    setSessions(prev => prev.filter(s => s.sessionId !== sid))
+    if (sessionId === sid) startNewChat()
+  }, [sessionId, startNewChat])
 
   return (
     <div style={{ display: 'flex', height: 'calc(100vh - 160px)', gap: 0 }}>
@@ -188,16 +193,60 @@ export default function ChatPanel({ persona, title, assistantName, description, 
             {sessionsLoading ? (
               <Box textAlign="center" padding="l"><Spinner /></Box>
             ) : sessions.length === 0 ? (
-              <Box textAlign="center" padding="l" color="text-body-secondary" variant="small">No past sessions</Box>
+              <div className="empty-state" style={{ padding: '24px 16px' }}>
+                <div className="empty-state-icon" style={{ width: 48, height: 48, fontSize: 20 }}>&#128172;</div>
+                <div className="empty-state-description">No past sessions</div>
+              </div>
             ) : (
-              <SideNavigation
-                activeHref={sessionId ? `#session-${sessionId}` : undefined}
-                onFollow={({ detail }) => {
-                  const sid = detail.href?.replace('#session-', '')
-                  if (sid) resumeSession(sid)
-                }}
-                items={sessionNavItems}
-              />
+              <div style={{ padding: '4px 0' }}>
+                {sessions.map(s => (
+                  <div
+                    key={s.sessionId}
+                    style={{
+                      padding: '8px 12px',
+                      cursor: 'pointer',
+                      borderRadius: 6,
+                      margin: '2px 8px',
+                      background: sessionId === s.sessionId ? (isDarkMode ? 'rgba(9,114,211,0.15)' : 'rgba(9,114,211,0.08)') : 'transparent',
+                    }}
+                    onClick={() => { if (editingSession !== s.sessionId) resumeSession(s.sessionId) }}
+                  >
+                    {editingSession === s.sessionId ? (
+                      <div style={{ display: 'flex', gap: 4 }}>
+                        <input
+                          value={editTitle}
+                          onChange={e => setEditTitle(e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter') renameSession(s.sessionId, editTitle); if (e.key === 'Escape') setEditingSession(null) }}
+                          autoFocus
+                          style={{ flex: 1, fontSize: 12, padding: '2px 4px', background: isDarkMode ? '#1e2228' : '#fff', color: 'inherit', border: `1px solid ${isDarkMode ? '#414d5c' : '#d1d5db'}`, borderRadius: 4 }}
+                        />
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 12, fontWeight: sessionId === s.sessionId ? 600 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {s.title || 'Untitled'}
+                          </div>
+                          <div style={{ fontSize: 10, opacity: 0.5 }}>{formatSessionTime(s.updatedAt)}</div>
+                        </div>
+                        <div style={{ display: 'flex', gap: 2, flexShrink: 0, opacity: 0.5 }}
+                          onClick={e => e.stopPropagation()}>
+                          <button
+                            onClick={() => { setEditingSession(s.sessionId); setEditTitle(s.title || '') }}
+                            title="Rename"
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: 'inherit', padding: '2px 4px' }}
+                          >&#9998;</button>
+                          <button
+                            onClick={() => deleteSession(s.sessionId)}
+                            title="Delete"
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: '#e8001c', padding: '2px 4px' }}
+                          >&#10005;</button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </div>
