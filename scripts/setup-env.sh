@@ -52,6 +52,16 @@ CHAT_HANDLER_FN=$(get_output "RA-Functions" "ChatHandlerFnName")
 GET_SESSION_FN=$(get_output "RA-Functions" "GetSessionFnName")
 LIST_SESSIONS_FN=$(get_output "RA-Functions" "ListSessionsFnName")
 
+# DynamoDB table names (from stack outputs or defaults)
+UPLOADS_TABLE=$(get_output "RA-Database" "UploadsTableName")
+DOCUMENTS_TABLE=$(get_output "RA-Database" "DocumentsTableName")
+TARGETS_TABLE=$(get_output "RA-Database" "TargetsTableName")
+
+# Use defaults if outputs not available (backwards compat)
+UPLOADS_TABLE="${UPLOADS_TABLE:-RA-Uploads}"
+DOCUMENTS_TABLE="${DOCUMENTS_TABLE:-RA-Documents}"
+TARGETS_TABLE="${TARGETS_TABLE:-RA-Targets}"
+
 ENV_FILE="$(dirname "$0")/../apps/web/.env"
 
 cat > "$ENV_FILE" << EOF
@@ -79,6 +89,9 @@ VITE_UPDATE_CONTEXT_FN=$UPDATE_CONTEXT_FN
 VITE_CHAT_HANDLER_FN=$CHAT_HANDLER_FN
 VITE_GET_SESSION_FN=$GET_SESSION_FN
 VITE_LIST_SESSIONS_FN=$LIST_SESSIONS_FN
+VITE_UPLOADS_TABLE=$UPLOADS_TABLE
+VITE_DOCUMENTS_TABLE=$DOCUMENTS_TABLE
+VITE_TARGETS_TABLE=$TARGETS_TABLE
 EOF
 
 echo "Wrote $ENV_FILE"

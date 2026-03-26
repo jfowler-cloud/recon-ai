@@ -137,7 +137,7 @@ export async function queueForRedteam(target: Partial<Target>): Promise<Target> 
 export async function listUploads(): Promise<Upload[]> {
   const client = await getDdbClient()
   const result = await client.send(new ScanCommand({
-    TableName: 'RA-Uploads',
+    TableName: appConfig.uploadsTable,
     Limit: 50,
   }))
   return (result.Items ?? []) as Upload[]
@@ -147,7 +147,7 @@ export async function listUploads(): Promise<Upload[]> {
 export async function listDocuments(uploadId: string): Promise<Record<string, unknown>[]> {
   const client = await getDdbClient()
   const result = await client.send(new QueryCommand({
-    TableName: 'RA-Documents',
+    TableName: appConfig.documentsTable,
     KeyConditionExpression: 'uploadId = :uid',
     ExpressionAttributeValues: { ':uid': uploadId },
   }))
@@ -158,7 +158,7 @@ export async function listDocuments(uploadId: string): Promise<Record<string, un
 export async function listTargets(): Promise<Target[]> {
   const client = await getDdbClient()
   const result = await client.send(new ScanCommand({
-    TableName: 'RA-Targets',
+    TableName: appConfig.targetsTable,
     Limit: 100,
   }))
   return (result.Items ?? []) as Target[]

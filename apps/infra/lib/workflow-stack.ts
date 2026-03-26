@@ -15,6 +15,7 @@ import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';
 import * as cwActions from 'aws-cdk-lib/aws-cloudwatch-actions';
 import * as logs from 'aws-cdk-lib/aws-logs';
+import * as sqs from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 import { AuthStack } from './auth-stack';
 import { DatabaseStack } from './database-stack';
@@ -89,9 +90,33 @@ export class WorkflowStack extends cdk.Stack {
       outputPath: '$.Payload',
     });
 
+    // DLQ for failed workflow executions
+    const workflowDlq = new sqs.Queue(this, 'WorkflowDLQ', {
+      queueName: 'RA-WorkflowFailures',
+      retentionPeriod: cdk.Duration.days(14),
+      encryption: sqs.QueueEncryption.SQS_MANAGED,
+    });
+
+    // Error handler: mark upload as failed on ingestion errors
+    const markFailed = new tasks.LambdaInvoke(this, 'MarkUploadFailed', {
+      lambdaFunction: fns.parseUploadFn,
+      payload: sfn.TaskInput.fromObject({
+        mode: 'finalize',
+        'uploadId.$': '$.uploadId',
+        status: 'failed',
+        'error.$': '$.error',
+      }),
+      outputPath: '$.Payload',
+    });
+    markFailed.next(new sfn.Fail(this, 'IngestionFailed', {
+      cause: 'Ingestion pipeline step failed',
+    }));
+
+    // Chain with error catch — each step catches to markFailed
     const ingestionDef = detectType
-      .next(parseData)
-      .next(embedDocuments)
+      .addCatch(markFailed, { errors: ['States.ALL'], resultPath: '$.error' })
+      .next(parseData.addCatch(markFailed, { errors: ['States.ALL'], resultPath: '$.error' }))
+      .next(embedDocuments.addCatch(markFailed, { errors: ['States.ALL'], resultPath: '$.error' }))
       .next(updateStatus);
 
     const ingestionLogGroup = new logs.LogGroup(this, 'IngestionWorkflowLogs', {
@@ -113,11 +138,16 @@ export class WorkflowStack extends cdk.Stack {
     // ── Enrichment Workflow ───────────────────────────────────────────────────
     // EnrichTarget(agent) — single step, the agent does all the work
 
+    const enrichmentFailed = new sfn.Fail(this, 'EnrichmentFailed', {
+      cause: 'Target enrichment agent failed',
+    });
+
     const enrichTarget = new tasks.LambdaInvoke(this, 'EnrichTarget', {
       lambdaFunction: fns.enrichmentAgentFn,
       outputPath: '$.Payload',
       retryOnServiceExceptions: true,
     });
+    enrichTarget.addCatch(enrichmentFailed, { errors: ['States.ALL'], resultPath: '$.error' });
 
     const enrichmentLogGroup = new logs.LogGroup(this, 'EnrichmentWorkflowLogs', {
       logGroupName: '/aws/states/RA-EnrichmentWorkflow',
@@ -138,11 +168,16 @@ export class WorkflowStack extends cdk.Stack {
     // ── Prioritization Workflow ───────────────────────────────────────────────
     // ScoreAllTargets(agent) — single step, the agent does all the work
 
+    const prioritizationFailed = new sfn.Fail(this, 'PrioritizationFailed', {
+      cause: 'Prioritization agent failed',
+    });
+
     const scoreAllTargets = new tasks.LambdaInvoke(this, 'ScoreAllTargets', {
       lambdaFunction: fns.prioritizationAgentFn,
       outputPath: '$.Payload',
       retryOnServiceExceptions: true,
     });
+    scoreAllTargets.addCatch(prioritizationFailed, { errors: ['States.ALL'], resultPath: '$.error' });
 
     const prioritizationLogGroup = new logs.LogGroup(this, 'PrioritizationWorkflowLogs', {
       logGroupName: '/aws/states/RA-PrioritizationWorkflow',

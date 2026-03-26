@@ -30,6 +30,10 @@ export const appConfig = {
   chatHandlerFn: import.meta.env.VITE_CHAT_HANDLER_FN || 'ra-chat_handler',
   getSessionFn: import.meta.env.VITE_GET_SESSION_FN || 'ra-get_session',
   listSessionsFn: import.meta.env.VITE_LIST_SESSIONS_FN || 'ra-list_sessions',
+  // DynamoDB table names (for direct SDK calls)
+  uploadsTable: import.meta.env.VITE_UPLOADS_TABLE || 'RA-Uploads',
+  documentsTable: import.meta.env.VITE_DOCUMENTS_TABLE || 'RA-Documents',
+  targetsTable: import.meta.env.VITE_TARGETS_TABLE || 'RA-Targets',
 }
 
 export const amplifyConfig = {

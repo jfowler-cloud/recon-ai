@@ -15,6 +15,8 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';
 import * as cwActions from 'aws-cdk-lib/aws-cloudwatch-actions';
 import * as sns from 'aws-cdk-lib/aws-sns';
+import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as lambdaDestinations from 'aws-cdk-lib/aws-lambda-destinations';
 import { PythonLayerVersion } from '@aws-cdk/aws-lambda-python-alpha';
 import { Construct } from 'constructs';
 import * as path from 'path';
@@ -146,6 +148,13 @@ export class FunctionsStack extends cdk.Stack {
       COMPREHEND_ENRICHMENT: 'true',
     };
 
+    // DLQ for failed async Lambda invocations
+    const lambdaDlq = new sqs.Queue(this, 'LambdaDLQ', {
+      queueName: 'RA-LambdaFailures',
+      retentionPeriod: cdk.Duration.days(14),
+      encryption: sqs.QueueEncryption.SQS_MANAGED,
+    });
+
     const makeFn = (
       name: string,
       layers: lambda.ILayerVersion[],
@@ -163,6 +172,8 @@ export class FunctionsStack extends cdk.Stack {
         environment: commonEnv,
         tracing: lambda.Tracing.ACTIVE,
         layers,
+        onFailure: new lambdaDestinations.SqsDestination(lambdaDlq),
+        retryAttempts: 2,
       });
     };
 
@@ -189,6 +200,8 @@ export class FunctionsStack extends cdk.Stack {
         environment: { ...commonEnv, ...extraEnv },
         tracing: lambda.Tracing.ACTIVE,
         layers: [sharedLayer, agentsLayer],
+        onFailure: new lambdaDestinations.SqsDestination(lambdaDlq),
+        retryAttempts: 2,
       });
     };
 

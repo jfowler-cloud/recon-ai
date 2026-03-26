@@ -4,7 +4,10 @@ Provides vectorized document search and chart generation. Each agent imports
 these tools and may define additional persona-specific tools alongside them.
 """
 
+import hashlib
 import json
+import os
+import time
 
 import boto3
 from boto3.dynamodb.conditions import Key
@@ -20,6 +23,11 @@ _s3 = None
 # Collects output data (charts, tables) generated during a single agent invocation.
 # Reset before each call via clear_collected_output().
 _collected_output: list[dict] = []
+
+# In-memory vector cache (survives across warm Lambda invocations)
+_vector_cache: list[dict] = []
+_vector_cache_ts: float = 0.0
+_VECTOR_CACHE_TTL = 300  # 5 minutes
 
 
 def clear_collected_output():
@@ -41,12 +49,41 @@ def _get_s3():
 
 
 def _load_all_vectors() -> list[dict]:
-    """Load all embedding vectors from S3 vectors bucket."""
+    """Load embedding vectors from S3 with in-memory + /tmp disk caching.
+
+    Cache strategy:
+    - In-memory cache survives across warm Lambda invocations (5-min TTL)
+    - /tmp disk cache survives across cold starts within the same execution environment
+    - Full S3 download only when both caches miss or expire
+    """
+    global _vector_cache, _vector_cache_ts
+
+    # Check in-memory cache first
+    if _vector_cache and (time.time() - _vector_cache_ts) < _VECTOR_CACHE_TTL:
+        return _vector_cache
+
     s3 = _get_s3()
     bucket = _config.vectors_bucket
     if not bucket:
         return []
 
+    # Try /tmp disk cache
+    cache_path = "/tmp/vectors_cache.json"
+    cache_meta_path = "/tmp/vectors_cache_meta.json"
+    try:
+        if os.path.exists(cache_path) and os.path.exists(cache_meta_path):
+            with open(cache_meta_path) as f:
+                meta = json.load(f)
+            cache_age = time.time() - meta.get("timestamp", 0)
+            if cache_age < _VECTOR_CACHE_TTL:
+                with open(cache_path) as f:
+                    _vector_cache = json.load(f)
+                _vector_cache_ts = meta["timestamp"]
+                return _vector_cache
+    except Exception:
+        pass  # Disk cache corrupted, fall through to S3
+
+    # Full S3 download
     vectors = []
     paginator = s3.get_paginator("list_objects_v2")
     for page in paginator.paginate(Bucket=bucket, Prefix="embeddings/"):
@@ -58,6 +95,20 @@ def _load_all_vectors() -> list[dict]:
                     vectors.extend(batch)
             except Exception:
                 continue
+
+    # Update in-memory cache
+    _vector_cache = vectors
+    _vector_cache_ts = time.time()
+
+    # Persist to /tmp for cross-invocation reuse
+    try:
+        with open(cache_path, "w") as f:
+            json.dump(vectors, f)
+        with open(cache_meta_path, "w") as f:
+            json.dump({"timestamp": _vector_cache_ts, "count": len(vectors)}, f)
+    except Exception:
+        pass  # /tmp write failure is non-fatal
+
     return vectors
 
 

@@ -353,29 +353,19 @@ AWS_PROFILE=cdk-deploy-prod npx cdk deploy --all --require-approval never
 
 | Issue | Location | Description |
 |-------|----------|-------------|
-| S3 vectors fully re-downloaded per search | `shared/chat_tools.py:43-61` | Every `search_documents` call downloads all S3 vector files; no caching |
-| No Step Functions error handlers | `workflow-stack.ts:92-95` | No `addCatch()` on ingestion workflow; failures leave uploads stuck in "processing" |
-| S3 CORS allows all origins | `database-stack.ts:201` | Uploads bucket `allowedOrigins: ['*']`; should be restricted |
+| S3 CORS allows all origins | `database-stack.ts:201` | Uploads bucket `allowedOrigins: ['*']`; should be restricted to CloudFront domain |
 
 ### Medium (Code Quality)
 
 | Issue | Location | Description |
 |-------|----------|-------------|
-| Three identical chat agent handlers | `osint/redteam/leadership_chat_agent/handler.py` | Same code except import path; use a handler factory |
-| `formatters.ts` utilities mostly unused | `src/utils/formatters.ts` | Components define inline versions instead |
 | No SNS alarm topic subscriptions | `auth-stack.ts` | Alarm topic created but nobody receives alerts |
-| `setup-env.sh` incomplete | `scripts/setup-env.sh` | Only fetches 10 of 24 Lambda function names |
-| Hardcoded DynamoDB table names in frontend | `api.ts` | Should come from env config |
 
 ### Infrastructure
 
 | Issue | Description |
 |-------|-------------|
-| No S3 bucket versioning | Upload data not recoverable if overwritten/deleted |
 | No Lambda reserved concurrency | Runaway invocations could exhaust account limits |
-| No DLQ on Lambda/Step Functions | Failed invocations silently lost |
-| Hardcoded table names in CDK | Prevents multi-environment deployments to same account |
-| No CloudFront security headers | Missing CSP, HSTS, X-Content-Type-Options |
 | `--require-approval never` in deploy scripts | Skips IAM change review for all deployments |
 
 ## Project Status

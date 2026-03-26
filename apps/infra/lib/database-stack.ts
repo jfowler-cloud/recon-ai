@@ -16,6 +16,7 @@ import { Construct } from 'constructs';
 
 interface DatabaseStackProps extends cdk.StackProps {
   alarmTopic: sns.Topic;
+  tablePrefix?: string;
 }
 
 export class DatabaseStack extends cdk.Stack {
@@ -45,7 +46,7 @@ export class DatabaseStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: DatabaseStackProps) {
     super(scope, id, props);
 
-    const { alarmTopic } = props;
+    const { alarmTopic, tablePrefix = 'RA' } = props;
 
     const tableDefaults = {
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
@@ -57,13 +58,13 @@ export class DatabaseStack extends cdk.Stack {
     // ── DynamoDB Tables ───────────────────────────────────────────────────────
 
     this.dataSourcesTable = new dynamodb.Table(this, 'DataSourcesTable', {
-      tableName: 'RA-DataSources',
+      tableName: `${tablePrefix}-DataSources`,
       partitionKey: { name: 'sourceId', type: dynamodb.AttributeType.STRING },
       ...tableDefaults,
     });
 
     this.uploadsTable = new dynamodb.Table(this, 'UploadsTable', {
-      tableName: 'RA-Uploads',
+      tableName: `${tablePrefix}-Uploads`,
       partitionKey: { name: 'uploadId', type: dynamodb.AttributeType.STRING },
       ...tableDefaults,
     });
@@ -79,7 +80,7 @@ export class DatabaseStack extends cdk.Stack {
     });
 
     this.documentsTable = new dynamodb.Table(this, 'DocumentsTable', {
-      tableName: 'RA-Documents',
+      tableName: `${tablePrefix}-Documents`,
       partitionKey: { name: 'uploadId', type: dynamodb.AttributeType.STRING },
       sortKey: { name: 'documentId', type: dynamodb.AttributeType.STRING },
       timeToLiveAttribute: 'expiresAt',
@@ -87,7 +88,7 @@ export class DatabaseStack extends cdk.Stack {
     });
 
     this.ticketsTable = new dynamodb.Table(this, 'TicketsTable', {
-      tableName: 'RA-Tickets',
+      tableName: `${tablePrefix}-Tickets`,
       partitionKey: { name: 'ticketId', type: dynamodb.AttributeType.STRING },
       ...tableDefaults,
     });
@@ -113,14 +114,14 @@ export class DatabaseStack extends cdk.Stack {
     });
 
     this.ticketNotesTable = new dynamodb.Table(this, 'TicketNotesTable', {
-      tableName: 'RA-TicketNotes',
+      tableName: `${tablePrefix}-TicketNotes`,
       partitionKey: { name: 'ticketId', type: dynamodb.AttributeType.STRING },
       sortKey: { name: 'noteId', type: dynamodb.AttributeType.STRING },
       ...tableDefaults,
     });
 
     this.targetsTable = new dynamodb.Table(this, 'TargetsTable', {
-      tableName: 'RA-Targets',
+      tableName: `${tablePrefix}-Targets`,
       partitionKey: { name: 'targetId', type: dynamodb.AttributeType.STRING },
       ...tableDefaults,
     });
@@ -131,20 +132,20 @@ export class DatabaseStack extends cdk.Stack {
     });
 
     this.leadershipContextTable = new dynamodb.Table(this, 'LeadershipContextTable', {
-      tableName: 'RA-LeadershipContext',
+      tableName: `${tablePrefix}-LeadershipContext`,
       partitionKey: { name: 'contextId', type: dynamodb.AttributeType.STRING },
       ...tableDefaults,
     });
 
     this.toolActionsTable = new dynamodb.Table(this, 'ToolActionsTable', {
-      tableName: 'RA-ToolActions',
+      tableName: `${tablePrefix}-ToolActions`,
       partitionKey: { name: 'ticketId', type: dynamodb.AttributeType.STRING },
       sortKey: { name: 'actionId', type: dynamodb.AttributeType.STRING },
       ...tableDefaults,
     });
 
     this.toolsTable = new dynamodb.Table(this, 'ToolsTable', {
-      tableName: 'RA-Tools',
+      tableName: `${tablePrefix}-Tools`,
       partitionKey: { name: 'toolId', type: dynamodb.AttributeType.STRING },
       ...tableDefaults,
     });
@@ -160,7 +161,7 @@ export class DatabaseStack extends cdk.Stack {
     });
 
     this.chatSessionsTable = new dynamodb.Table(this, 'ChatSessionsTable', {
-      tableName: 'RA-ChatSessions',
+      tableName: `${tablePrefix}-ChatSessions`,
       partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
       sortKey: { name: 'sessionId', type: dynamodb.AttributeType.STRING },
       timeToLiveAttribute: 'expiresAt',
@@ -168,7 +169,7 @@ export class DatabaseStack extends cdk.Stack {
     });
 
     this.chatMessagesTable = new dynamodb.Table(this, 'ChatMessagesTable', {
-      tableName: 'RA-ChatMessages',
+      tableName: `${tablePrefix}-ChatMessages`,
       partitionKey: { name: 'sessionId', type: dynamodb.AttributeType.STRING },
       sortKey: { name: 'messageId', type: dynamodb.AttributeType.STRING },
       timeToLiveAttribute: 'expiresAt',
@@ -176,13 +177,13 @@ export class DatabaseStack extends cdk.Stack {
     });
 
     this.configTable = new dynamodb.Table(this, 'ConfigTable', {
-      tableName: 'RA-Config',
+      tableName: `${tablePrefix}-Config`,
       partitionKey: { name: 'configKey', type: dynamodb.AttributeType.STRING },
       ...tableDefaults,
     });
 
     this.scoringHistoryTable = new dynamodb.Table(this, 'ScoringHistoryTable', {
-      tableName: 'RA-ScoringHistory',
+      tableName: `${tablePrefix}-ScoringHistory`,
       partitionKey: { name: 'runId', type: dynamodb.AttributeType.STRING },
       timeToLiveAttribute: 'expiresAt',
       ...tableDefaults,
@@ -195,12 +196,16 @@ export class DatabaseStack extends cdk.Stack {
       encryption: s3.BucketEncryption.S3_MANAGED,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
+      versioned: true,
       eventBridgeEnabled: true,
       cors: [{
         allowedMethods: [s3.HttpMethods.PUT],
         allowedOrigins: ['*'],
         allowedHeaders: ['*'],
         maxAge: 3600,
+      }],
+      lifecycleRules: [{
+        noncurrentVersionExpiration: cdk.Duration.days(30),
       }],
     });
 
@@ -209,8 +214,10 @@ export class DatabaseStack extends cdk.Stack {
       encryption: s3.BucketEncryption.S3_MANAGED,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
+      versioned: true,
       lifecycleRules: [{
         expiration: cdk.Duration.days(365),
+        noncurrentVersionExpiration: cdk.Duration.days(7),
         prefix: 'embeddings/',
       }],
     });
@@ -227,6 +234,22 @@ export class DatabaseStack extends cdk.Stack {
       description: 'OAC for Recon AI frontend',
     });
 
+    const securityHeaders = new cloudfront.ResponseHeadersPolicy(this, 'SecurityHeaders', {
+      responseHeadersPolicyName: 'RA-SecurityHeaders',
+      securityHeadersBehavior: {
+        strictTransportSecurity: {
+          accessControlMaxAge: cdk.Duration.days(365),
+          includeSubdomains: true,
+          preload: true,
+          override: true,
+        },
+        contentTypeOptions: { override: true },
+        frameOptions: { frameOption: cloudfront.HeadersFrameOption.DENY, override: true },
+        referrerPolicy: { referrerPolicy: cloudfront.HeadersReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN, override: true },
+        xssProtection: { protection: true, modeBlock: true, override: true },
+      },
+    });
+
     this.distribution = new cloudfront.Distribution(this, 'Distribution', {
       defaultBehavior: {
         origin: origins.S3BucketOrigin.withOriginAccessControl(this.hostingBucket, {
@@ -234,6 +257,7 @@ export class DatabaseStack extends cdk.Stack {
         }),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+        responseHeadersPolicy: securityHeaders,
       },
       defaultRootObject: 'index.html',
       errorResponses: [
@@ -261,13 +285,13 @@ export class DatabaseStack extends cdk.Stack {
     };
     for (const [name, table] of Object.entries(tables)) {
       const alarm = new cloudwatch.Alarm(this, `${name}ThrottleAlarm`, {
-        alarmName: `RA-${name}-DynamoThrottle`,
+        alarmName: `${tablePrefix}-${name}-DynamoThrottle`,
         metric: table.metricThrottledRequests({ period: cdk.Duration.minutes(1) }),
         threshold: 0,
         evaluationPeriods: 1,
         comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
         treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
-        alarmDescription: `DynamoDB throttled requests on RA-${name}`,
+        alarmDescription: `DynamoDB throttled requests on ${tablePrefix}-${name}`,
       });
       alarm.addAlarmAction(new cwActions.SnsAction(alarmTopic));
     }
@@ -296,6 +320,9 @@ export class DatabaseStack extends cdk.Stack {
 
     // ── Outputs ──────────────────────────────────────────────────────────────
 
+    new cdk.CfnOutput(this, 'UploadsTableName', { value: this.uploadsTable.tableName });
+    new cdk.CfnOutput(this, 'DocumentsTableName', { value: this.documentsTable.tableName });
+    new cdk.CfnOutput(this, 'TargetsTableName', { value: this.targetsTable.tableName });
     new cdk.CfnOutput(this, 'HostingBucketName', { value: this.hostingBucket.bucketName });
     new cdk.CfnOutput(this, 'DistributionDomain', { value: this.distribution.distributionDomainName });
     new cdk.CfnOutput(this, 'UploadsBucketName', { value: this.uploadsBucket.bucketName });
