@@ -4,7 +4,7 @@
 ![Python 3.13+](https://img.shields.io/badge/python-3.13%2B-blue)
 ![Node 22](https://img.shields.io/badge/node-22-green)
 ![CDK v2](https://img.shields.io/badge/CDK-v2-orange)
-![Tests 356+](https://img.shields.io/badge/tests-356%2B-brightgreen)
+![Tests 364+](https://img.shields.io/badge/tests-364%2B-brightgreen)
 
 OSINT Intelligence Portal -- unified platform for OSINT analysts, red team operators, and leadership. Data flows through smart parsing pipelines into vectorized storage, enabling AI-powered search, tool-aware target prioritization, and persona-specific chat agents with risk analysis.
 
@@ -100,7 +100,7 @@ See the interactive [Architecture Overview](docs/architecture.html) for the full
 | **Orchestration** | Step Functions, EventBridge | 3 workflows: ingestion, enrichment, prioritization |
 | **Infra** | CDK v2 TypeScript | 4 stacks, Jest assertion tests |
 | **Hosting** | S3 + CloudFront | `deploy-frontend.sh` for updates |
-| **Testing** | pytest + moto, Vitest, Playwright, Jest | 199 backend, 79 agent, 75 CDK, 10 unit, 34 E2E |
+| **Testing** | pytest + moto, Vitest, Playwright, Jest | 199 backend, 79 agent, 83 CDK, 10 unit, 34 E2E |
 | **Linting** | ruff (Python), TypeScript strict mode | Line length 120, target py313 |
 
 ## Prerequisites
@@ -290,7 +290,7 @@ cd apps/functions && uv run pytest tests/ --cov=. --cov-report=term-missing -q
 # Agent modules (79 tests)
 cd apps/agents && uv run pytest tests/ --cov=. --cov-report=term-missing -q
 
-# CDK infrastructure (75 tests)
+# CDK infrastructure (83 tests)
 cd apps/infra && npm test
 
 # Frontend unit (10 tests)
@@ -382,7 +382,6 @@ AWS_PROFILE=cdk-deploy-prod npx cdk deploy --all --require-approval never
 - **Frontend unit tests**: Increase from 10 to 95%+ coverage (Vitest + React Testing Library)
 - **E2E tests**: Update Playwright specs to cover seeded data flows, chat interactions
 - **Backend test updates**: Update tests for ConditionExpression race condition fixes, new chat history, defusedxml
-- **CDK test updates**: Add assertions for RA-Tools table, admin role, DLQ, security headers
 - **SNS alarm subscriptions**: Wire alarm topic to email or Slack
 
 See [CLAUDE.md](CLAUDE.md) for full architecture documentation.
