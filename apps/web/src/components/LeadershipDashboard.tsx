@@ -153,7 +153,7 @@ export default function LeadershipDashboard() {
           <MetricCard title="OSINT Investigations" value={metrics.osintInvestigations} description={metrics.osintDescription} onClick={() => navigate('osint-investigations')} linkText="View investigations" />
           <MetricCard title="Red Team Operations" value={metrics.redTeamOperations} description={metrics.rtDescription} onClick={() => navigate('redteam-operations')} linkText="View operations" />
           <MetricCard title="Critical Findings" value={metrics.criticalFindings} description={metrics.criticalDescription} onClick={() => navigate('osint-investigations')} linkText="View findings" />
-          <MetricCard title="Team Utilization" value={metrics.teamUtilization} description={metrics.teamDescription} onClick={() => navigate('leadership-goals')} linkText="View goals" />
+          <MetricCard title="Team Utilization" value={metrics.teamUtilization} description={metrics.teamDescription} onClick={() => navigate('leadership-targets')} linkText="View targets" />
         </ColumnLayout>
 
         <ColumnLayout columns={2}>

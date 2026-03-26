@@ -43,7 +43,7 @@ recon-ai/
 │   ├── infra/                      # CDK v2 TypeScript
 │   │   ├── bin/recon-ai.ts         # App bootstrap, reads config.json
 │   │   ├── lib/
-│   │   │   ├── auth-stack.ts       # Cognito User Pool + Identity Pool + 3 groups
+│   │   │   ├── auth-stack.ts       # Cognito User Pool + Identity Pool + 4 groups (incl. admin)
 │   │   │   ├── database-stack.ts   # 13 DynamoDB tables, S3 buckets, CloudFront
 │   │   │   ├── functions-stack.ts  # Lambda layers, functions, IAM, alarms
 │   │   │   └── workflow-stack.ts   # Step Functions, EventBridge, Cognito roles
@@ -52,7 +52,7 @@ recon-ai/
 │   └── web/                        # React 19 + Vite + Cloudscape
 │       ├── src/
 │       │   ├── App.tsx             # Amplify auth, AppLayout, role-based nav
-│       │   ├── components/         # OSINT, Red Team, Leadership views
+│       │   ├── components/         # 17 views: OSINT (5), Red Team (6), Leadership (6)
 │       │   ├── hooks/              # useChatPolling, useTicketPolling
 │       │   ├── utils/              # api.ts, formatters.ts, charts.ts
 │       │   └── config/amplify.ts   # Cognito + AWS resource config
@@ -73,7 +73,7 @@ recon-ai/
 - **Agents**: Strands SDK (5 agents: 3 chat + enrichment + prioritization)
 - **AI**: Claude via Amazon Bedrock (tiered: Haiku 4.5 / Sonnet 4.5 / Opus 4.5), Titan Embeddings v2
 - **Database**: DynamoDB (13 tables, RA- prefix), S3 (uploads, vectors, hosting)
-- **Auth**: Cognito User Pool + Identity Pool (3 groups: osint-analyst, red-team-analyst, leadership)
+- **Auth**: Cognito User Pool + Identity Pool (4 groups: osint-analyst, red-team-analyst, leadership, admin)
 - **Infra**: CDK v2 TypeScript (4 stacks: RA-Auth, RA-Database [13 tables], RA-Functions [24 Lambdas], RA-Workflow)
 - **Hosting**: S3 + CloudFront
 - **Testing**: Vitest + Playwright (frontend), pytest + moto (backend), Jest (CDK)
@@ -112,8 +112,9 @@ recon-ai/
 ## Cognito Groups & Permissions
 
 - **osint-analyst** — upload data, create/update tickets, queue for red team, chat, dashboard
-- **red-team-analyst** — create/update targets, record tool actions, create/update tickets, chat, dashboard
-- **leadership** — update context (goals/KPIs), chat (cross-domain), dashboard, config
+- **red-team-analyst** — create/update targets, manage tools, record tool actions, create/update tickets, chat, dashboard
+- **leadership** — update context (goals/KPIs), chat (cross-domain), target overview, tool registry, dashboard, config
+- **admin** — all permissions + seed demo data, admin banner
 
 ## Deployment Tiers
 

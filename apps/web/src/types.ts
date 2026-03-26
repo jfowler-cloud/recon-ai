@@ -94,3 +94,29 @@ export interface TableColumn {
   header: string
   sortingField?: string
 }
+
+export interface Tool {
+  toolId: string
+  name: string
+  description: string
+  category: string
+  framework: string
+  status: string
+  targetTypes: string[]
+  protocols: string[]
+  riskProfile: {
+    serviceDisruption: string
+    systemDamage: string
+    detectionLikelihood: string
+    requiresAuth: boolean
+    reversible: boolean
+    noisy: boolean
+  }
+  successProfile: {
+    estimatedSuccessRate: number
+    avgExecutionTime: string
+    requiredAccess: string
+    outputType: string
+  }
+  createdAt: number
+}

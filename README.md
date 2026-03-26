@@ -34,7 +34,7 @@ See the interactive [Architecture Overview](docs/architecture.html) for the full
 
 ## Screenshots
 
-### OSINT Analyst
+### OSINT Analyst (5 views)
 
 | Dashboard | Upload Data |
 |-----------|------------|
@@ -44,25 +44,37 @@ See the interactive [Architecture Overview](docs/architecture.html) for the full
 |---------------|-----------|
 | ![Investigations](docs/images/03_osint_investigations.png) | ![OSINT Chat](docs/images/04_osint_chat.png) |
 
-### Red Team Operator
+| Network Topology |
+|-----------------|
+| ![OSINT Topology](docs/images/05_osint_topology.png) |
+
+### Red Team Operator (6 views)
 
 | Dashboard | Target Queue |
 |-----------|-------------|
 | ![Red Team Dashboard](docs/images/06_redteam_dashboard.png) | ![Target Queue](docs/images/07_redteam_targets.png) |
 
-| Operations | Red Team Chat |
+| Operations | Tool Registry |
 |-----------|--------------|
-| ![Operations](docs/images/08_redteam_operations.png) | ![Red Team Chat](docs/images/09_redteam_chat.png) |
+| ![Operations](docs/images/08_redteam_operations.png) | ![Tool Registry](docs/images/09_redteam_tools.png) |
 
-### Leadership
+| Red Team Chat | Network Topology |
+|--------------|-----------------|
+| ![Red Team Chat](docs/images/10_redteam_chat.png) | ![Red Team Topology](docs/images/11_redteam_topology.png) |
+
+### Leadership (6 views)
 
 | Dashboard | Goals & KPIs |
 |-----------|-------------|
-| ![Leadership Dashboard](docs/images/11_leadership_dashboard.png) | ![Goals & KPIs](docs/images/12_leadership_goals.png) |
+| ![Leadership Dashboard](docs/images/12_leadership_dashboard.png) | ![Goals & KPIs](docs/images/13_leadership_goals.png) |
 
-| Leadership Chat |
-|----------------|
-| ![Leadership Chat](docs/images/13_leadership_chat.png) |
+| Target Overview | Tool Registry |
+|----------------|--------------|
+| ![Target Overview](docs/images/14_leadership_targets.png) | ![Tool Registry](docs/images/15_leadership_tools.png) |
+
+| Leadership Chat | Network Topology |
+|----------------|-----------------|
+| ![Leadership Chat](docs/images/16_leadership_chat.png) | ![Network Topology](docs/images/17_leadership_topology.png) |
 
 ## How It Works
 
@@ -79,7 +91,7 @@ See the interactive [Architecture Overview](docs/architecture.html) for the full
 | Layer | Technology | Notes |
 |-------|-----------|-------|
 | **Frontend** | React 19, Vite 7, TypeScript 5.7, Cloudscape 3 | Dark mode default, direct DynamoDB/Lambda SDK calls |
-| **Auth** | Amplify Authenticator, Cognito User Pool + Identity Pool | 3 groups: osint-analyst, red-team-analyst, leadership |
+| **Auth** | Amplify Authenticator, Cognito User Pool + Identity Pool | 4 groups: osint-analyst, red-team-analyst, leadership, admin |
 | **Backend** | Python 3.13+, uv, AWS Lambda (ARM64 Graviton) | 19 Lambda handlers, Lambda Powertools v3 |
 | **Agents** | Strands SDK | 5 agents: 3 chat + enrichment + prioritization |
 | **AI** | Claude via Amazon Bedrock, Titan Embeddings v2 | Tiered: Haiku/Sonnet/Opus per deployment |
@@ -218,21 +230,27 @@ The prioritization agent uses this data to:
 |-------|-------------|
 | osint-analyst | Upload data, create/update tickets, queue for red team, chat, dashboard |
 | red-team-analyst | Create/update targets, manage tools, record tool actions, tickets, chat, dashboard |
-| leadership | Set goals/KPIs, cross-domain chat, dashboard, config |
+| leadership | Set goals/KPIs, cross-domain chat, target overview, tool registry (read), dashboard, config |
+| admin | All permissions + seed demo data button, admin banner |
 
-## Frontend Views
+## Frontend Views (17)
 
 | View | Persona | Key Components |
 |------|---------|---------------|
+| OSINT Dashboard | OSINT | Metric cards, uploads chart, severity bar chart, clickable navigation |
 | Upload Wizard | OSINT | File upload with source type selection, presigned S3 URLs |
-| Vulnerability Dashboard | OSINT | Data sources, ingestion status, document explorer |
-| Target Queue | Red Team | Prioritized targets sorted by composite score |
-| Red Team Operations | Red Team | Operations planning, tool tracking |
-| Red Team Dashboard | Red Team | Target stats, operations overview |
-| Goal Management | Leadership | Goals, KPIs, priority weights, planning window |
-| OSINT Chat | OSINT | AI Q&A with semantic search + Recharts visualizations |
-| Red Team Chat | Red Team | Tool recommendations with risk analysis + charts |
-| Leadership Chat | Leadership | Cross-domain Q&A, workload, activities + charts |
+| Investigations | OSINT | Ticket table with create modal, status management |
+| OSINT Chat | OSINT | AI Q&A with semantic search + Recharts visualizations + markdown |
+| Network Topology | OSINT, Red Team, Leadership | React Flow interactive graph with dagre auto-layout, custom nodes (source/target/tool/operation), right-click context menu, edge labels |
+| Red Team Dashboard | Red Team | Target pie chart, severity bar chart, split panel detail, clickable metrics |
+| Target Queue | Red Team | Prioritized targets with split panel, status change, assign, create modal |
+| Red Team Operations | Red Team | Operations table with split panel detail, status change, create modal |
+| Tool Registry | Red Team, Leadership | CRUD for tools with risk/success profiles, 3-tab create modal, vectorization on save |
+| Red Team Chat | Red Team | Tool recommendations with risk analysis + GFM markdown tables |
+| Leadership Dashboard | Leadership | Cross-domain metrics, activity feed, status pie chart, tickets bar chart |
+| Goals & KPIs | Leadership | CRUD goals/KPIs, priority weight sliders, planning window |
+| Target Overview | Leadership | Read-only cross-domain target view with charts, goal alignment, linked ops, available tools |
+| Leadership Chat | Leadership | Cross-domain Q&A, workload, activities + charts + markdown |
 
 ## Step Functions Workflows (3)
 
@@ -368,20 +386,19 @@ AWS_PROFILE=cdk-deploy-prod npx cdk deploy --all --require-approval never
 | 2. OSINT Dashboard + Ticketing | Complete | Ticket CRUD, dashboards, queue for red team |
 | 3. Red Team Workflow | Complete | Target management, tool registry + vectorization, prioritization |
 | 4. AI Chat Agents | Complete | 3 persona-specific chat agents, tool search, risk analysis |
-| 5. Visualization + Leadership | In Progress | React Flow topology, dashboard charts, clickable metrics |
+| 5. Visualization + Leadership | Complete | React Flow topology (dagre, custom nodes, context menu), Tool Registry UI, Target Overview, dashboard charts, clickable metrics |
 | 6. Testing + Polish | Planned | 95%+ coverage, E2E, deploy to CloudFront |
 
 ## Next Steps
 
 ### Phase 5 Remaining
-- **Network Topology enhancements**: Edge connections between source nodes and targets based on data lineage, animated edges for active operations, right-click context menu for target actions
-- **Leadership dashboard charts**: Add target-vs-ticket trend line chart (time series), analyst workload bar chart from `get_analyst_workload` tool
+- **Leadership dashboard charts**: Add target-vs-ticket trend line chart (time series), analyst workload bar chart
 - **Chat session persistence**: Show session history sidebar (list_sessions API is wired but UI not built), allow resuming past conversations
-- **Deploy to CloudFront**: Run `setup-env.sh` + `deploy-frontend.sh` for production deployment after testing
+- **Deploy to CloudFront**: Run `setup-env.sh` + `deploy-frontend.sh` for production deployment
 
 ### Phase 6: Testing + Polish
 - **Frontend unit tests**: Increase from 10 to 95%+ coverage (Vitest + React Testing Library)
-- **E2E tests**: Update Playwright specs to cover seeded data flows, chat interactions, network topology
+- **E2E tests**: Update Playwright specs to cover seeded data flows, chat interactions
 - **Backend test updates**: Update tests for ConditionExpression race condition fixes, new chat history, defusedxml
 - **CDK test updates**: Add assertions for RA-Tools table, admin role, manage_tools + update_target Lambdas
 - **S3 vector caching**: Add in-memory or /tmp cache in chat agent Lambdas to avoid re-downloading all vectors per search

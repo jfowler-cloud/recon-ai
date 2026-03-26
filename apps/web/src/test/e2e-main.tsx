@@ -29,6 +29,9 @@ import RedTeamChat from '../components/RedTeamChat'
 import LeadershipDashboard from '../components/LeadershipDashboard'
 import GoalManagement from '../components/GoalManagement'
 import LeadershipChat from '../components/LeadershipChat'
+import NetworkTopology from '../components/NetworkTopology'
+import ToolRegistry from '../components/ToolRegistry'
+import TargetOverview from '../components/TargetOverview'
 import '../index.css'
 
 Amplify.configure(amplifyConfig)
@@ -41,9 +44,9 @@ declare global {
 }
 
 type Persona = 'osint-analyst' | 'red-team-analyst' | 'leadership'
-type ViewType = 'osint-dashboard' | 'osint-upload' | 'osint-investigations' | 'osint-chat'
-  | 'redteam-dashboard' | 'redteam-targets' | 'redteam-operations' | 'redteam-chat'
-  | 'leadership-dashboard' | 'leadership-goals' | 'leadership-chat'
+type ViewType = 'osint-dashboard' | 'osint-upload' | 'osint-investigations' | 'osint-chat' | 'osint-topology'
+  | 'redteam-dashboard' | 'redteam-targets' | 'redteam-operations' | 'redteam-chat' | 'redteam-topology' | 'redteam-tools'
+  | 'leadership-dashboard' | 'leadership-goals' | 'leadership-chat' | 'leadership-targets' | 'leadership-tools' | 'leadership-topology'
 
 function getPersona(groups: string[]): Persona {
   if (groups.includes('leadership')) return 'leadership'
@@ -69,6 +72,7 @@ function buildNavItems(persona: Persona): SideNavigationProps.Item[] {
         { type: 'link', text: 'Upload Data', href: '#osint-upload' },
         { type: 'link', text: 'Investigations', href: '#osint-investigations' },
         { type: 'link', text: 'OSINT Chat', href: '#osint-chat' },
+        { type: 'link', text: 'Network Topology', href: '#osint-topology' },
       ],
     })
   }
@@ -79,7 +83,9 @@ function buildNavItems(persona: Persona): SideNavigationProps.Item[] {
         { type: 'link', text: 'Dashboard', href: '#redteam-dashboard' },
         { type: 'link', text: 'Target Queue', href: '#redteam-targets' },
         { type: 'link', text: 'Operations', href: '#redteam-operations' },
+        { type: 'link', text: 'Tool Registry', href: '#redteam-tools' },
         { type: 'link', text: 'Red Team Chat', href: '#redteam-chat' },
+        { type: 'link', text: 'Network Topology', href: '#redteam-topology' },
       ],
     })
   }
@@ -89,7 +95,10 @@ function buildNavItems(persona: Persona): SideNavigationProps.Item[] {
       items: [
         { type: 'link', text: 'Overview', href: '#leadership-dashboard' },
         { type: 'link', text: 'Goals & KPIs', href: '#leadership-goals' },
+        { type: 'link', text: 'Target Overview', href: '#leadership-targets' },
+        { type: 'link', text: 'Tool Registry', href: '#leadership-tools' },
         { type: 'link', text: 'Leadership Chat', href: '#leadership-chat' },
+        { type: 'link', text: 'Network Topology', href: '#leadership-topology' },
       ],
     })
   }
@@ -115,13 +124,19 @@ function renderView(view: ViewType) {
     case 'osint-upload': return <DataUpload />
     case 'osint-investigations': return <OsintInvestigations />
     case 'osint-chat': return <OsintChat />
+    case 'osint-topology': return <NetworkTopology />
     case 'redteam-dashboard': return <RedTeamDashboard />
     case 'redteam-targets': return <TargetQueue />
     case 'redteam-operations': return <RedTeamOperations />
+    case 'redteam-tools': return <ToolRegistry />
     case 'redteam-chat': return <RedTeamChat />
+    case 'redteam-topology': return <NetworkTopology />
     case 'leadership-dashboard': return <LeadershipDashboard />
     case 'leadership-goals': return <GoalManagement />
+    case 'leadership-targets': return <TargetOverview />
+    case 'leadership-tools': return <ToolRegistry />
     case 'leadership-chat': return <LeadershipChat />
+    case 'leadership-topology': return <NetworkTopology />
     default: return <PlaceholderView title="Recon AI" description="Select a section from the navigation." />
   }
 }

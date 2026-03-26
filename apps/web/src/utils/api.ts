@@ -5,7 +5,7 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocumentClient, ScanCommand, QueryCommand } from '@aws-sdk/lib-dynamodb'
 import { fetchAuthSession } from 'aws-amplify/auth'
 import { awsConfig, appConfig } from '@/config/amplify'
-import type { Ticket, Target, Upload } from '@/types'
+import type { Ticket, Target, Upload, Tool } from '@/types'
 
 let _lambdaClient: LambdaClient | null = null
 let _ddbClient: DynamoDBDocumentClient | null = null
@@ -189,6 +189,12 @@ export async function manageTools(
   payload: Record<string, unknown> = {},
 ): Promise<Record<string, unknown>> {
   return invokeLambda(appConfig.manageToolsFn, { action, ...payload })
+}
+
+/** List all tools from RA-Tools table. */
+export async function listTools(): Promise<Tool[]> {
+  const result = await manageTools('list')
+  return (result.tools ?? []) as Tool[]
 }
 
 /** Record a tool action against a target/ticket. */

@@ -25,12 +25,14 @@ import GoalManagement from './components/GoalManagement'
 import RunDemo from './components/RunDemo'
 import LeadershipChat from './components/LeadershipChat'
 import NetworkTopology from './components/NetworkTopology'
+import ToolRegistry from './components/ToolRegistry'
+import TargetOverview from './components/TargetOverview'
 import './index.css'
 
 type Persona = 'osint-analyst' | 'red-team-analyst' | 'leadership'
 export type ViewType = 'osint-dashboard' | 'osint-upload' | 'osint-investigations' | 'osint-chat' | 'osint-topology'
-  | 'redteam-dashboard' | 'redteam-targets' | 'redteam-operations' | 'redteam-chat' | 'redteam-topology'
-  | 'leadership-dashboard' | 'leadership-goals' | 'leadership-chat'
+  | 'redteam-dashboard' | 'redteam-targets' | 'redteam-operations' | 'redteam-chat' | 'redteam-topology' | 'redteam-tools'
+  | 'leadership-dashboard' | 'leadership-goals' | 'leadership-chat' | 'leadership-targets' | 'leadership-tools' | 'leadership-topology'
 
 interface AuthContextType {
   userId: string
@@ -107,6 +109,7 @@ function buildNavItems(persona: Persona): SideNavigationProps.Item[] {
         { type: 'link', text: 'Dashboard', href: '#redteam-dashboard' },
         { type: 'link', text: 'Target Queue', href: '#redteam-targets' },
         { type: 'link', text: 'Operations', href: '#redteam-operations' },
+        { type: 'link', text: 'Tool Registry', href: '#redteam-tools' },
         { type: 'link', text: 'Red Team Chat', href: '#redteam-chat' },
         { type: 'link', text: 'Network Topology', href: '#redteam-topology' },
       ],
@@ -120,7 +123,10 @@ function buildNavItems(persona: Persona): SideNavigationProps.Item[] {
       items: [
         { type: 'link', text: 'Overview', href: '#leadership-dashboard' },
         { type: 'link', text: 'Goals & KPIs', href: '#leadership-goals' },
+        { type: 'link', text: 'Target Overview', href: '#leadership-targets' },
+        { type: 'link', text: 'Tool Registry', href: '#leadership-tools' },
         { type: 'link', text: 'Leadership Chat', href: '#leadership-chat' },
+        { type: 'link', text: 'Network Topology', href: '#leadership-topology' },
       ],
     })
   }
@@ -161,6 +167,8 @@ function renderView(view: ViewType) {
       return <TargetQueue />
     case 'redteam-operations':
       return <RedTeamOperations />
+    case 'redteam-tools':
+      return <ToolRegistry />
     case 'redteam-chat':
       return <RedTeamChat />
     case 'redteam-topology':
@@ -169,6 +177,12 @@ function renderView(view: ViewType) {
       return <LeadershipDashboard />
     case 'leadership-goals':
       return <GoalManagement />
+    case 'leadership-targets':
+      return <TargetOverview />
+    case 'leadership-tools':
+      return <ToolRegistry />
+    case 'leadership-topology':
+      return <NetworkTopology />
     case 'leadership-chat':
       return <LeadershipChat />
     default:

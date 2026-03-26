@@ -13,7 +13,7 @@ test.describe('Screenshots', () => {
     fs.mkdirSync(DOCS_DIR, { recursive: true })
   })
 
-  // ── OSINT Analyst views (4 pages) ──────────────────────────────────────
+  // ── OSINT Analyst views (5 pages) ──────────────────────────────────────
 
   test('capture OSINT Dashboard', async ({ page }) => {
     await setUser(page, { groups: ['osint-analyst'] })
@@ -59,7 +59,7 @@ test.describe('Screenshots', () => {
     await page.screenshot({ path: path.join(DOCS_DIR, '05_osint_topology.png'), fullPage: true })
   })
 
-  // ── Red Team Analyst views (5 pages) ───────────────────────────────────
+  // ── Red Team Analyst views (6 pages) ───────────────────────────────────
 
   test('capture Red Team Dashboard', async ({ page }) => {
     await setUser(page, { groups: ['red-team-analyst'] })
@@ -87,13 +87,22 @@ test.describe('Screenshots', () => {
     await page.screenshot({ path: path.join(DOCS_DIR, '08_redteam_operations.png'), fullPage: true })
   })
 
+  test('capture Red Team Tool Registry', async ({ page }) => {
+    await setUser(page, { groups: ['red-team-analyst'] })
+    await mockAuth(page)
+    await page.goto('/e2e.html')
+    await page.getByRole('link', { name: 'Tool Registry' }).click()
+    await page.waitForTimeout(500)
+    await page.screenshot({ path: path.join(DOCS_DIR, '09_redteam_tools.png'), fullPage: true })
+  })
+
   test('capture Red Team Chat', async ({ page }) => {
     await setUser(page, { groups: ['red-team-analyst'] })
     await mockAuth(page)
     await page.goto('/e2e.html')
     await page.getByRole('link', { name: 'Red Team Chat' }).click()
     await page.waitForTimeout(500)
-    await page.screenshot({ path: path.join(DOCS_DIR, '09_redteam_chat.png'), fullPage: true })
+    await page.screenshot({ path: path.join(DOCS_DIR, '10_redteam_chat.png'), fullPage: true })
   })
 
   test('capture Red Team Network Topology', async ({ page }) => {
@@ -102,17 +111,17 @@ test.describe('Screenshots', () => {
     await page.goto('/e2e.html')
     await page.getByRole('link', { name: 'Network Topology' }).click()
     await page.waitForTimeout(1500)
-    await page.screenshot({ path: path.join(DOCS_DIR, '10_redteam_topology.png'), fullPage: true })
+    await page.screenshot({ path: path.join(DOCS_DIR, '11_redteam_topology.png'), fullPage: true })
   })
 
-  // ── Leadership views (3 pages) ─────────────────────────────────────────
+  // ── Leadership views (6 pages) ─────────────────────────────────────────
 
   test('capture Leadership Dashboard', async ({ page }) => {
     await setUser(page, { groups: ['leadership'] })
     await mockAuth(page)
     await page.goto('/e2e.html')
     await page.waitForTimeout(1000)
-    await page.screenshot({ path: path.join(DOCS_DIR, '11_leadership_dashboard.png'), fullPage: true })
+    await page.screenshot({ path: path.join(DOCS_DIR, '12_leadership_dashboard.png'), fullPage: true })
   })
 
   test('capture Leadership Goals & KPIs', async ({ page }) => {
@@ -121,7 +130,25 @@ test.describe('Screenshots', () => {
     await page.goto('/e2e.html')
     await page.getByRole('link', { name: 'Goals & KPIs' }).click()
     await page.waitForTimeout(500)
-    await page.screenshot({ path: path.join(DOCS_DIR, '12_leadership_goals.png'), fullPage: true })
+    await page.screenshot({ path: path.join(DOCS_DIR, '13_leadership_goals.png'), fullPage: true })
+  })
+
+  test('capture Leadership Target Overview', async ({ page }) => {
+    await setUser(page, { groups: ['leadership'] })
+    await mockAuth(page)
+    await page.goto('/e2e.html')
+    await page.getByRole('link', { name: 'Target Overview' }).click()
+    await page.waitForTimeout(500)
+    await page.screenshot({ path: path.join(DOCS_DIR, '14_leadership_targets.png'), fullPage: true })
+  })
+
+  test('capture Leadership Tool Registry', async ({ page }) => {
+    await setUser(page, { groups: ['leadership'] })
+    await mockAuth(page)
+    await page.goto('/e2e.html')
+    await page.getByLabel('Leadership').getByRole('link', { name: 'Tool Registry' }).click()
+    await page.waitForTimeout(500)
+    await page.screenshot({ path: path.join(DOCS_DIR, '15_leadership_tools.png'), fullPage: true })
   })
 
   test('capture Leadership Chat', async ({ page }) => {
@@ -130,6 +157,15 @@ test.describe('Screenshots', () => {
     await page.goto('/e2e.html')
     await page.getByRole('link', { name: 'Leadership Chat' }).click()
     await page.waitForTimeout(500)
-    await page.screenshot({ path: path.join(DOCS_DIR, '13_leadership_chat.png'), fullPage: true })
+    await page.screenshot({ path: path.join(DOCS_DIR, '16_leadership_chat.png'), fullPage: true })
+  })
+
+  test('capture Leadership Network Topology', async ({ page }) => {
+    await setUser(page, { groups: ['leadership'] })
+    await mockAuth(page)
+    await page.goto('/e2e.html')
+    await page.getByLabel('Leadership').getByRole('link', { name: 'Network Topology' }).click()
+    await page.waitForTimeout(1500)
+    await page.screenshot({ path: path.join(DOCS_DIR, '17_leadership_topology.png'), fullPage: true })
   })
 })

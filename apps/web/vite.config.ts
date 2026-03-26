@@ -7,6 +7,8 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      react: path.resolve(__dirname, 'node_modules/react'),
+      'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
       ...(mode === 'e2e' ? {
         'aws-amplify/auth': path.resolve(__dirname, 'src/test/e2e-auth-stub.ts'),
       } : {}),
