@@ -349,12 +349,6 @@ AWS_PROFILE=cdk-deploy-prod npx cdk deploy --all --require-approval never
 
 ## Known Issues & Improvement Areas
 
-### High (P1)
-
-| Issue | Location | Description |
-|-------|----------|-------------|
-| S3 CORS allows all origins | `database-stack.ts:201` | Uploads bucket `allowedOrigins: ['*']`; should be restricted to CloudFront domain |
-
 ### Medium (Code Quality)
 
 | Issue | Location | Description |
