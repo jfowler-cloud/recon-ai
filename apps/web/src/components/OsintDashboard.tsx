@@ -247,6 +247,9 @@ export default function OsintDashboard() {
       {/* Charts: Severity + Source Type side by side */}
       <ColumnLayout columns={2}>
         <Container header={<Header variant="h2">Threat Severity Distribution</Header>}>
+          {severityData.every(d => d.count === 0) ? (
+            <div className="chart-empty">No severity data available yet</div>
+          ) : (
           <div style={{ width: '100%', height: 300 }}>
             <ResponsiveContainer>
               <BarChart data={severityData} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
@@ -272,9 +275,13 @@ export default function OsintDashboard() {
               </BarChart>
             </ResponsiveContainer>
           </div>
+          )}
         </Container>
 
         <Container header={<Header variant="h2">Uploads by Source Type</Header>}>
+          {sourceTypeData.length === 0 ? (
+            <div className="chart-empty">No upload data available yet</div>
+          ) : (
           <div style={{ width: '100%', height: 300 }}>
             <ResponsiveContainer>
               <PieChart>
@@ -296,6 +303,7 @@ export default function OsintDashboard() {
               </PieChart>
             </ResponsiveContainer>
           </div>
+          )}
         </Container>
       </ColumnLayout>
     </SpaceBetween>

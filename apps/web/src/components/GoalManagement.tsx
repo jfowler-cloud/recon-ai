@@ -169,7 +169,7 @@ export default function GoalManagement() {
         <Container header={<Header variant="h2">Goals</Header>}>
           <SpaceBetween size="m">
             {goals.map((goal, i) => (
-              <div key={goal.id} style={{ padding: '12px', border: '1px solid #414d5c', borderRadius: '8px' }}>
+              <div key={goal.id} className="goal-card">
                 <SpaceBetween size="s">
                   <ColumnLayout columns={3}>
                     <FormField label="Title">
@@ -210,7 +210,7 @@ export default function GoalManagement() {
         <Container header={<Header variant="h2">KPIs</Header>}>
           <SpaceBetween size="m">
             {kpis.map((kpi, i) => (
-              <div key={kpi.id} style={{ padding: '12px', border: '1px solid #414d5c', borderRadius: '8px' }}>
+              <div key={kpi.id} className="goal-card">
                 <SpaceBetween size="s">
                   <ColumnLayout columns={3}>
                     <FormField label="Title">

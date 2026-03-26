@@ -73,6 +73,38 @@ html body {
 }
 ── end Cloudscape accent ─────────────────────────────────────────── */
 
+/* ── CSS custom properties (shared colors) ───────────────────────── */
+:root {
+  --ra-bg-primary: #0f1419;
+  --ra-bg-secondary: #1e2228;
+  --ra-bg-surface: #16191f;
+  --ra-bg-elevated: #1a2332;
+  --ra-border: #414d5c;
+  --ra-border-light: #2d3139;
+  --ra-text-primary: #e8eaed;
+  --ra-text-secondary: #b4b8bf;
+  --ra-text-muted: #8c8c8c;
+  --ra-accent: #0972d3;
+  --ra-danger: #e8001c;
+  --ra-success: #29a368;
+  --ra-warning: #f89256;
+}
+body.ra-light {
+  --ra-bg-primary: #f9fafb;
+  --ra-bg-secondary: #ffffff;
+  --ra-bg-surface: #ffffff;
+  --ra-bg-elevated: #f2f3f3;
+  --ra-border: #d1d5db;
+  --ra-border-light: #e5e7eb;
+  --ra-text-primary: #0f141a;
+  --ra-text-secondary: #5f6b7a;
+  --ra-text-muted: #687078;
+  --ra-accent: #0972d3;
+  --ra-danger: #d91515;
+  --ra-success: #037f0c;
+  --ra-warning: #d97706;
+}
+
 /* Fix TopNavigation title truncation */
 [class*="awsui_identity"] {
   overflow: visible !important;
@@ -344,4 +376,99 @@ body.ra-light .metric-card-link:hover {
 .audit-detail {
   flex: 1;
   opacity: 0.8;
+}
+
+/* ── Global polish ───────────────────────────────────────────────── */
+
+/* Chat message overflow safety */
+.chat-bubble-content {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* Session sidebar hover effect */
+.session-item {
+  transition: background-color 0.15s ease;
+}
+.session-item:hover {
+  background-color: var(--ra-bg-elevated) !important;
+}
+.session-item:hover .session-actions {
+  opacity: 1 !important;
+}
+
+/* Improve secondary text contrast (WCAG AA) */
+.ra-dark .audit-timestamp { opacity: 0.75; }
+.ra-dark .session-time { opacity: 0.65; font-size: 11px; }
+
+/* Table cell text overflow */
+.cell-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 300px;
+}
+
+/* Form validation error state */
+.field-error {
+  border-color: var(--ra-danger) !important;
+}
+.field-error-text {
+  color: var(--ra-danger);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Goal/KPI card borders — theme-aware */
+.goal-card {
+  padding: 12px;
+  border: 1px solid var(--ra-border);
+  border-radius: 8px;
+}
+
+/* Empty chart placeholder */
+.chart-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 250px;
+  opacity: 0.5;
+  font-size: 14px;
+}
+
+/* Retry button in chat errors */
+.chat-error-action {
+  margin-top: 8px;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Focus ring for custom inputs */
+input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 2px solid var(--ra-accent);
+  outline-offset: 1px;
+}
+
+/* Drag zone theme-aware */
+.upload-dropzone {
+  border: 2px dashed var(--ra-border);
+  border-radius: 12px;
+  padding: 40px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+.upload-dropzone:hover, .upload-dropzone.drag-active {
+  border-color: var(--ra-accent);
+  background-color: var(--ra-bg-elevated);
+}
+
+/* Toast slide out */
+.toast-item-exit {
+  animation: toast-slide-out 0.25s ease forwards;
+}
+@keyframes toast-slide-out {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
 }

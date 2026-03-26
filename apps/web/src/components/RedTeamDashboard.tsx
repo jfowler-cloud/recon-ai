@@ -250,6 +250,9 @@ export default function RedTeamDashboard() {
 
       <ColumnLayout columns={2}>
         <Container header={<Header variant="h2">Target Status Distribution</Header>}>
+          {statusDistribution.length === 0 ? (
+            <div className="chart-empty">No target data available yet</div>
+          ) : (
           <div style={{ width: '100%', height: 300 }}>
             <ResponsiveContainer>
               <PieChart>
@@ -271,9 +274,13 @@ export default function RedTeamDashboard() {
               </PieChart>
             </ResponsiveContainer>
           </div>
+          )}
         </Container>
 
         <Container header={<Header variant="h2">Tickets by Severity</Header>}>
+          {severityData.length === 0 ? (
+            <div className="chart-empty">No ticket data available yet</div>
+          ) : (
           <div style={{ width: '100%', height: 300 }}>
             <ResponsiveContainer>
               <BarChart data={severityData} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
@@ -299,6 +306,7 @@ export default function RedTeamDashboard() {
               </BarChart>
             </ResponsiveContainer>
           </div>
+          )}
         </Container>
       </ColumnLayout>
 

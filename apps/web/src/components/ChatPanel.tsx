@@ -202,6 +202,7 @@ export default function ChatPanel({ persona, title, assistantName, description, 
                 {sessions.map(s => (
                   <div
                     key={s.sessionId}
+                    className="session-item"
                     style={{
                       padding: '8px 12px',
                       cursor: 'pointer',
@@ -227,9 +228,9 @@ export default function ChatPanel({ persona, title, assistantName, description, 
                           <div style={{ fontSize: 12, fontWeight: sessionId === s.sessionId ? 600 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {s.title || 'Untitled'}
                           </div>
-                          <div style={{ fontSize: 10, opacity: 0.5 }}>{formatSessionTime(s.updatedAt)}</div>
+                          <div className="session-time" style={{ fontSize: 11, opacity: 0.65 }}>{formatSessionTime(s.updatedAt)}</div>
                         </div>
-                        <div style={{ display: 'flex', gap: 2, flexShrink: 0, opacity: 0.5 }}
+                        <div className="session-actions" style={{ display: 'flex', gap: 2, flexShrink: 0, opacity: 0.3, transition: 'opacity 0.15s' }}
                           onClick={e => e.stopPropagation()}>
                           <button
                             onClick={() => { setEditingSession(s.sessionId); setEditTitle(s.title || '') }}
@@ -297,12 +298,12 @@ export default function ChatPanel({ persona, title, assistantName, description, 
 
               {messages.map(m => (
                 <div key={m.id} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start', marginBottom: 12 }}>
-                  <div style={{
+                  <div className="chat-bubble-content" style={{
                     maxWidth: '85%',
                     padding: '12px 16px',
                     borderRadius: 12,
-                    backgroundColor: m.role === 'user' ? '#0972d3' : isDarkMode ? '#1e2228' : '#f2f3f3',
-                    color: m.role === 'user' ? '#ffffff' : isDarkMode ? '#e8eaed' : '#000716',
+                    backgroundColor: m.role === 'user' ? 'var(--ra-accent)' : 'var(--ra-bg-elevated)',
+                    color: m.role === 'user' ? '#ffffff' : 'var(--ra-text-primary)',
                   }}>
                     {m.role === 'user' ? (
                       <SpaceBetween direction="horizontal" size="xs">
