@@ -1,5 +1,6 @@
-import { useState, useEffect, createContext, useContext } from 'react'
+import { useState, useEffect, createContext, useContext, useCallback } from 'react'
 import { Authenticator, useTheme, View, Text, Heading } from '@aws-amplify/ui-react'
+import { fetchAuthSession } from 'aws-amplify/auth'
 import '@aws-amplify/ui-react/styles.css'
 import '@cloudscape-design/global-styles/index.css'
 import { applyMode, Mode } from '@cloudscape-design/global-styles'
@@ -198,19 +199,28 @@ export default function App() {
     >
       {({ signOut, user }) => {
         const userId = user?.signInDetails?.loginId ?? user?.username ?? ''
-        // Extract Cognito groups from the ID token payload
-        const userAny = user as unknown as Record<string, unknown> | undefined
-        const session = userAny?.['signInUserSession'] as Record<string, unknown> | undefined
-        const idToken = session?.['idToken'] as Record<string, unknown> | undefined
-        const payload = idToken?.['payload'] as Record<string, unknown> | undefined
-        const groups: string[] = (payload?.['cognito:groups'] as string[]) ?? []
+        const [groups, setGroups] = useState<string[]>([])
+
+        // Extract Cognito groups from the ID token via fetchAuthSession (Amplify v6)
+        const loadGroups = useCallback(async () => {
+          try {
+            const session = await fetchAuthSession()
+            const g = (session.tokens?.idToken?.payload?.['cognito:groups'] as string[]) ?? []
+            setGroups(g)
+          } catch {
+            setGroups([])
+          }
+        }, [])
+
+        useEffect(() => { loadGroups() }, [loadGroups])
+
         const persona = getPersona(groups)
         const navItems = buildNavItems(persona)
 
         // Set default view based on persona on first render
         useEffect(() => {
-          setCurrentView(getDefaultView(persona))
-        }, [persona])
+          if (groups.length > 0) setCurrentView(getDefaultView(persona))
+        }, [persona, groups])
 
         return (
           <AuthContext.Provider value={{ userId, groups, persona, isDarkMode: darkMode }}>
