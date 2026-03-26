@@ -32,6 +32,38 @@ Click the image below to view the full architecture diagram:
 
 See the interactive [Architecture Overview](docs/architecture.html) for the full HTML version.
 
+## Screenshots
+
+### OSINT Analyst
+
+| Dashboard | Upload Data |
+|-----------|------------|
+| ![OSINT Dashboard](docs/images/01_osint_dashboard.png) | ![Upload Data](docs/images/02_osint_upload.png) |
+
+| Investigations | OSINT Chat |
+|---------------|-----------|
+| ![Investigations](docs/images/03_osint_investigations.png) | ![OSINT Chat](docs/images/04_osint_chat.png) |
+
+### Red Team Operator
+
+| Dashboard | Target Queue |
+|-----------|-------------|
+| ![Red Team Dashboard](docs/images/06_redteam_dashboard.png) | ![Target Queue](docs/images/07_redteam_targets.png) |
+
+| Operations | Red Team Chat |
+|-----------|--------------|
+| ![Operations](docs/images/08_redteam_operations.png) | ![Red Team Chat](docs/images/09_redteam_chat.png) |
+
+### Leadership
+
+| Dashboard | Goals & KPIs |
+|-----------|-------------|
+| ![Leadership Dashboard](docs/images/11_leadership_dashboard.png) | ![Goals & KPIs](docs/images/12_leadership_goals.png) |
+
+| Leadership Chat |
+|----------------|
+| ![Leadership Chat](docs/images/13_leadership_chat.png) |
+
 ## How It Works
 
 1. **OSINT analysts** upload data (Shodan, Nmap, CSV, logs, PDFs) via presigned S3 URLs

@@ -1,0 +1,106 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - banner [ref=e6]:
+    - generic [ref=e7]:
+      - link "Recon AI" [ref=e9] [cursor=pointer]:
+        - /url: "#"
+        - generic [ref=e10]: Recon AI
+      - generic [ref=e11]:
+        - button "Dark" [ref=e14]
+        - button "e2e@test.com" [ref=e20] [cursor=pointer]:
+          - generic [ref=e21]:
+            - img
+          - generic [ref=e22]: e2e@test.com
+          - generic [ref=e23]:
+            - img
+  - main [ref=e25]:
+    - navigation [ref=e28]:
+      - generic [ref=e29]:
+        - button [ref=e31] [cursor=pointer]:
+          - generic [ref=e32]:
+            - img
+        - generic [ref=e33]:
+          - heading "Recon AI" [level=2] [ref=e34]:
+            - link "Recon AI" [ref=e35] [cursor=pointer]:
+              - /url: "#"
+              - generic [ref=e36]: Recon AI
+          - list [ref=e38]:
+            - listitem [ref=e39]:
+              - generic [ref=e40]:
+                - button "Red Team" [expanded] [ref=e44] [cursor=pointer]:
+                  - generic [ref=e46]:
+                    - img
+                  - generic [ref=e47]: Red Team
+                - group "Red Team" [ref=e48]:
+                  - list [ref=e49]:
+                    - listitem [ref=e50]:
+                      - link "Dashboard" [ref=e51] [cursor=pointer]:
+                        - /url: "#redteam-dashboard"
+                    - listitem [ref=e52]:
+                      - link "Target Queue" [ref=e53] [cursor=pointer]:
+                        - /url: "#redteam-targets"
+                    - listitem [ref=e54]:
+                      - link "Operations" [ref=e55] [cursor=pointer]:
+                        - /url: "#redteam-operations"
+                    - listitem [ref=e56]:
+                      - link "Red Team Chat" [ref=e57] [cursor=pointer]:
+                        - /url: "#redteam-chat"
+    - generic [ref=e59]:
+      - heading "Red Team Dashboard" [level=1] [ref=e65]
+      - main [ref=e68]:
+        - generic [ref=e70]:
+          - generic [ref=e72]:
+            - generic:
+              - generic [ref=e79]:
+                - generic [ref=e81]: Priority Targets
+                - generic [ref=e83]: "0"
+                - generic [ref=e85]: Total queued and active
+                - generic [ref=e87]: View targets →
+              - generic [ref=e94]:
+                - generic [ref=e96]: Active Operations
+                - generic [ref=e98]: "0"
+                - generic [ref=e100]: Currently running
+                - generic [ref=e102]: View operations →
+              - generic [ref=e109]:
+                - generic [ref=e111]: Total Tickets
+                - generic [ref=e113]: "0"
+                - generic [ref=e115]: Investigations + operations
+                - generic [ref=e117]: View tickets →
+              - generic [ref=e124]:
+                - generic [ref=e126]: Avg Priority Score
+                - generic [ref=e128]: "0"
+                - generic [ref=e130]: Across all targets
+                - generic [ref=e132]: View targets →
+          - generic [ref=e134]:
+            - generic:
+              - generic [ref=e137]:
+                - heading "Target Status Distribution" [level=2] [ref=e142]
+                - img [ref=e148]
+              - generic [ref=e151]:
+                - heading "Tickets by Severity" [level=2] [ref=e156]
+                - img [ref=e162]
+          - generic [ref=e168]:
+            - heading "Top Priority Targets" [level=2] [ref=e173]
+            - table [ref=e181]:
+              - rowgroup [ref=e182]:
+                - row "# Name Status Priority Score Category Vulnerabilities" [ref=e183]:
+                  - columnheader [ref=e184]
+                  - columnheader "#" [ref=e185]:
+                    - generic [ref=e187]: "#"
+                  - columnheader "Name" [ref=e188]:
+                    - generic [ref=e190]: Name
+                  - columnheader "Status" [ref=e191]:
+                    - generic [ref=e193]: Status
+                  - columnheader "Priority Score" [ref=e194]:
+                    - generic [ref=e196]: Priority Score
+                  - columnheader "Category" [ref=e197]:
+                    - generic [ref=e199]: Category
+                  - columnheader "Vulnerabilities" [ref=e200]:
+                    - generic [ref=e202]: Vulnerabilities
+              - rowgroup [ref=e203]:
+                - row "No targets found" [ref=e204]:
+                  - cell "No targets found" [ref=e205]:
+                    - generic [ref=e208]: No targets found
+```

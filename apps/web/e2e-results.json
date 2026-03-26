@@ -66,1270 +66,6 @@
   },
   "suites": [
     {
-      "title": "01-navigation.spec.ts",
-      "file": "01-navigation.spec.ts",
-      "column": 0,
-      "line": 0,
-      "specs": [],
-      "suites": [
-        {
-          "title": "Navigation — OSINT Analyst",
-          "file": "01-navigation.spec.ts",
-          "line": 4,
-          "column": 6,
-          "specs": [
-            {
-              "title": "shows OSINT section in side navigation",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 672,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:50.142Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "957431cae479accf8a10-ae9b49d6c47d7d629447",
-              "file": "01-navigation.spec.ts",
-              "line": 11,
-              "column": 3
-            },
-            {
-              "title": "does NOT show Red Team or Leadership sections",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
-                      "status": "passed",
-                      "duration": 649,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:50.128Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "957431cae479accf8a10-c5b7044a870e32d4a31b",
-              "file": "01-navigation.spec.ts",
-              "line": 18,
-              "column": 3
-            },
-            {
-              "title": "defaults to OSINT Dashboard view",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 2,
-                      "parallelIndex": 2,
-                      "status": "passed",
-                      "duration": 877,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:50.241Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "957431cae479accf8a10-15fc6626c07078630fac",
-              "file": "01-navigation.spec.ts",
-              "line": 23,
-              "column": 3
-            },
-            {
-              "title": "navigates to Upload Data view",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 3,
-                      "parallelIndex": 3,
-                      "status": "passed",
-                      "duration": 1027,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:50.294Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "957431cae479accf8a10-e9265060f94d8df9a039",
-              "file": "01-navigation.spec.ts",
-              "line": 27,
-              "column": 3
-            },
-            {
-              "title": "navigates to Investigations view",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
-                      "status": "passed",
-                      "duration": 970,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:50.953Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "957431cae479accf8a10-d07287a660b07ef12433",
-              "file": "01-navigation.spec.ts",
-              "line": 32,
-              "column": 3
-            },
-            {
-              "title": "navigates to OSINT Chat view",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 823,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:50.944Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "957431cae479accf8a10-3153c276b1d0330aec34",
-              "file": "01-navigation.spec.ts",
-              "line": 37,
-              "column": 3
-            }
-          ]
-        },
-        {
-          "title": "Navigation — Red Team Analyst",
-          "file": "01-navigation.spec.ts",
-          "line": 43,
-          "column": 6,
-          "specs": [
-            {
-              "title": "shows Red Team section in side navigation",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 2,
-                      "parallelIndex": 2,
-                      "status": "passed",
-                      "duration": 601,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:51.276Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "957431cae479accf8a10-87095dda5841300b648d",
-              "file": "01-navigation.spec.ts",
-              "line": 50,
-              "column": 3
-            },
-            {
-              "title": "does NOT show OSINT or Leadership sections",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 3,
-                      "parallelIndex": 3,
-                      "status": "passed",
-                      "duration": 531,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:51.485Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "957431cae479accf8a10-d655e26c6fd23bc0467e",
-              "file": "01-navigation.spec.ts",
-              "line": 57,
-              "column": 3
-            },
-            {
-              "title": "defaults to Red Team Dashboard view",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 631,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:51.803Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "957431cae479accf8a10-5fc3d6da298d41ecbf69",
-              "file": "01-navigation.spec.ts",
-              "line": 62,
-              "column": 3
-            },
-            {
-              "title": "navigates to Target Queue",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 2,
-                      "parallelIndex": 2,
-                      "status": "passed",
-                      "duration": 874,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:51.900Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "957431cae479accf8a10-9e68795a793f7a38271f",
-              "file": "01-navigation.spec.ts",
-              "line": 66,
-              "column": 3
-            },
-            {
-              "title": "navigates to Operations",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
-                      "status": "passed",
-                      "duration": 727,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:51.956Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "957431cae479accf8a10-83ac7508291655253c6c",
-              "file": "01-navigation.spec.ts",
-              "line": 71,
-              "column": 3
-            }
-          ]
-        },
-        {
-          "title": "Navigation — Leadership",
-          "file": "01-navigation.spec.ts",
-          "line": 77,
-          "column": 6,
-          "specs": [
-            {
-              "title": "shows all three sections (OSINT, Red Team, Leadership)",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 3,
-                      "parallelIndex": 3,
-                      "status": "passed",
-                      "duration": 601,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:52.041Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "957431cae479accf8a10-6d9ecc42e3affde9fcc8",
-              "file": "01-navigation.spec.ts",
-              "line": 84,
-              "column": 3
-            },
-            {
-              "title": "defaults to Leadership Dashboard view",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 602,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:52.450Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "957431cae479accf8a10-e1862fb208dbf5d211dc",
-              "file": "01-navigation.spec.ts",
-              "line": 90,
-              "column": 3
-            },
-            {
-              "title": "navigates to Goals & KPIs",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 3,
-                      "parallelIndex": 3,
-                      "status": "passed",
-                      "duration": 798,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:52.681Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "957431cae479accf8a10-a443f715cd62b19dacc8",
-              "file": "01-navigation.spec.ts",
-              "line": 94,
-              "column": 3
-            },
-            {
-              "title": "navigates to Leadership Chat",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
-                      "status": "passed",
-                      "duration": 732,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:52.713Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "957431cae479accf8a10-9ea0571deb0edffa46ac",
-              "file": "01-navigation.spec.ts",
-              "line": 99,
-              "column": 3
-            },
-            {
-              "title": "can navigate cross-domain to OSINT Upload",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 2,
-                      "parallelIndex": 2,
-                      "status": "passed",
-                      "duration": 758,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:52.803Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "957431cae479accf8a10-2c17a94ffcc48f0f705c",
-              "file": "01-navigation.spec.ts",
-              "line": 104,
-              "column": 3
-            },
-            {
-              "title": "can navigate cross-domain to Red Team Target Queue",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 808,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:53.070Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "957431cae479accf8a10-0b825ee7a9d86bfd13c6",
-              "file": "01-navigation.spec.ts",
-              "line": 109,
-              "column": 3
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "title": "02-views.spec.ts",
-      "file": "02-views.spec.ts",
-      "column": 0,
-      "line": 0,
-      "specs": [],
-      "suites": [
-        {
-          "title": "OSINT Views render real components",
-          "file": "02-views.spec.ts",
-          "line": 4,
-          "column": 6,
-          "specs": [
-            {
-              "title": "OSINT Dashboard shows metric cards",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
-                      "status": "passed",
-                      "duration": 742,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:53.477Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "1d5635b309ae01f93968-1949cf238e0112009aad",
-              "file": "02-views.spec.ts",
-              "line": 11,
-              "column": 3
-            },
-            {
-              "title": "Upload Data shows file upload form",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 3,
-                      "parallelIndex": 3,
-                      "status": "passed",
-                      "duration": 818,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:53.514Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "1d5635b309ae01f93968-267143f7c045e19347c1",
-              "file": "02-views.spec.ts",
-              "line": 16,
-              "column": 3
-            },
-            {
-              "title": "Investigations shows ticket table",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 2,
-                      "parallelIndex": 2,
-                      "status": "passed",
-                      "duration": 810,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:53.595Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "1d5635b309ae01f93968-6fcb1865d3fede129dac",
-              "file": "02-views.spec.ts",
-              "line": 21,
-              "column": 3
-            },
-            {
-              "title": "OSINT Chat shows input area",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 821,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:53.936Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "1d5635b309ae01f93968-f8d03a216639a3641049",
-              "file": "02-views.spec.ts",
-              "line": 26,
-              "column": 3
-            }
-          ]
-        },
-        {
-          "title": "Red Team Views render real components",
-          "file": "02-views.spec.ts",
-          "line": 32,
-          "column": 6,
-          "specs": [
-            {
-              "title": "Red Team Dashboard shows metric cards",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
-                      "status": "passed",
-                      "duration": 585,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:54.236Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "1d5635b309ae01f93968-56a0588ca47bb06b7281",
-              "file": "02-views.spec.ts",
-              "line": 39,
-              "column": 3
-            },
-            {
-              "title": "Target Queue shows target table",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 3,
-                      "parallelIndex": 3,
-                      "status": "passed",
-                      "duration": 691,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:54.362Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "1d5635b309ae01f93968-236d0f92f306f4932073",
-              "file": "02-views.spec.ts",
-              "line": 43,
-              "column": 3
-            },
-            {
-              "title": "Operations shows operations table",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 2,
-                      "parallelIndex": 2,
-                      "status": "passed",
-                      "duration": 648,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:54.427Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "1d5635b309ae01f93968-3f7542f8566334008941",
-              "file": "02-views.spec.ts",
-              "line": 48,
-              "column": 3
-            },
-            {
-              "title": "Red Team Chat shows input area",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 724,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:54.788Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "1d5635b309ae01f93968-8e0fcf4d218c5af70376",
-              "file": "02-views.spec.ts",
-              "line": 53,
-              "column": 3
-            }
-          ]
-        },
-        {
-          "title": "Leadership Views render real components",
-          "file": "02-views.spec.ts",
-          "line": 59,
-          "column": 6,
-          "specs": [
-            {
-              "title": "Leadership Dashboard shows cross-domain metrics",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
-                      "status": "passed",
-                      "duration": 512,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:54.841Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "1d5635b309ae01f93968-f837c2485011e4ef6693",
-              "file": "02-views.spec.ts",
-              "line": 66,
-              "column": 3
-            },
-            {
-              "title": "Goals & KPIs shows goal management form",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 3,
-                      "parallelIndex": 3,
-                      "status": "passed",
-                      "duration": 644,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:55.071Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "1d5635b309ae01f93968-70d32a814d6d1b525157",
-              "file": "02-views.spec.ts",
-              "line": 70,
-              "column": 3
-            },
-            {
-              "title": "Leadership Chat shows input area",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 2,
-                      "parallelIndex": 2,
-                      "status": "passed",
-                      "duration": 694,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:55.099Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "1d5635b309ae01f93968-1a13be060ae5ad310c2a",
-              "file": "02-views.spec.ts",
-              "line": 75,
-              "column": 3
-            }
-          ]
-        },
-        {
-          "title": "Top Navigation",
-          "file": "02-views.spec.ts",
-          "line": 81,
-          "column": 6,
-          "specs": [
-            {
-              "title": "shows user email in account dropdown",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
-                      "status": "passed",
-                      "duration": 480,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:55.370Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "1d5635b309ae01f93968-810e3258a609ba165dbe",
-              "file": "02-views.spec.ts",
-              "line": 82,
-              "column": 3
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "title": "accessibility.spec.ts",
-      "file": "accessibility.spec.ts",
-      "column": 0,
-      "line": 0,
-      "specs": [],
-      "suites": [
-        {
-          "title": "Accessibility",
-          "file": "accessibility.spec.ts",
-          "line": 5,
-          "column": 6,
-          "specs": [
-            {
-              "title": "OSINT analyst view has no critical accessibility violations",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 2584,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:55.702Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "ddd864604af8a6a0198f-d4a6c697e2251a123ae2",
-              "file": "accessibility.spec.ts",
-              "line": 6,
-              "column": 3
-            },
-            {
-              "title": "leadership view has no critical accessibility violations",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 3,
-                      "parallelIndex": 3,
-                      "status": "passed",
-                      "duration": 2707,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:56.027Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "ddd864604af8a6a0198f-0c7b4ec4a466f27fe2df",
-              "file": "accessibility.spec.ts",
-              "line": 20,
-              "column": 3
-            },
-            {
-              "title": "red team view has no critical accessibility violations",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 2,
-                      "parallelIndex": 2,
-                      "status": "passed",
-                      "duration": 2727,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:56.050Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "ddd864604af8a6a0198f-f8c4c636be0bdea2ce65",
-              "file": "accessibility.spec.ts",
-              "line": 34,
-              "column": 3
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "title": "performance.spec.ts",
-      "file": "performance.spec.ts",
-      "column": 0,
-      "line": 0,
-      "specs": [],
-      "suites": [
-        {
-          "title": "Performance",
-          "file": "performance.spec.ts",
-          "line": 4,
-          "column": 6,
-          "specs": [
-            {
-              "title": "initial page load completes within 3 seconds",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
-                      "status": "passed",
-                      "duration": 446,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:55.885Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "b15d6361b2fc38288977-71dd2aed07f7e604a48b",
-              "file": "performance.spec.ts",
-              "line": 5,
-              "column": 3
-            },
-            {
-              "title": "navigation between views is fast (< 500ms)",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
-                      "status": "passed",
-                      "duration": 366,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-25T23:45:56.346Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "b15d6361b2fc38288977-28ca9ae5c692526ee1fe",
-              "file": "performance.spec.ts",
-              "line": 17,
-              "column": 3
-            }
-          ]
-        }
-      ]
-    },
-    {
       "title": "screenshots.spec.ts",
       "file": "screenshots.spec.ts",
       "column": 0,
@@ -1355,15 +91,15 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1391,
+                      "duration": 1669,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-25T23:45:56.729Z",
+                      "startTime": "2026-03-26T14:54:26.491Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1389,15 +125,15 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1339,
+                      "duration": 964,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-25T23:45:58.143Z",
+                      "startTime": "2026-03-26T14:54:28.348Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1423,15 +159,15 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1132,
+                      "duration": 801,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-25T23:45:59.497Z",
+                      "startTime": "2026-03-26T14:54:29.325Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1460,12 +196,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1283,
+                      "duration": 900,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-25T23:45:58.321Z",
+                      "startTime": "2026-03-26T14:54:30.137Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1476,6 +212,62 @@
               "id": "677a4938ef65bfc6a6e5-cff9d4ff82c36352eef4",
               "file": "screenshots.spec.ts",
               "line": 44,
+              "column": 3
+            },
+            {
+              "title": "capture OSINT Network Topology",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "timedOut",
+                      "duration": 30049,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/home/user/Desktop/Projects/recon-ai/apps/web/e2e/screenshots.spec.ts",
+                            "column": 72,
+                            "line": 57
+                          },
+                          "message": "Error: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('link', { name: 'Network Topology' }).first()\u001b[22m\n\n\n  55 |     await mockAuth(page)\n  56 |     await page.goto('/e2e.html')\n> 57 |     await page.getByRole('link', { name: 'Network Topology' }).first().click()\n     |                                                                        ^\n  58 |     await page.waitForTimeout(1500)\n  59 |     await page.screenshot({ path: path.join(DOCS_DIR, '05_osint_topology.png'), fullPage: true })\n  60 |   })\n    at /home/user/Desktop/Projects/recon-ai/apps/web/e2e/screenshots.spec.ts:57:72"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-26T14:54:26.531Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/user/Desktop/Projects/recon-ai/apps/web/test-results/screenshots-Screenshots-capture-OSINT-Network-Topology-chromium/error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-ffb815db2ce0cb333a77",
+              "file": "screenshots.spec.ts",
+              "line": 53,
               "column": 3
             },
             {
@@ -1491,15 +283,15 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 0,
+                      "workerIndex": 4,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1339,
+                      "duration": 1304,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-25T23:45:59.625Z",
+                      "startTime": "2026-03-26T14:54:57.691Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1509,7 +301,7 @@
               ],
               "id": "677a4938ef65bfc6a6e5-0264c089a8a852f52077",
               "file": "screenshots.spec.ts",
-              "line": 55,
+              "line": 64,
               "column": 3
             },
             {
@@ -1525,15 +317,15 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 0,
+                      "workerIndex": 4,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1023,
+                      "duration": 979,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-25T23:46:00.974Z",
+                      "startTime": "2026-03-26T14:54:59.085Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1543,7 +335,7 @@
               ],
               "id": "677a4938ef65bfc6a6e5-62729fbb5da34028e889",
               "file": "screenshots.spec.ts",
-              "line": 63,
+              "line": 72,
               "column": 3
             },
             {
@@ -1559,15 +351,15 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 3,
-                      "parallelIndex": 3,
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1019,
+                      "duration": 858,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-25T23:45:58.770Z",
+                      "startTime": "2026-03-26T14:55:00.076Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1577,7 +369,7 @@
               ],
               "id": "677a4938ef65bfc6a6e5-0bdfadf6cbd49502a8f6",
               "file": "screenshots.spec.ts",
-              "line": 72,
+              "line": 81,
               "column": 3
             },
             {
@@ -1593,15 +385,15 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 3,
-                      "parallelIndex": 3,
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
                       "status": "passed",
-                      "duration": 1106,
+                      "duration": 1607,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-25T23:45:59.820Z",
+                      "startTime": "2026-03-26T14:54:26.540Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1611,7 +403,63 @@
               ],
               "id": "677a4938ef65bfc6a6e5-e1edf545a414805d8b69",
               "file": "screenshots.spec.ts",
-              "line": 81,
+              "line": 90,
+              "column": 3
+            },
+            {
+              "title": "capture Red Team Network Topology",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "timedOut",
+                      "duration": 30020,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/home/user/Desktop/Projects/recon-ai/apps/web/e2e/screenshots.spec.ts",
+                            "column": 64,
+                            "line": 103
+                          },
+                          "message": "Error: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('link', { name: 'Network Topology' })\u001b[22m\n\n\n  101 |     await mockAuth(page)\n  102 |     await page.goto('/e2e.html')\n> 103 |     await page.getByRole('link', { name: 'Network Topology' }).click()\n      |                                                                ^\n  104 |     await page.waitForTimeout(1500)\n  105 |     await page.screenshot({ path: path.join(DOCS_DIR, '10_redteam_topology.png'), fullPage: true })\n  106 |   })\n    at /home/user/Desktop/Projects/recon-ai/apps/web/e2e/screenshots.spec.ts:103:64"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-26T14:54:28.293Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/user/Desktop/Projects/recon-ai/apps/web/test-results/screenshots-Screenshots-capture-Red-Team-Network-Topology-chromium/error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-4038badd318133113162",
+              "file": "screenshots.spec.ts",
+              "line": 99,
               "column": 3
             },
             {
@@ -1627,15 +475,15 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 3,
-                      "parallelIndex": 3,
+                      "workerIndex": 5,
+                      "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 1347,
+                      "duration": 1336,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-25T23:46:00.939Z",
+                      "startTime": "2026-03-26T14:54:59.213Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1645,7 +493,7 @@
               ],
               "id": "677a4938ef65bfc6a6e5-c4c76c9382a7f9aa9c3b",
               "file": "screenshots.spec.ts",
-              "line": 92,
+              "line": 110,
               "column": 3
             },
             {
@@ -1661,15 +509,15 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 2,
-                      "parallelIndex": 2,
+                      "workerIndex": 5,
+                      "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 1244,
+                      "duration": 1030,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-25T23:45:58.815Z",
+                      "startTime": "2026-03-26T14:55:00.637Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1679,7 +527,7 @@
               ],
               "id": "677a4938ef65bfc6a6e5-d0d8aeaa89e192b2d8c4",
               "file": "screenshots.spec.ts",
-              "line": 100,
+              "line": 118,
               "column": 3
             },
             {
@@ -1695,15 +543,15 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 2,
-                      "parallelIndex": 2,
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
                       "status": "passed",
-                      "duration": 986,
+                      "duration": 1601,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-25T23:46:00.103Z",
+                      "startTime": "2026-03-26T14:54:26.424Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1713,7 +561,7 @@
               ],
               "id": "677a4938ef65bfc6a6e5-004a95df584e35507015",
               "file": "screenshots.spec.ts",
-              "line": 109,
+              "line": 127,
               "column": 3
             }
           ]
@@ -1723,11 +571,11 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-03-25T23:45:40.813Z",
-    "duration": 21536.686999999998,
-    "expected": 45,
+    "startTime": "2026-03-26T14:54:17.507Z",
+    "duration": 44214.936,
+    "expected": 11,
     "skipped": 0,
-    "unexpected": 0,
+    "unexpected": 2,
     "flaky": 0
   }
 }

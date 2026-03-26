@@ -1,0 +1,128 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - banner [ref=e6]:
+    - generic [ref=e7]:
+      - link "Recon AI" [ref=e9] [cursor=pointer]:
+        - /url: "#"
+        - generic [ref=e10]: Recon AI
+      - generic [ref=e11]:
+        - button "Dark" [ref=e14]
+        - button "e2e@test.com" [ref=e20] [cursor=pointer]:
+          - generic [ref=e21]:
+            - img
+          - generic [ref=e22]: e2e@test.com
+          - generic [ref=e23]:
+            - img
+  - main [ref=e25]:
+    - navigation [ref=e26]:
+      - generic [ref=e27]:
+        - button [ref=e29] [cursor=pointer]:
+          - generic [ref=e30]:
+            - img
+        - generic [ref=e31]:
+          - heading "Recon AI" [level=2] [ref=e32]:
+            - link "Recon AI" [ref=e33] [cursor=pointer]:
+              - /url: "#"
+              - generic [ref=e34]: Recon AI
+          - list [ref=e36]:
+            - listitem [ref=e37]:
+              - generic [ref=e38]:
+                - button "OSINT" [expanded] [ref=e42] [cursor=pointer]:
+                  - generic [ref=e44]:
+                    - img
+                  - generic [ref=e45]: OSINT
+                - group "OSINT" [ref=e46]:
+                  - list [ref=e47]:
+                    - listitem [ref=e48]:
+                      - link "Dashboard" [ref=e49] [cursor=pointer]:
+                        - /url: "#osint-dashboard"
+                    - listitem [ref=e50]:
+                      - link "Upload Data" [ref=e51] [cursor=pointer]:
+                        - /url: "#osint-upload"
+                    - listitem [ref=e52]:
+                      - link "Investigations" [ref=e53] [cursor=pointer]:
+                        - /url: "#osint-investigations"
+                    - listitem [ref=e54]:
+                      - link "OSINT Chat" [ref=e55] [cursor=pointer]:
+                        - /url: "#osint-chat"
+    - generic [ref=e57]:
+      - generic [ref=e59]:
+        - generic:
+          - generic [ref=e66]:
+            - generic [ref=e69]:
+              - generic [ref=e71]:
+                - img
+              - generic [ref=e72]: Uploads Today
+            - generic [ref=e73]: "0"
+            - generic [ref=e75]:
+              - generic [ref=e78]:
+                - generic [ref=e80]:
+                  - img
+                - text: Monitoring
+              - generic [ref=e82]: View pending →
+          - generic [ref=e89]:
+            - generic [ref=e92]:
+              - generic [ref=e94]:
+                - img
+              - generic [ref=e95]: Active Investigations
+            - generic [ref=e96]: "0"
+            - generic [ref=e98]:
+              - generic [ref=e101]:
+                - generic [ref=e103]:
+                  - img
+                - text: In progress
+              - generic [ref=e105]: View investigations →
+          - generic [ref=e112]:
+            - generic [ref=e115]:
+              - generic [ref=e117]:
+                - img
+              - generic [ref=e118]: Critical Findings
+            - generic [ref=e119]: "0"
+            - generic [ref=e121]:
+              - generic [ref=e124]:
+                - generic [ref=e126]:
+                  - img
+                - text: Requires attention
+              - generic [ref=e128]: View findings →
+          - generic [ref=e135]:
+            - generic [ref=e138]:
+              - generic [ref=e140]:
+                - img
+              - generic [ref=e141]: Pending Ingestion
+            - generic [ref=e142]: "0"
+            - generic [ref=e144]:
+              - generic [ref=e147]:
+                - generic [ref=e149]:
+                  - img
+                - text: On track
+              - generic [ref=e151]: View uploads →
+      - generic [ref=e154]:
+        - heading "Recent Uploads (0)" [level=2] [ref=e159]:
+          - text: Recent Uploads
+          - generic [ref=e160]: (0)
+        - table [ref=e168]:
+          - rowgroup [ref=e169]:
+            - row "Filename Source Type Status Uploaded" [ref=e170]:
+              - columnheader "Filename" [ref=e171]:
+                - generic [ref=e173]: Filename
+              - columnheader "Source Type" [ref=e174]:
+                - generic [ref=e176]: Source Type
+              - columnheader "Status" [ref=e177]:
+                - generic [ref=e179]: Status
+              - columnheader "Uploaded" [ref=e180]:
+                - generic [ref=e182]: Uploaded
+          - rowgroup [ref=e183]:
+            - row "No recent uploads" [ref=e184]:
+              - cell "No recent uploads" [ref=e185]:
+                - generic [ref=e188]: No recent uploads
+      - generic [ref=e191]:
+        - generic:
+          - generic [ref=e194]:
+            - heading "Threat Severity Distribution" [level=2] [ref=e199]
+            - img [ref=e205]
+          - generic [ref=e211]:
+            - heading "Uploads by Source Type" [level=2] [ref=e216]
+            - img [ref=e222]
+```
