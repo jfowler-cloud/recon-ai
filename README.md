@@ -233,7 +233,7 @@ The prioritization agent uses this data to:
 | leadership | Set goals/KPIs, cross-domain chat, target overview, tool registry (read), dashboard, config |
 | admin | All permissions + seed demo data button, admin banner |
 
-## Frontend Views (17)
+## Frontend Views (18)
 
 | View | Persona | Key Components |
 |------|---------|---------------|
@@ -251,6 +251,7 @@ The prioritization agent uses this data to:
 | Goals & KPIs | Leadership | CRUD goals/KPIs, priority weight sliders, planning window |
 | Target Overview | Leadership | Read-only cross-domain target view with charts, goal alignment, linked ops, available tools |
 | Leadership Chat | Leadership | Cross-domain Q&A, workload, activities + charts + markdown |
+| Audit Log | Admin | Unified timeline of tickets, targets, tools — entity filter, text search, relative timestamps |
 
 ## Step Functions Workflows (3)
 
@@ -400,7 +401,11 @@ AWS_PROFILE=cdk-deploy-prod npx cdk deploy --all --require-approval never
 ## Next Steps
 
 ### Remaining
-- **Deploy to CloudFront**: Run `setup-env.sh` + `deploy-frontend.sh` for production deployment
 - **SNS alarm subscriptions**: Wire alarm topic to email or Slack
+- **Custom domain + ACM certificate** for CloudFront
+- **WAF on CloudFront** (rate limiting, geo-blocking)
+- **Real-time updates** via WebSocket/AppSync instead of manual refresh
+- **Tool execution integration** (actually run Nmap/Metasploit from UI)
+- **Export reports** (PDF/CSV) from dashboards and target overview
 
 See [CLAUDE.md](CLAUDE.md) for full architecture documentation.
