@@ -9,7 +9,8 @@ import ContentLayout from '@cloudscape-design/components/content-layout'
 import Spinner from '@cloudscape-design/components/spinner'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
 import { useAuth } from '@/App'
-import { getDashboard } from '@/utils/api'
+import { getDashboard, listTargets } from '@/utils/api'
+import type { Target } from '@/types'
 
 interface ActivityItem {
   id: string
@@ -62,6 +63,8 @@ export default function LeadershipDashboard() {
   const [activity, setActivity] = useState<ActivityItem[]>([])
   const [statusDistribution, setStatusDistribution] = useState<{ name: string; value: number }[]>([])
   const [typeData, setTypeData] = useState<{ type: string; count: number }[]>([])
+  const [severityData, setSeverityData] = useState<{ severity: string; count: number }[]>([])
+  const [targetPriorityData, setTargetPriorityData] = useState<{ range: string; count: number }[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -126,6 +129,35 @@ export default function LeadershipDashboard() {
               }))
             )
           }
+
+          // Build severity distribution
+          if (bySeverity) {
+            setSeverityData(
+              ['critical', 'high', 'medium', 'low']
+                .filter(s => (bySeverity[s] ?? 0) > 0)
+                .map(severity => ({
+                  severity: severity.charAt(0).toUpperCase() + severity.slice(1),
+                  count: bySeverity[severity] ?? 0,
+                }))
+            )
+          }
+        }
+
+        // Fetch targets for priority distribution
+        const targetsResult = await listTargets()
+        if (!cancelled && targetsResult.length > 0) {
+          const buckets = { 'Critical (80-100)': 0, 'High (50-79)': 0, 'Medium (20-49)': 0, 'Low (0-19)': 0 }
+          targetsResult.forEach((t: Target) => {
+            if (t.priorityScore >= 80) buckets['Critical (80-100)']++
+            else if (t.priorityScore >= 50) buckets['High (50-79)']++
+            else if (t.priorityScore >= 20) buckets['Medium (20-49)']++
+            else buckets['Low (0-19)']++
+          })
+          setTargetPriorityData(
+            Object.entries(buckets)
+              .filter(([, count]) => count > 0)
+              .map(([range, count]) => ({ range, count }))
+          )
         }
       } catch {
         // Leave defaults on error
@@ -221,6 +253,58 @@ export default function LeadershipDashboard() {
             </ResponsiveContainer>
           </div>
         </Container>
+        {/* Severity + Target Priority charts */}
+        <ColumnLayout columns={2}>
+          {severityData.length > 0 && (
+            <Container header={<Header variant="h2">Findings by Severity</Header>}>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={severityData} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#414d5c' : '#d1d5db'} />
+                  <XAxis dataKey="severity" tick={{ fill: isDarkMode ? '#b4b8bf' : '#687078', fontSize: 12 }} />
+                  <YAxis tick={{ fill: isDarkMode ? '#b4b8bf' : '#687078', fontSize: 12 }} />
+                  <Tooltip />
+                  <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                    {severityData.map((entry) => (
+                      <Cell key={entry.severity} fill={
+                        entry.severity === 'Critical' ? '#e8001c' :
+                        entry.severity === 'High' ? '#f89256' :
+                        entry.severity === 'Medium' ? '#0972d3' : '#29a368'
+                      } />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </Container>
+          )}
+
+          {targetPriorityData.length > 0 && (
+            <Container header={<Header variant="h2">Target Priority Distribution</Header>}>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={targetPriorityData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    dataKey="count"
+                    nameKey="range"
+                    label={({ range, count }) => `${range}: ${count}`}
+                  >
+                    {targetPriorityData.map((entry) => (
+                      <Cell key={entry.range} fill={
+                        entry.range.startsWith('Critical') ? '#e8001c' :
+                        entry.range.startsWith('High') ? '#f89256' :
+                        entry.range.startsWith('Medium') ? '#0972d3' : '#29a368'
+                      } />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </Container>
+          )}
+        </ColumnLayout>
       </SpaceBetween>
     </ContentLayout>
   )

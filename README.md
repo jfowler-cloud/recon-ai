@@ -376,18 +376,13 @@ AWS_PROFILE=cdk-deploy-prod npx cdk deploy --all --require-approval never
 ## Next Steps
 
 ### Phase 5 Remaining
-- **Leadership dashboard charts**: Add target-vs-ticket trend line chart (time series), analyst workload bar chart
-- **Chat session persistence**: Show session history sidebar (list_sessions API is wired but UI not built), allow resuming past conversations
 - **Deploy to CloudFront**: Run `setup-env.sh` + `deploy-frontend.sh` for production deployment
 
 ### Phase 6: Testing + Polish
 - **Frontend unit tests**: Increase from 10 to 95%+ coverage (Vitest + React Testing Library)
 - **E2E tests**: Update Playwright specs to cover seeded data flows, chat interactions
 - **Backend test updates**: Update tests for ConditionExpression race condition fixes, new chat history, defusedxml
-- **CDK test updates**: Add assertions for RA-Tools table, admin role, manage_tools + update_target Lambdas
-- **S3 vector caching**: Add in-memory or /tmp cache in chat agent Lambdas to avoid re-downloading all vectors per search
-- **Step Functions error handlers**: Add `addCatch()` to ingestion workflow to mark failed uploads
-- **S3 CORS restriction**: Restrict uploads bucket CORS to CloudFront domain
+- **CDK test updates**: Add assertions for RA-Tools table, admin role, DLQ, security headers
 - **SNS alarm subscriptions**: Wire alarm topic to email or Slack
 
 See [CLAUDE.md](CLAUDE.md) for full architecture documentation.
