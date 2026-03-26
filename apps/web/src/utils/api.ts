@@ -163,3 +163,73 @@ export async function listTargets(): Promise<Target[]> {
   }))
   return (result.Items ?? []) as Target[]
 }
+
+// ── Phase 3 API functions ─────────────────────────────────────────────
+
+/** Create a new red team target from a plain-text goal. */
+export async function createTarget(
+  plainTextGoal: string,
+  category: string = 'other',
+  createdBy: string = 'unknown',
+): Promise<Target> {
+  return invokeLambda(appConfig.createTargetFn, { plainTextGoal, category, createdBy })
+}
+
+/** Update a target's status or fields. */
+export async function updateTarget(
+  targetId: string,
+  updates: Record<string, unknown>,
+): Promise<Target> {
+  return invokeLambda(appConfig.updateTargetFn, { targetId, ...updates })
+}
+
+/** Manage tools: list, get, create, update. */
+export async function manageTools(
+  action: 'list' | 'get' | 'create' | 'update',
+  payload: Record<string, unknown> = {},
+): Promise<Record<string, unknown>> {
+  return invokeLambda(appConfig.manageToolsFn, { action, ...payload })
+}
+
+/** Record a tool action against a target/ticket. */
+export async function recordToolAction(
+  payload: Record<string, unknown>,
+): Promise<Record<string, unknown>> {
+  return invokeLambda(appConfig.recordToolActionFn, payload)
+}
+
+/** Update leadership context (goals, KPIs, weights). */
+export async function updateContext(
+  payload: Record<string, unknown>,
+): Promise<Record<string, unknown>> {
+  return invokeLambda(appConfig.updateContextFn, payload)
+}
+
+// ── Phase 4 API functions ─────────────────────────────────────────────
+
+/** Send a chat message to a persona-specific agent. */
+export async function sendChatMessage(
+  userId: string,
+  persona: 'osint' | 'redteam' | 'leadership',
+  message: string,
+  sessionId?: string,
+): Promise<{ sessionId: string; messageId: string; content: string; outputData?: unknown }> {
+  const payload: Record<string, unknown> = { userId, persona, message }
+  if (sessionId) payload.sessionId = sessionId
+  return invokeLambda(appConfig.chatHandlerFn, payload)
+}
+
+/** Get a chat session with all messages. */
+export async function getChatSession(
+  userId: string,
+  sessionId: string,
+): Promise<Record<string, unknown>> {
+  return invokeLambda(appConfig.getSessionFn, { userId, sessionId })
+}
+
+/** List chat sessions for a user. */
+export async function listChatSessions(
+  userId: string,
+): Promise<Record<string, unknown>> {
+  return invokeLambda(appConfig.listSessionsFn, { userId })
+}
