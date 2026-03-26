@@ -512,7 +512,7 @@
             <div class="stat-label">Strands Agents</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number">19</div>
+            <div class="stat-number">24</div>
             <div class="stat-label">Lambda Functions</div>
         </div>
         <div class="stat-card">
@@ -589,7 +589,7 @@
                         <div class="coverage-row">
                             <div class="coverage-label">Tests</div>
                             <div class="coverage-bar-bg"><div class="coverage-bar-fill high" style="width: 100%"></div></div>
-                            <div class="coverage-value high">44</div>
+                            <div class="coverage-value high">79</div>
                         </div>
                         <div class="coverage-row">
                             <div class="coverage-label">Coverage</div>
@@ -605,7 +605,7 @@
                 <div class="card-top blue"></div>
                 <div class="card-body">
                     <h3>Lambda Functions</h3>
-                    <div class="subtitle">19 handlers &bull; Python 3.13+ &bull; ARM64 Graviton</div>
+                    <div class="subtitle">24 functions (19 handlers + 5 agents) &bull; Python 3.13+ &bull; ARM64 Graviton</div>
                     <ul>
                         <li><strong>Data Pipeline</strong> &mdash; upload_data, parse_upload, trigger_ingestion</li>
                         <li><strong>Ticketing</strong> &mdash; create_ticket, update_ticket, list_tickets</li>
@@ -638,14 +638,14 @@
                     <ul>
                         <li><strong>RA-Auth</strong> &mdash; Cognito User Pool + Identity Pool + 3 groups</li>
                         <li><strong>RA-Database</strong> &mdash; 13 DynamoDB tables, S3 buckets, CloudFront</li>
-                        <li><strong>RA-Functions</strong> &mdash; 19 Lambda functions + shared layers + IAM</li>
+                        <li><strong>RA-Functions</strong> &mdash; 24 Lambda functions + shared layers + IAM</li>
                         <li><strong>RA-Workflow</strong> &mdash; 3 Step Functions, EventBridge, Cognito roles</li>
                     </ul>
                     <div class="coverage-section">
                         <div class="coverage-row">
                             <div class="coverage-label">CDK Tests</div>
                             <div class="coverage-bar-bg"><div class="coverage-bar-fill high" style="width: 90%"></div></div>
-                            <div class="coverage-value high">66</div>
+                            <div class="coverage-value high">75</div>
                         </div>
                     </div>
                 </div>
@@ -668,7 +668,7 @@
                         <div class="coverage-row">
                             <div class="coverage-label">Unit Tests</div>
                             <div class="coverage-bar-bg"><div class="coverage-bar-fill medium" style="width: 50%"></div></div>
-                            <div class="coverage-value medium">13</div>
+                            <div class="coverage-value medium">10</div>
                         </div>
                         <div class="coverage-row">
                             <div class="coverage-label">E2E Tests</div>
@@ -834,64 +834,6 @@
             </div>
         </div>
 
-        <!-- Risk Profile Example -->
-        <div style="margin-top: 1.5rem;">
-            <div style="font-size: 0.9rem; color: #8892b0; margin-bottom: 0.75rem; font-weight: 600;">Tool Risk Profile Dimensions</div>
-            <div class="risk-grid">
-                <div class="risk-item">
-                    <div class="risk-label">Service Disruption</div>
-                    <div class="risk-value high">none &rarr; critical</div>
-                </div>
-                <div class="risk-item">
-                    <div class="risk-label">System Damage</div>
-                    <div class="risk-value high">none &rarr; critical</div>
-                </div>
-                <div class="risk-item">
-                    <div class="risk-label">Detection Likelihood</div>
-                    <div class="risk-value medium">low &rarr; high</div>
-                </div>
-                <div class="risk-item">
-                    <div class="risk-label">Success Rate</div>
-                    <div class="risk-value low">0-100%</div>
-                </div>
-                <div class="risk-item">
-                    <div class="risk-label">Reversible</div>
-                    <div class="risk-value none">yes / no</div>
-                </div>
-                <div class="risk-item">
-                    <div class="risk-label">Noisy</div>
-                    <div class="risk-value medium">yes / no</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- DynamoDB Tables -->
-    <div class="section">
-        <div class="section-title">
-            <span class="dot" style="background: #10b981;"></span>
-            DynamoDB Tables (13)
-        </div>
-        <table class="styled-table">
-            <thead>
-                <tr><th>Table</th><th>PK</th><th>SK</th><th>GSIs</th><th>TTL</th></tr>
-            </thead>
-            <tbody>
-                <tr><td><code>RA-DataSources</code></td><td>sourceId</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
-                <tr><td><code>RA-Uploads</code></td><td>uploadId</td><td>&mdash;</td><td>AnalystIndex, StatusIndex</td><td>&mdash;</td></tr>
-                <tr><td><code>RA-Documents</code></td><td>uploadId</td><td>documentId</td><td>&mdash;</td><td>365d</td></tr>
-                <tr><td><code>RA-Tickets</code></td><td>ticketId</td><td>&mdash;</td><td>OwnerIndex, StatusIndex, TypeIndex, TargetIndex</td><td>&mdash;</td></tr>
-                <tr><td><code>RA-TicketNotes</code></td><td>ticketId</td><td>noteId</td><td>&mdash;</td><td>&mdash;</td></tr>
-                <tr><td><code>RA-Targets</code></td><td>targetId</td><td>&mdash;</td><td>StatusIndex(status, priorityScore)</td><td>&mdash;</td></tr>
-                <tr><td><code>RA-LeadershipContext</code></td><td>contextId</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
-                <tr><td><code>RA-ToolActions</code></td><td>ticketId</td><td>actionId</td><td>&mdash;</td><td>&mdash;</td></tr>
-                <tr><td><code>RA-Tools</code></td><td>toolId</td><td>&mdash;</td><td>CategoryIndex, StatusIndex</td><td>&mdash;</td></tr>
-                <tr><td><code>RA-ChatSessions</code></td><td>userId</td><td>sessionId</td><td>&mdash;</td><td>90d</td></tr>
-                <tr><td><code>RA-ChatMessages</code></td><td>sessionId</td><td>messageId</td><td>&mdash;</td><td>90d</td></tr>
-                <tr><td><code>RA-Config</code></td><td>configKey</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
-                <tr><td><code>RA-ScoringHistory</code></td><td>runId</td><td>&mdash;</td><td>&mdash;</td><td>90d</td></tr>
-            </tbody>
-        </table>
     </div>
 
     <!-- Deployment Tiers -->
@@ -956,29 +898,6 @@
         </div>
     </div>
 
-    <!-- Key Design Decisions -->
-    <div class="section">
-        <div class="section-title">
-            <span class="dot" style="background: #6b7280;"></span>
-            Key Design Decisions
-        </div>
-        <div class="card">
-            <div class="card-body">
-                <ul>
-                    <li><strong>No API Gateway</strong> &mdash; frontend calls DynamoDB + Lambda directly via Cognito identity pool credentials</li>
-                    <li><strong>Adapter pattern</strong> &mdash; single parse_upload Lambda with pluggable adapters for each data source type</li>
-                    <li><strong>Three separate chat agents</strong> &mdash; focused tool surfaces and prompts, not one multi-persona agent</li>
-                    <li><strong>S3 vectors + in-memory cosine</strong> &mdash; no OpenSearch needed for &lt;10K document corpus</li>
-                    <li><strong>Tool vectorization</strong> &mdash; risk profiles, success rates, and pros/cons embedded alongside documents for semantic search</li>
-                    <li><strong>Tool-aware prioritization</strong> &mdash; scoring factors tool availability, collateral risk, and detection likelihood</li>
-                    <li><strong>Weighted formula</strong> &mdash; alignment*0.40 + severity*0.30 + (100-effort)*0.20 + urgency*0.10 with leadership-configurable weights</li>
-                    <li><strong>Ticket state machine</strong> &mdash; new &rarr; triaging &rarr; investigating &rarr; active &rarr; completed &rarr; closed</li>
-                    <li><strong>Comprehend for entity extraction</strong> &mdash; budget-conscious, LLMs only for semantic enrichment and chat</li>
-                    <li><strong>Manual tool tracking</strong> &mdash; automation hooks built in but execution is currently manual</li>
-                </ul>
-            </div>
-        </div>
-    </div>
 
 </div>
 
