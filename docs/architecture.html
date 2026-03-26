@@ -392,7 +392,7 @@
         /* Persona Cards */
         .persona-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 1rem;
         }
 
@@ -415,6 +415,7 @@
         .persona-card.osint h4  { color: #60a5fa; }
         .persona-card.redteam h4 { color: #e8001c; }
         .persona-card.leadership h4 { color: #f59e0b; }
+        .persona-card.admin h4 { color: #e8001c; }
 
         .persona-card ul {
             list-style: none;
@@ -520,7 +521,7 @@
             <div class="stat-label">DynamoDB Tables</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number">17</div>
+            <div class="stat-number">18</div>
             <div class="stat-label">Frontend Views</div>
         </div>
     </div>
@@ -561,6 +562,16 @@
                     <li>Tool registry (read-only)</li>
                     <li>AI Q&amp;A with visualizations</li>
                     <li>Network topology (full graph)</li>
+                </ul>
+            </div>
+            <div class="persona-card admin">
+                <h4>Admin (1 view + all)</h4>
+                <ul>
+                    <li>Audit log (unified timeline)</li>
+                    <li>Seed demo data</li>
+                    <li>Full access to all personas</li>
+                    <li>Notification toasts</li>
+                    <li>Keyboard shortcuts (Ctrl+K, Esc)</li>
                 </ul>
             </div>
         </div>
@@ -638,15 +649,15 @@
                     <div class="subtitle">4 stacks &bull; TypeScript &bull; CDK v2</div>
                     <ul>
                         <li><strong>RA-Auth</strong> &mdash; Cognito User Pool + Identity Pool + 4 groups (incl. admin)</li>
-                        <li><strong>RA-Database</strong> &mdash; 13 DynamoDB tables, S3 buckets, CloudFront</li>
-                        <li><strong>RA-Functions</strong> &mdash; 24 Lambda functions + shared layers + IAM</li>
-                        <li><strong>RA-Workflow</strong> &mdash; 3 Step Functions, EventBridge, Cognito roles</li>
+                        <li><strong>RA-Database</strong> &mdash; 13 DynamoDB tables, S3 (versioned), CloudFront + security headers</li>
+                        <li><strong>RA-Functions</strong> &mdash; 24 Lambda functions + shared layers + IAM + SQS DLQ</li>
+                        <li><strong>RA-Workflow</strong> &mdash; 3 Step Functions (with error handlers), EventBridge, Cognito roles, SQS DLQ</li>
                     </ul>
                     <div class="coverage-section">
                         <div class="coverage-row">
                             <div class="coverage-label">CDK Tests</div>
                             <div class="coverage-bar-bg"><div class="coverage-bar-fill high" style="width: 90%"></div></div>
-                            <div class="coverage-value high">75</div>
+                            <div class="coverage-value high">83</div>
                         </div>
                     </div>
                 </div>
@@ -657,19 +668,19 @@
                 <div class="card-top amber"></div>
                 <div class="card-body">
                     <h3>React Frontend</h3>
-                    <div class="subtitle">17 views &bull; React 19 &bull; Vite 7 &bull; Cloudscape &bull; Dark Mode</div>
+                    <div class="subtitle">18 views &bull; React 19 &bull; Vite 7 &bull; Cloudscape &bull; Dark/Light &bull; Responsive</div>
                     <ul>
                         <li><strong>OSINT (5)</strong> &mdash; dashboard, upload, investigations, chat, topology</li>
                         <li><strong>Red Team (6)</strong> &mdash; dashboard, targets, operations, tool registry, chat, topology</li>
                         <li><strong>Leadership (6)</strong> &mdash; dashboard, goals, target overview, tool registry, chat, topology</li>
-                        <li><strong>Visualizations</strong> &mdash; Recharts (pie/bar), React Flow (dagre), markdown (GFM)</li>
-                        <li><strong>Auth</strong> &mdash; Amplify Authenticator, 4 Cognito groups, admin mode</li>
+                        <li><strong>Admin (1)</strong> &mdash; audit log, seed demo</li>
+                        <li><strong>UX</strong> &mdash; session persistence, toasts, Ctrl+K search, responsive, CSS vars</li>
                     </ul>
                     <div class="coverage-section">
                         <div class="coverage-row">
                             <div class="coverage-label">Unit Tests</div>
-                            <div class="coverage-bar-bg"><div class="coverage-bar-fill medium" style="width: 50%"></div></div>
-                            <div class="coverage-value medium">10</div>
+                            <div class="coverage-bar-bg"><div class="coverage-bar-fill high" style="width: 65%"></div></div>
+                            <div class="coverage-value high">50</div>
                         </div>
                         <div class="coverage-row">
                             <div class="coverage-label">E2E Tests</div>

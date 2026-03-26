@@ -85,12 +85,14 @@ See the interactive [Architecture Overview](docs/architecture.html) for the full
 5. **Leadership** sets goals and KPIs, which triggers the **Prioritization Agent** to re-score all targets using a weighted formula that factors in tool availability, risk profiles, and success rates
 6. **Three AI chat agents** (OSINT, Red Team, Leadership) provide persona-specific Q&A with semantic search across all vectorized data, tool recommendations with risk trade-offs, and auto-generated Recharts visualizations
 7. **Tool registry** lets operators register security tools with risk/success profiles that are vectorized for semantic search and factored into prioritization
+8. **Chat sessions** persist with full history, rename, and delete — conversations resume across page navigations
+9. **Audit log** (admin) provides a unified timeline of all ticket, target, and tool changes with entity filtering
 
 ## Tech Stack
 
 | Layer | Technology | Notes |
 |-------|-----------|-------|
-| **Frontend** | React 19, Vite 7, TypeScript 5.7, Cloudscape 3 | Dark mode default, direct DynamoDB/Lambda SDK calls |
+| **Frontend** | React 19, Vite 7, TypeScript 5.7, Cloudscape 3 | 18 views, dark/light mode, responsive, notification toasts, keyboard shortcuts |
 | **Auth** | Amplify Authenticator, Cognito User Pool + Identity Pool | 4 groups: osint-analyst, red-team-analyst, leadership, admin |
 | **Backend** | Python 3.13+, uv, AWS Lambda (ARM64 Graviton) | 19 Lambda handlers, Lambda Powertools v3 |
 | **Agents** | Strands SDK | 5 agents: 3 chat + enrichment + prioritization |
@@ -152,7 +154,7 @@ All tables: on-demand billing, PITR enabled, AWS-managed encryption.
 
 | Stack ID | Purpose |
 |----------|---------|
-| RA-Auth | Cognito User Pool + Identity Pool + 3 groups |
+| RA-Auth | Cognito User Pool + Identity Pool + 4 groups (incl. admin) |
 | RA-Database | 13 DynamoDB tables, S3 buckets (uploads, vectors, hosting), CloudFront |
 | RA-Functions | 24 Lambda functions (19 handlers + 5 agents) + shared layers + IAM + CloudWatch alarms |
 | RA-Workflow | 3 Step Functions, EventBridge trigger, Cognito identity pool role bindings |
@@ -240,17 +242,17 @@ The prioritization agent uses this data to:
 | OSINT Dashboard | OSINT | Metric cards, uploads chart, severity bar chart, clickable navigation |
 | Upload Wizard | OSINT | File upload with source type selection, presigned S3 URLs |
 | Investigations | OSINT | Ticket table with create modal, status management |
-| OSINT Chat | OSINT | AI Q&A with semantic search + Recharts visualizations + markdown |
+| OSINT Chat | OSINT | AI Q&A with semantic search, markdown, session history sidebar (rename/delete/resume) |
 | Network Topology | OSINT, Red Team, Leadership | React Flow interactive graph with dagre auto-layout, custom nodes (source/target/tool/operation), right-click context menu, edge labels |
 | Red Team Dashboard | Red Team | Target pie chart, severity bar chart, split panel detail, clickable metrics |
 | Target Queue | Red Team | Prioritized targets with split panel, status change, assign, create modal |
 | Red Team Operations | Red Team | Operations table with split panel detail, status change, create modal |
 | Tool Registry | Red Team, Leadership | CRUD for tools with risk/success profiles, 3-tab create modal, vectorization on save |
-| Red Team Chat | Red Team | Tool recommendations with risk analysis + GFM markdown tables |
+| Red Team Chat | Red Team | Tool recommendations with risk analysis, GFM markdown, session history |
 | Leadership Dashboard | Leadership | Cross-domain metrics, activity feed, status pie chart, tickets bar chart |
 | Goals & KPIs | Leadership | CRUD goals/KPIs, priority weight sliders, planning window |
 | Target Overview | Leadership | Read-only cross-domain target view with charts, goal alignment, linked ops, available tools |
-| Leadership Chat | Leadership | Cross-domain Q&A, workload, activities + charts + markdown |
+| Leadership Chat | Leadership | Cross-domain Q&A with auto-visualizations, charts, session history |
 | Audit Log | Admin | Unified timeline of tickets, targets, tools — entity filter, text search, relative timestamps |
 
 ## Step Functions Workflows (3)
@@ -340,6 +342,10 @@ Deeper coverage for these would require either integration-level Playwright test
 - **Ticket state machine** -- new -> triaging -> investigating -> active -> completed -> closed
 - **Comprehend for entity extraction** -- budget-conscious; LLMs reserved for semantic enrichment and chat
 - **Manual tool tracking with automation hooks** -- executionType and apiEndpoint fields in RA-ToolActions for future automation
+- **CSS custom properties** -- all shared colors in `:root` variables with dark/light variants for consistent theming
+- **Shared ChatPanel** -- single component with session sidebar, message rendering, output data slot used by all 3 chat views
+- **Shared agent handler factory** -- `make_chat_handler(persona, create_agent_fn)` eliminates duplicate Lambda handler code
+- **S3 vector caching** -- in-memory (5-min TTL) + /tmp disk cache to avoid re-downloading all vectors per search
 
 ## S3 Key Structure
 
@@ -395,8 +401,9 @@ AWS_PROFILE=cdk-deploy-prod npx cdk deploy --all --require-approval never
 | 2. OSINT Dashboard + Ticketing | Complete | Ticket CRUD, dashboards, queue for red team |
 | 3. Red Team Workflow | Complete | Target management, tool registry + vectorization, prioritization |
 | 4. AI Chat Agents | Complete | 3 persona-specific chat agents, tool search, risk analysis |
-| 5. Visualization + Leadership | Complete | React Flow topology (dagre, custom nodes, context menu), Tool Registry UI, Target Overview, dashboard charts, chat session persistence |
-| 6. Testing + Polish | Complete | CDK 83, backend 209, agent 79, frontend 50 unit + 17 E2E screenshots, defusedxml XXE, ConditionExpression |
+| 5. Visualization + Leadership | Complete | React Flow topology, Tool Registry, Target Overview, dashboard charts, session persistence, audit log |
+| 6. Testing + Polish | Complete | 414+ tests (83 CDK, 209 backend, 79 agent, 50 unit, 17 E2E), UI polish, responsive, accessibility |
+| 7. Hardening | Complete | S3 versioning, CloudFront security headers, DLQ, error handlers, vector caching, configurable table prefix |
 
 ## Next Steps
 

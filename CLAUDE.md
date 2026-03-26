@@ -68,7 +68,7 @@ recon-ai/
 
 ## Tech Stack
 
-- **Frontend**: React 19, Vite 7, TypeScript 5.7, AWS Cloudscape, Amplify Authenticator, Recharts, React Flow, Mermaid.js
+- **Frontend**: React 19, Vite 7, TypeScript 5.7, AWS Cloudscape, Amplify Authenticator, Recharts, React Flow, Mermaid.js, 18 views
 - **Backend**: Python 3.13+, uv, AWS Lambda (Graviton / ARM_64), Step Functions, aws-lambda-powertools
 - **Agents**: Strands SDK (5 agents: 3 chat + enrichment + prioritization)
 - **AI**: Claude via Amazon Bedrock (tiered: Haiku 4.5 / Sonnet 4.5 / Opus 4.5), Titan Embeddings v2
@@ -90,6 +90,14 @@ recon-ai/
 - Manual tool tracking with future automation hooks (executionType, apiEndpoint fields in RA-ToolActions)
 - Target prioritization uses weighted formula: alignment*0.40 + severity*0.30 + (100-effort)*0.20 + urgency*0.10
 - Ticket state machine: new → triaging → investigating → active → completed → closed
+- Shared ChatPanel component with session history sidebar (rename/delete/resume)
+- Shared agent handler factory (`make_chat_handler`) eliminates duplicate Lambda code
+- CSS custom properties (`:root` vars) for all colors with dark/light variants
+- S3 vector caching: in-memory (5-min TTL) + /tmp disk cache
+- S3 bucket versioning enabled (uploads 30d noncurrent, vectors 7d)
+- CloudFront security headers: HSTS, X-Content-Type-Options, X-Frame-Options, XSS-Protection
+- Lambda DLQ (SQS RA-LambdaFailures) + Step Functions error handlers with catch states
+- Configurable table prefix (default 'RA') for multi-environment deploys
 
 ## DynamoDB Tables
 
