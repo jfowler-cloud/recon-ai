@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Markdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import Container from '@cloudscape-design/components/container'
 import Header from '@cloudscape-design/components/header'
 import SpaceBetween from '@cloudscape-design/components/space-between'
@@ -124,7 +125,7 @@ export default function OsintChat() {
                 fontSize: 14,
                 lineHeight: 1.6,
               }}>
-                {m.role === 'user' ? m.content : <div className="chat-markdown"><Markdown>{m.content}</Markdown></div>}
+                {m.role === 'user' ? m.content : <div className="chat-markdown"><Markdown remarkPlugins={[remarkGfm]}>{m.content}</Markdown></div>}
               </div>
             </div>
           ))}

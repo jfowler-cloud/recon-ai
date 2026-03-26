@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import Markdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import Container from '@cloudscape-design/components/container'
 import Header from '@cloudscape-design/components/header'
 import SpaceBetween from '@cloudscape-design/components/space-between'
@@ -48,7 +49,7 @@ function ChatBubble({ message, chart }: { message: ChatMessage; chart?: ChartCon
               <Icon name="contact" />
               <Box variant="small" fontWeight="bold" color="text-body-secondary">Leadership Assistant</Box>
             </div>
-            <div className="chat-markdown"><Markdown>{message.content}</Markdown></div>
+            <div className="chat-markdown"><Markdown remarkPlugins={[remarkGfm]}>{message.content}</Markdown></div>
             {chart && (
               <div style={{ marginTop: '16px', backgroundColor: isDarkMode ? '#0f1419' : '#ffffff', borderRadius: '8px', padding: '12px' }}>
                 <Box variant="small" fontWeight="bold" padding={{ bottom: 'xs' }}>{chart.title}</Box>

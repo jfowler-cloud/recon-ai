@@ -98,6 +98,7 @@ export default function RunDemo({ visible, onDismiss, userId }: Props) {
       ...DEMO_TICKETS.map((t, i) => ({ label: `Create ticket ${i + 1}: ${t.title}`, status: 'pending' as StepStatus })),
       ...DEMO_TARGETS.map((_, i) => ({ label: `Create target ${i + 1} of ${DEMO_TARGETS.length}`, status: 'pending' as StepStatus })),
       ...DEMO_TOOLS.map((t, i) => ({ label: `Register tool ${i + 1}: ${t.name}`, status: 'pending' as StepStatus })),
+      { label: 'Trigger re-prioritization (scores targets against goals + tools)', status: 'pending' },
     ]
     setSteps(initialSteps)
 
@@ -140,6 +141,11 @@ export default function RunDemo({ visible, onDismiss, userId }: Props) {
         setStep(stepIdx, { status: 'success', detail: tool.name })
         stepIdx++
       }
+
+      // Re-prioritize: trigger prioritization agent now that targets + tools exist
+      setStep(stepIdx, { status: 'running' })
+      await updateContext(DEMO_CONTEXT)
+      setStep(stepIdx, { status: 'success', detail: 'Prioritization triggered — scores update in ~30s' })
 
       setDone(true)
     } catch (e: unknown) {
