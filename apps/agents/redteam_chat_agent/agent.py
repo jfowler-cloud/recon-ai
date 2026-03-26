@@ -5,7 +5,7 @@ from strands.models.bedrock import BedrockModel
 
 from shared.chat_tools import search_documents, generate_chart_config
 from shared.config import AppConfig
-from tools import get_priority_targets, get_tool_history, get_leadership_goals, search_tools, get_tool_registry
+from redteam_chat_agent.tools import get_priority_targets, get_tool_history, get_leadership_goals, search_tools, get_tool_registry
 
 _config = AppConfig()
 

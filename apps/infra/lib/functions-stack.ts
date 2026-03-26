@@ -166,6 +166,9 @@ export class FunctionsStack extends cdk.Stack {
       });
     };
 
+    // Bundle from agents/ root so shared/ module is available alongside each agent dir
+    const agentsRoot = path.join(__dirname, '..', '..', 'agents');
+
     const makeAgentFn = (
       name: string,
       agentDir: string,
@@ -177,8 +180,10 @@ export class FunctionsStack extends cdk.Stack {
         functionName: `ra-${agentDir}`,
         runtime: lambda.Runtime.PYTHON_3_13,
         architecture: lambda.Architecture.ARM_64,
-        handler: 'handler.handler',
-        code: lambda.Code.fromAsset(path.join(__dirname, '..', '..', 'agents', agentDir)),
+        handler: `${agentDir}/handler.handler`,
+        code: lambda.Code.fromAsset(agentsRoot, {
+          exclude: ['tests', '__pycache__', '.venv', '*.pyc', 'pyproject.toml', 'uv.lock'],
+        }),
         timeout,
         memorySize,
         environment: { ...commonEnv, ...extraEnv },

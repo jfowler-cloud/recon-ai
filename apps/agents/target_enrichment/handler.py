@@ -1,8 +1,8 @@
 """Lambda handler for the Target Enrichment agent."""
 import logging
 from typing import Any
-from agent import make_agent
-from tools import get_leadership_context, save_enriched_target
+from target_enrichment.agent import make_agent
+from target_enrichment.tools import get_leadership_context, save_enriched_target
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)

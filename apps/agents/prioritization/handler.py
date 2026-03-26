@@ -3,8 +3,8 @@ import logging
 import time
 import uuid
 from typing import Any
-from agent import make_agent
-from tools import (
+from prioritization.agent import make_agent
+from prioritization.tools import (
     get_all_active_targets,
     get_leadership_context,
     get_available_tools,
