@@ -520,8 +520,8 @@
             <div class="stat-label">DynamoDB Tables</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number">3</div>
-            <div class="stat-label">User Personas</div>
+            <div class="stat-number">17</div>
+            <div class="stat-label">Frontend Views</div>
         </div>
     </div>
 
@@ -533,33 +533,34 @@
         </div>
         <div class="persona-grid">
             <div class="persona-card osint">
-                <h4>OSINT Analyst</h4>
+                <h4>OSINT Analyst (5 views)</h4>
                 <ul>
+                    <li>Dashboard with severity charts</li>
                     <li>Upload &amp; parse diverse data sources</li>
                     <li>Investigate vulnerabilities</li>
                     <li>AI chat with semantic search</li>
-                    <li>Queue findings for red team</li>
-                    <li>Ticket management (OSINT)</li>
+                    <li>Network topology visualization</li>
                 </ul>
             </div>
             <div class="persona-card redteam">
-                <h4>Red Team Operator</h4>
+                <h4>Red Team Operator (6 views)</h4>
                 <ul>
-                    <li>Prioritized target queue</li>
-                    <li>Tool registry with risk analysis</li>
-                    <li>Semantic tool search</li>
-                    <li>Operations tracking</li>
+                    <li>Prioritized target queue with split panel</li>
+                    <li>Tool registry UI (CRUD + risk/success profiles)</li>
+                    <li>Operations tracking &amp; management</li>
                     <li>AI chat with tool recommendations</li>
+                    <li>Network topology (dagre auto-layout)</li>
                 </ul>
             </div>
             <div class="persona-card leadership">
-                <h4>Leadership</h4>
+                <h4>Leadership (6 views)</h4>
                 <ul>
-                    <li>Set goals &amp; KPIs</li>
-                    <li>Cross-domain visibility</li>
-                    <li>Auto-reprioritization on goal change</li>
+                    <li>Cross-domain dashboard &amp; metrics</li>
+                    <li>Goals, KPIs &amp; priority weights</li>
+                    <li>Target overview with goal alignment</li>
+                    <li>Tool registry (read-only)</li>
                     <li>AI Q&amp;A with visualizations</li>
-                    <li>Operations overview dashboards</li>
+                    <li>Network topology (full graph)</li>
                 </ul>
             </div>
         </div>
@@ -636,7 +637,7 @@
                     <h3>CDK Infrastructure</h3>
                     <div class="subtitle">4 stacks &bull; TypeScript &bull; CDK v2</div>
                     <ul>
-                        <li><strong>RA-Auth</strong> &mdash; Cognito User Pool + Identity Pool + 3 groups</li>
+                        <li><strong>RA-Auth</strong> &mdash; Cognito User Pool + Identity Pool + 4 groups (incl. admin)</li>
                         <li><strong>RA-Database</strong> &mdash; 13 DynamoDB tables, S3 buckets, CloudFront</li>
                         <li><strong>RA-Functions</strong> &mdash; 24 Lambda functions + shared layers + IAM</li>
                         <li><strong>RA-Workflow</strong> &mdash; 3 Step Functions, EventBridge, Cognito roles</li>
@@ -656,13 +657,13 @@
                 <div class="card-top amber"></div>
                 <div class="card-body">
                     <h3>React Frontend</h3>
-                    <div class="subtitle">React 19 &bull; Vite 7 &bull; Cloudscape &bull; Dark Mode</div>
+                    <div class="subtitle">17 views &bull; React 19 &bull; Vite 7 &bull; Cloudscape &bull; Dark Mode</div>
                     <ul>
-                        <li><strong>OSINT Views</strong> &mdash; upload wizard, vulnerability dashboard, data sources</li>
-                        <li><strong>Red Team Views</strong> &mdash; target queue, operations, tool tracking, dashboard</li>
-                        <li><strong>Leadership Views</strong> &mdash; goal management, cross-domain dashboard</li>
-                        <li><strong>Chat UIs</strong> &mdash; 3 persona-specific chats with OutputPanel (Recharts)</li>
-                        <li><strong>Auth</strong> &mdash; Amplify Authenticator, role-based navigation</li>
+                        <li><strong>OSINT (5)</strong> &mdash; dashboard, upload, investigations, chat, topology</li>
+                        <li><strong>Red Team (6)</strong> &mdash; dashboard, targets, operations, tool registry, chat, topology</li>
+                        <li><strong>Leadership (6)</strong> &mdash; dashboard, goals, target overview, tool registry, chat, topology</li>
+                        <li><strong>Visualizations</strong> &mdash; Recharts (pie/bar), React Flow (dagre), markdown (GFM)</li>
+                        <li><strong>Auth</strong> &mdash; Amplify Authenticator, 4 Cognito groups, admin mode</li>
                     </ul>
                     <div class="coverage-section">
                         <div class="coverage-row">
@@ -889,6 +890,8 @@
             <span class="pill">Cognito</span>
             <span class="pill">Amplify Auth</span>
             <span class="pill">Recharts</span>
+            <span class="pill">React Flow</span>
+            <span class="pill">dagre</span>
             <span class="pill">Lambda Powertools</span>
             <span class="pill">Playwright</span>
             <span class="pill">pytest + moto</span>
