@@ -8,39 +8,10 @@ import Button from '@cloudscape-design/components/button'
 import SpaceBetween from '@cloudscape-design/components/space-between'
 import TextFilter from '@cloudscape-design/components/text-filter'
 import ContentLayout from '@cloudscape-design/components/content-layout'
-import Alert from '@cloudscape-design/components/alert'
 import Spinner from '@cloudscape-design/components/spinner'
 import { useCollection } from '@cloudscape-design/collection-hooks'
 import { listTickets } from '@/utils/api'
 import type { Ticket } from '@/types'
-
-const MOCK_OPERATIONS: Ticket[] = [
-  {
-    ticketId: 'RT-001', ticketType: 'red-team-operation', title: 'ProxyLogon Exploitation on Exchange',
-    description: 'Exploit CVE-2021-26855 chain on mail.meridian-defense.com', status: 'active', severity: 'critical',
-    assigneeId: 'analyst-1', targetId: 't-001', createdAt: Date.now() - 86400000, updatedAt: Date.now() - 3600000,
-  },
-  {
-    ticketId: 'RT-002', ticketType: 'red-team-operation', title: 'Deep Nmap Scan of Database Subnet',
-    description: 'Full port scan and service enumeration of 10.0.5.0/24', status: 'investigating', severity: 'high',
-    assigneeId: 'analyst-2', targetId: 't-003', createdAt: Date.now() - 172800000, updatedAt: Date.now() - 7200000,
-  },
-  {
-    ticketId: 'RT-003', ticketType: 'red-team-operation', title: 'Jenkins CLI RCE Attempt',
-    description: 'Exploit CVE-2024-23897 arbitrary file read via Jenkins CLI', status: 'active', severity: 'critical',
-    assigneeId: 'analyst-2', targetId: 't-002', createdAt: Date.now() - 259200000, updatedAt: Date.now() - 14400000,
-  },
-  {
-    ticketId: 'RT-004', ticketType: 'red-team-operation', title: 'Fortinet VPN Pre-Auth RCE',
-    description: 'Attempt CVE-2024-21762 out-of-bounds write on vpn.meridian-defense.com', status: 'triaging', severity: 'critical',
-    assigneeId: 'analyst-1', targetId: 't-004', createdAt: Date.now() - 345600000, updatedAt: Date.now() - 28800000,
-  },
-  {
-    ticketId: 'RT-005', ticketType: 'red-team-operation', title: 'Redis Unauthorized Access',
-    description: 'Connect to Redis 6.2 on 10.0.5.40:6379, attempt data exfil and config write', status: 'completed', severity: 'medium',
-    assigneeId: 'analyst-3', targetId: 't-003', createdAt: Date.now() - 432000000, updatedAt: Date.now() - 43200000,
-  },
-]
 
 function statusBadge(status: string) {
   const colorMap: Record<string, 'blue' | 'green' | 'red' | 'grey'> = {
@@ -67,25 +38,18 @@ function severityBadge(severity: string) {
 export default function RedTeamOperations() {
   const [operations, setOperations] = useState<Ticket[]>([])
   const [loading, setLoading] = useState(true)
-  const [usingMock, setUsingMock] = useState(false)
 
   useEffect(() => {
     let cancelled = false
     async function fetchOperations() {
       try {
-        const tickets = await listTickets('ticketType', 'red-team-operation')
+        const tickets = await listTickets('type', 'red-team-operation')
         if (!cancelled) {
-          if (tickets.length > 0) {
-            setOperations(tickets)
-          } else {
-            setOperations(MOCK_OPERATIONS)
-            setUsingMock(true)
-          }
+          setOperations(tickets)
         }
       } catch {
         if (!cancelled) {
-          setOperations(MOCK_OPERATIONS)
-          setUsingMock(true)
+          setOperations([])
         }
       } finally {
         if (!cancelled) setLoading(false)
@@ -112,12 +76,6 @@ export default function RedTeamOperations() {
   return (
     <ContentLayout header={<Header variant="h1">Red Team Operations</Header>}>
       <SpaceBetween size="l">
-        {usingMock && (
-          <Alert type="info" dismissible>
-            Using demo data — backend not yet connected
-          </Alert>
-        )}
-
         <Container
           header={
             <Header

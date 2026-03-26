@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext, useCallback } from 'react'
+import { useState, useEffect, createContext, useContext } from 'react'
 import { Authenticator, useTheme, View, Text, Heading } from '@aws-amplify/ui-react'
 import { fetchAuthSession } from 'aws-amplify/auth'
 import '@aws-amplify/ui-react/styles.css'
@@ -166,6 +166,81 @@ function renderView(view: ViewType) {
   }
 }
 
+interface AuthenticatedAppProps {
+  signOut?: () => void
+  user?: { signInDetails?: { loginId?: string }; username?: string }
+  darkMode: boolean
+  toggleTheme: () => void
+  currentView: ViewType
+  setCurrentView: (v: ViewType) => void
+  navigationOpen: boolean
+  setNavigationOpen: (v: boolean) => void
+}
+
+function AuthenticatedApp({ signOut, user, darkMode, toggleTheme, currentView, setCurrentView, navigationOpen, setNavigationOpen }: AuthenticatedAppProps) {
+  const userId = user?.signInDetails?.loginId ?? user?.username ?? ''
+  const [groups, setGroups] = useState<string[]>([])
+
+  useEffect(() => {
+    fetchAuthSession().then(session => {
+      const g = (session.tokens?.idToken?.payload?.['cognito:groups'] as string[]) ?? []
+      setGroups(g)
+    }).catch(() => setGroups([]))
+  }, [])
+
+  const persona = getPersona(groups)
+  const navItems = buildNavItems(persona)
+
+  useEffect(() => {
+    if (groups.length > 0) setCurrentView(getDefaultView(persona))
+  }, [persona, groups, setCurrentView])
+
+  return (
+    <AuthContext.Provider value={{ userId, groups, persona, isDarkMode: darkMode }}>
+      <div id="top-nav" style={{ position: 'sticky', top: 0, zIndex: 1002 }}>
+        <TopNavigation
+          identity={{ href: '#', title: 'Recon AI' }}
+          utilities={[
+            { type: 'button', text: darkMode ? 'Light' : 'Dark', onClick: toggleTheme },
+            {
+              type: 'menu-dropdown',
+              text: userId || 'Account',
+              iconName: 'user-profile',
+              items: [{ id: 'signout', text: 'Sign out' }],
+              onItemClick: ({ detail }) => { if (detail.id === 'signout') signOut?.() },
+            },
+          ]}
+        />
+      </div>
+
+      <AppLayout
+        headerSelector="#top-nav"
+        navigation={
+          <SideNavigation
+            header={{ text: 'Recon AI', href: '#' }}
+            activeHref={`#${currentView}`}
+            onFollow={({ detail }) => {
+              const href = detail.href?.replace('#', '') as ViewType
+              if (href) setCurrentView(href)
+            }}
+            items={navItems}
+          />
+        }
+        navigationOpen={navigationOpen}
+        onNavigationChange={({ detail }) => setNavigationOpen(detail.open)}
+        navigationWidth={260}
+        toolsHide
+        content={renderView(currentView)}
+        ariaLabels={{
+          navigation: 'Main navigation',
+          navigationClose: 'Close navigation',
+          navigationToggle: 'Open navigation',
+        }}
+      />
+    </AuthContext.Provider>
+  )
+}
+
 export default function App() {
   const [currentView, setCurrentView] = useState<ViewType>('osint-dashboard')
   const [navigationOpen, setNavigationOpen] = useState(true)
@@ -197,76 +272,11 @@ export default function App() {
         },
       }}
     >
-      {({ signOut, user }) => {
-        const userId = user?.signInDetails?.loginId ?? user?.username ?? ''
-        const [groups, setGroups] = useState<string[]>([])
-
-        // Extract Cognito groups from the ID token via fetchAuthSession (Amplify v6)
-        const loadGroups = useCallback(async () => {
-          try {
-            const session = await fetchAuthSession()
-            const g = (session.tokens?.idToken?.payload?.['cognito:groups'] as string[]) ?? []
-            setGroups(g)
-          } catch {
-            setGroups([])
-          }
-        }, [])
-
-        useEffect(() => { loadGroups() }, [loadGroups])
-
-        const persona = getPersona(groups)
-        const navItems = buildNavItems(persona)
-
-        // Set default view based on persona on first render
-        useEffect(() => {
-          if (groups.length > 0) setCurrentView(getDefaultView(persona))
-        }, [persona, groups])
-
-        return (
-          <AuthContext.Provider value={{ userId, groups, persona, isDarkMode: darkMode }}>
-            <div id="top-nav" style={{ position: 'sticky', top: 0, zIndex: 1002 }}>
-              <TopNavigation
-                identity={{ href: '#', title: 'Recon AI' }}
-                utilities={[
-                  { type: 'button', text: darkMode ? 'Light' : 'Dark', onClick: toggleTheme },
-                  {
-                    type: 'menu-dropdown',
-                    text: userId || 'Account',
-                    iconName: 'user-profile',
-                    items: [{ id: 'signout', text: 'Sign out' }],
-                    onItemClick: ({ detail }) => { if (detail.id === 'signout') signOut?.() },
-                  },
-                ]}
-              />
-            </div>
-
-            <AppLayout
-              headerSelector="#top-nav"
-              navigation={
-                <SideNavigation
-                  header={{ text: 'Recon AI', href: '#' }}
-                  activeHref={`#${currentView}`}
-                  onFollow={({ detail }) => {
-                    const href = detail.href?.replace('#', '') as ViewType
-                    if (href) setCurrentView(href)
-                  }}
-                  items={navItems}
-                />
-              }
-              navigationOpen={navigationOpen}
-              onNavigationChange={({ detail }) => setNavigationOpen(detail.open)}
-              navigationWidth={260}
-              toolsHide
-              content={renderView(currentView)}
-              ariaLabels={{
-                navigation: 'Main navigation',
-                navigationClose: 'Close navigation',
-                navigationToggle: 'Open navigation',
-              }}
-            />
-          </AuthContext.Provider>
-        )
-      }}
+      {({ signOut, user }) => (
+        <AuthenticatedApp signOut={signOut} user={user} darkMode={darkMode} toggleTheme={toggleTheme}
+          currentView={currentView} setCurrentView={setCurrentView}
+          navigationOpen={navigationOpen} setNavigationOpen={setNavigationOpen} />
+      )}
     </Authenticator>
   )
 }

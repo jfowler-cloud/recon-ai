@@ -8,18 +8,9 @@ import Table from '@cloudscape-design/components/table'
 import Badge from '@cloudscape-design/components/badge'
 import ProgressBar from '@cloudscape-design/components/progress-bar'
 import ContentLayout from '@cloudscape-design/components/content-layout'
-import Alert from '@cloudscape-design/components/alert'
 import Spinner from '@cloudscape-design/components/spinner'
 import { getDashboard, listTargets } from '@/utils/api'
 import type { Target } from '@/types'
-
-const MOCK_TARGETS: Target[] = [
-  { targetId: 't-001', name: 'Exchange Server (ProxyLogon)', description: 'CVE-2021-26855 on mail.meridian-defense.com', status: 'approved', priorityScore: 95, category: 'Web Server', vulnerabilities: ['CVE-2021-26855', 'CVE-2021-27065'], assigneeId: 'analyst-1', createdAt: Date.now() - 86400000 },
-  { targetId: 't-002', name: 'Jenkins CI (Exposed CLI)', description: 'Unauthenticated Jenkins CLI on ci.meridian-defense.com:8080', status: 'in-progress', priorityScore: 88, category: 'CI/CD', vulnerabilities: ['CVE-2024-23897', 'CVE-2019-1003000'], assigneeId: 'analyst-2', createdAt: Date.now() - 172800000 },
-  { targetId: 't-003', name: 'Redis Instance (No Auth)', description: 'Exposed Redis 6.2 on 10.0.5.40:6379 with no password', status: 'queued', priorityScore: 82, category: 'Database', vulnerabilities: ['CWE-306', 'CVE-2022-24735'], createdAt: Date.now() - 259200000 },
-  { targetId: 't-004', name: 'VPN Gateway (Fortinet)', description: 'FortiOS SSL VPN pre-auth RCE on vpn.meridian-defense.com', status: 'approved', priorityScore: 91, category: 'Network', vulnerabilities: ['CVE-2024-21762', 'CVE-2023-27997'], assigneeId: 'analyst-1', createdAt: Date.now() - 345600000 },
-  { targetId: 't-005', name: 'PostgreSQL (Weak Creds)', description: 'PostgreSQL 14 on db-prod.meridian-defense.com with default creds', status: 'queued', priorityScore: 76, category: 'Database', vulnerabilities: ['CWE-521', 'CWE-798'], createdAt: Date.now() - 432000000 },
-]
 
 function MetricCard({ title, value, description }: { title: string; value: string | number; description?: string }) {
   return (
@@ -49,7 +40,6 @@ export default function RedTeamDashboard() {
   const [activeOps, setActiveOps] = useState(0)
   const [toolActionsToday, setToolActionsToday] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [usingMock, setUsingMock] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -63,32 +53,24 @@ export default function RedTeamDashboard() {
 
         if (cancelled) return
 
-        let usedMock = false
-
-        if (targetsResult.status === 'fulfilled' && targetsResult.value.length > 0) {
+        if (targetsResult.status === 'fulfilled') {
           setTargets(targetsResult.value)
         } else {
-          if (targetsResult.status === 'rejected') usedMock = true
-          setTargets(MOCK_TARGETS)
+          setTargets([])
         }
 
         if (dashResult.status === 'fulfilled' && dashResult.value) {
           const d = dashResult.value
-          setActiveOps((d.activeOperations as number) ?? 3)
-          setToolActionsToday((d.toolActionsToday as number) ?? 17)
-        } else {
-          usedMock = true
-          setActiveOps(3)
-          setToolActionsToday(17)
+          const byStatus = (d.tickets as Record<string, unknown>)?.byStatus as Record<string, number> | undefined
+          const active = (byStatus?.active ?? 0) + (byStatus?.in_progress ?? 0)
+          setActiveOps(active)
+          setToolActionsToday(((d.tickets as Record<string, unknown>)?.total as number) ?? 0)
         }
-
-        setUsingMock(usedMock)
       } catch {
         if (!cancelled) {
-          setTargets(MOCK_TARGETS)
-          setActiveOps(3)
-          setToolActionsToday(17)
-          setUsingMock(true)
+          setTargets([])
+          setActiveOps(0)
+          setToolActionsToday(0)
         }
       } finally {
         if (!cancelled) setLoading(false)
@@ -114,12 +96,6 @@ export default function RedTeamDashboard() {
   return (
     <ContentLayout header={<Header variant="h1">Red Team Dashboard</Header>}>
       <SpaceBetween size="l">
-        {usingMock && (
-          <Alert type="info" dismissible>
-            Using demo data — backend not yet connected
-          </Alert>
-        )}
-
         <ColumnLayout columns={4}>
           <MetricCard title="Priority Targets" value={targets.length} description="Total queued and approved" />
           <MetricCard title="Active Operations" value={activeOps} description="Currently running" />

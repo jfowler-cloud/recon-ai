@@ -26,16 +26,6 @@ const SOURCE_TYPE_OPTIONS: SelectProps.Option[] = [
   { value: 'custom-text', label: 'Custom Text' },
 ]
 
-// ── Mock recent uploads (fallback) ──────────────────────────────────
-
-const MOCK_UPLOADS: Upload[] = [
-  { uploadId: 'u-101', analystId: 'analyst-1', fileName: 'shodan-meridian-external.json', sourceType: 'Shodan JSON', ingestionStatus: 'completed', createdAt: Date.now() - 3600000 },
-  { uploadId: 'u-102', analystId: 'analyst-1', fileName: 'nmap-dmz-scan.xml', sourceType: 'Nmap XML', ingestionStatus: 'completed', createdAt: Date.now() - 7200000 },
-  { uploadId: 'u-103', analystId: 'analyst-2', fileName: 'twitter-mentions-march.csv', sourceType: 'Social Media CSV', ingestionStatus: 'processing', createdAt: Date.now() - 10800000 },
-  { uploadId: 'u-104', analystId: 'analyst-1', fileName: 'vpn-access-logs.log', sourceType: 'Log Files', ingestionStatus: 'completed', createdAt: Date.now() - 14400000 },
-  { uploadId: 'u-105', analystId: 'analyst-3', fileName: 'threat-brief-q1.pdf', sourceType: 'Documents/PDF', ingestionStatus: 'failed', createdAt: Date.now() - 18000000 },
-]
-
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
@@ -53,7 +43,6 @@ export default function DataUpload() {
   const [isDragging, setIsDragging] = useState(false)
   const [uploads, setUploads] = useState<Upload[]>([])
   const [loadingUploads, setLoadingUploads] = useState(true)
-  const [usingMock, setUsingMock] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Fetch real uploads on mount
@@ -63,17 +52,11 @@ export default function DataUpload() {
       try {
         const result = await listUploads()
         if (!cancelled) {
-          if (result.length > 0) {
-            setUploads(result.sort((a, b) => b.createdAt - a.createdAt))
-          } else {
-            setUploads(MOCK_UPLOADS)
-            setUsingMock(true)
-          }
+          setUploads(result.sort((a, b) => b.createdAt - a.createdAt))
         }
       } catch {
         if (!cancelled) {
-          setUploads(MOCK_UPLOADS)
-          setUsingMock(true)
+          setUploads([])
         }
       } finally {
         if (!cancelled) setLoadingUploads(false)
@@ -178,12 +161,6 @@ export default function DataUpload() {
       {alert && (
         <Alert type={alert.type} dismissible onDismiss={() => setAlert(null)}>
           {alert.message}
-        </Alert>
-      )}
-
-      {usingMock && (
-        <Alert type="info" dismissible>
-          Using demo data — backend not yet connected
         </Alert>
       )}
 

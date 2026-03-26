@@ -7,36 +7,29 @@ import ColumnLayout from '@cloudscape-design/components/column-layout'
 import StatusIndicator from '@cloudscape-design/components/status-indicator'
 import Table from '@cloudscape-design/components/table'
 import Icon from '@cloudscape-design/components/icon'
-import Alert from '@cloudscape-design/components/alert'
 import Spinner from '@cloudscape-design/components/spinner'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { getDashboard, listUploads } from '@/utils/api'
 import type { Upload } from '@/types'
 
-// ── Mock data (fallback when API unavailable) ────────────────────────
+// ── Severity colors ──────────────────────────────────────────────────
 
-const MOCK_METRICS = {
-  uploadsToday: 14,
-  activeInvestigations: 7,
-  criticalFindings: 3,
-  pendingIngestion: 5,
+const SEVERITY_COLORS: Record<string, string> = {
+  critical: '#d91515',
+  high: '#f89256',
+  medium: '#0972d3',
+  low: '#2ea597',
+  info: '#879596',
 }
 
-const MOCK_UPLOADS: Upload[] = [
-  { uploadId: 'u-001', analystId: 'analyst-1', fileName: 'shodan-scan-meridian-2026-03-25.json', sourceType: 'Shodan JSON', ingestionStatus: 'completed', createdAt: Date.now() - 3600000 },
-  { uploadId: 'u-002', analystId: 'analyst-1', fileName: 'nmap-external-perimeter.xml', sourceType: 'Nmap XML', ingestionStatus: 'completed', createdAt: Date.now() - 7200000 },
-  { uploadId: 'u-003', analystId: 'analyst-2', fileName: 'social-media-mentions.csv', sourceType: 'Social Media CSV', ingestionStatus: 'processing', createdAt: Date.now() - 10800000 },
-  { uploadId: 'u-004', analystId: 'analyst-1', fileName: 'firewall-logs-march.log', sourceType: 'Log Files', ingestionStatus: 'completed', createdAt: Date.now() - 14400000 },
-  { uploadId: 'u-005', analystId: 'analyst-3', fileName: 'threat-intel-brief.pdf', sourceType: 'Documents/PDF', ingestionStatus: 'failed', createdAt: Date.now() - 18000000 },
-]
+const DEFAULT_METRICS = {
+  uploadsToday: 0,
+  activeInvestigations: 0,
+  criticalFindings: 0,
+  pendingIngestion: 0,
+}
 
-const MOCK_SEVERITY_DATA = [
-  { severity: 'Critical', count: 3, color: '#d91515' },
-  { severity: 'High', count: 8, color: '#f89256' },
-  { severity: 'Medium', count: 15, color: '#0972d3' },
-  { severity: 'Low', count: 22, color: '#2ea597' },
-  { severity: 'Info', count: 11, color: '#879596' },
-]
+const DEFAULT_SEVERITY_DATA: { severity: string; count: number; color: string }[] = []
 
 // ── Metric card component ────────────────────────────────────────────
 
@@ -101,11 +94,10 @@ function ChartTooltip({ active, payload, label }: {
 // ── Main component ───────────────────────────────────────────────────
 
 export default function OsintDashboard() {
-  const [metrics, setMetrics] = useState(MOCK_METRICS)
+  const [metrics, setMetrics] = useState(DEFAULT_METRICS)
   const [uploads, setUploads] = useState<Upload[]>([])
-  const [severityData, setSeverityData] = useState(MOCK_SEVERITY_DATA)
+  const [severityData, setSeverityData] = useState(DEFAULT_SEVERITY_DATA)
   const [loading, setLoading] = useState(true)
-  const [usingMock, setUsingMock] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -119,37 +111,44 @@ export default function OsintDashboard() {
 
         if (cancelled) return
 
-        let usedMock = false
-
         if (dashboardResult.status === 'fulfilled' && dashboardResult.value) {
           const d = dashboardResult.value
+          // Count active investigations: all ticket statuses except 'closed'
+          const byStatus = (d.tickets as Record<string, unknown>)?.byStatus as Record<string, number> | undefined
+          const activeInvestigations = byStatus
+            ? Object.entries(byStatus).reduce((sum, [status, count]) => status !== 'closed' ? sum + count : sum, 0)
+            : 0
+
+          const bySeverity = (d.tickets as Record<string, unknown>)?.bySeverity as Record<string, number> | undefined
+
           setMetrics({
-            uploadsToday: (d.uploadsToday as number) ?? MOCK_METRICS.uploadsToday,
-            activeInvestigations: (d.activeInvestigations as number) ?? MOCK_METRICS.activeInvestigations,
-            criticalFindings: (d.criticalFindings as number) ?? MOCK_METRICS.criticalFindings,
-            pendingIngestion: (d.pendingIngestion as number) ?? MOCK_METRICS.pendingIngestion,
+            uploadsToday: ((d.uploads as Record<string, unknown>)?.total as number) ?? 0,
+            activeInvestigations,
+            criticalFindings: bySeverity?.critical ?? 0,
+            pendingIngestion: ((d.uploads as Record<string, unknown>)?.byStatus as Record<string, number> | undefined)?.pending ?? 0,
           })
-          if (Array.isArray(d.severityDistribution)) {
-            setSeverityData(d.severityDistribution as typeof MOCK_SEVERITY_DATA)
+
+          // Build severity chart data from bySeverity
+          if (bySeverity) {
+            setSeverityData(
+              Object.entries(bySeverity).map(([severity, count]) => ({
+                severity: severity.charAt(0).toUpperCase() + severity.slice(1),
+                count,
+                color: SEVERITY_COLORS[severity] ?? '#879596',
+              }))
+            )
           }
-        } else {
-          usedMock = true
-          setMetrics(MOCK_METRICS)
         }
 
-        if (uploadsResult.status === 'fulfilled' && uploadsResult.value.length > 0) {
+        if (uploadsResult.status === 'fulfilled') {
           setUploads(uploadsResult.value.sort((a, b) => b.createdAt - a.createdAt).slice(0, 10))
         } else {
-          if (uploadsResult.status === 'rejected') usedMock = true
-          setUploads(MOCK_UPLOADS)
+          setUploads([])
         }
-
-        setUsingMock(usedMock)
       } catch {
         if (!cancelled) {
-          setMetrics(MOCK_METRICS)
-          setUploads(MOCK_UPLOADS)
-          setUsingMock(true)
+          setMetrics(DEFAULT_METRICS)
+          setUploads([])
         }
       } finally {
         if (!cancelled) setLoading(false)
@@ -171,12 +170,6 @@ export default function OsintDashboard() {
 
   return (
     <SpaceBetween size="l">
-      {usingMock && (
-        <Alert type="info" dismissible>
-          Using demo data — backend not yet connected
-        </Alert>
-      )}
-
       {/* Metric cards */}
       <ColumnLayout columns={4} variant="text-grid">
         <MetricCard

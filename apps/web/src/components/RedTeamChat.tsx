@@ -9,62 +9,8 @@ import Spinner from '@cloudscape-design/components/spinner'
 import Icon from '@cloudscape-design/components/icon'
 import ContentLayout from '@cloudscape-design/components/content-layout'
 import { useAuth } from '@/App'
+import { sendChatMessage } from '@/utils/api'
 import type { ChatMessage } from '@/types'
-
-const MOCK_RESPONSES: Record<string, string> = {
-  'What are the highest priority targets?': `Here are the current highest priority targets for Meridian Defense:
-
-1. **Exchange Server (ProxyLogon)** - Priority: 95/100
-   - CVE-2021-26855 + CVE-2021-27065 on mail.meridian-defense.com
-   - Status: Approved, assigned to analyst-1
-
-2. **Kubernetes API (Exposed)** - Priority: 93/100
-   - Anonymous auth enabled on k8s.meridian-defense.com:6443
-   - Status: Queued, unassigned
-
-3. **VPN Gateway (Fortinet)** - Priority: 91/100
-   - CVE-2024-21762 pre-auth RCE on vpn.meridian-defense.com
-   - Status: Approved, assigned to analyst-1
-
-4. **Jenkins CI (Exposed CLI)** - Priority: 88/100
-   - CVE-2024-23897 on ci.meridian-defense.com:8080
-   - Status: In Progress, assigned to analyst-2
-
-All targets aligned with leadership goal of perimeter hardening.`,
-
-  'Show tool usage history': `**Tool Usage Summary (Last 7 Days)**
-
-| Tool | Actions | Targets Hit | Success Rate |
-|------|---------|------------|--------------|
-| Nmap | 12 | 6 | 100% |
-| Metasploit | 5 | 3 | 60% |
-| Jenkins CLI | 3 | 1 | 33% |
-| redis-cli | 2 | 1 | 100% |
-| Custom Script | 4 | 2 | 75% |
-
-**Total**: 26 tool actions across 8 unique targets.
-Most active analyst: analyst-2 (11 actions).`,
-
-  'What does leadership want us to focus on?': `**Current Leadership Priorities (Q1 2026)**
-
-1. **Perimeter Hardening** (Weight: 40%)
-   - Focus on internet-facing services: VPN, mail, CI/CD
-   - KPI: Reduce critical external vulns by 50%
-
-2. **Database Security** (Weight: 30%)
-   - Audit all database instances for auth gaps
-   - KPI: Zero unauthenticated database endpoints
-
-3. **Lateral Movement Prevention** (Weight: 20%)
-   - Test internal segmentation between subnets
-   - KPI: Document all cross-subnet access paths
-
-4. **Credential Hygiene** (Weight: 10%)
-   - Test for default and weak credentials
-   - KPI: 100% of services require strong auth
-
-This aligns with the current target queue — Exchange, Fortinet VPN, and Jenkins are top priority.`,
-}
 
 function ChatBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === 'user'
@@ -149,18 +95,19 @@ export default function RedTeamChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [sessionId, setSessionId] = useState<string | undefined>()
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const { isDarkMode } = useAuth()
+  const { userId, isDarkMode } = useAuth()
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const sendMessage = (text: string) => {
+  const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return
 
     const userMsg: ChatMessage = {
-      sessionId: 'mock-session',
+      sessionId: sessionId ?? '',
       messageId: `user-${Date.now()}`,
       role: 'user',
       content: text,
@@ -170,20 +117,24 @@ export default function RedTeamChat() {
     setInput('')
     setIsLoading(true)
 
-    setTimeout(() => {
-      const response = MOCK_RESPONSES[text] ??
-        `I found information related to your query about "${text}". Based on the current target queue, there are 10 targets tracked across 5 categories. The highest priority items are the Exchange Server (ProxyLogon) at 95/100 and the Kubernetes API at 93/100. Would you like me to drill into a specific target or operation?`
+    let response: string
+    try {
+      const result = await sendChatMessage(userId, 'redteam', text, sessionId)
+      setSessionId(result.sessionId)
+      response = result.content
+    } catch (err) {
+      response = `Error: ${err instanceof Error ? err.message : 'Failed to reach the AI agent. Please try again.'}`
+    }
 
-      const assistantMsg: ChatMessage = {
-        sessionId: 'mock-session',
-        messageId: `assistant-${Date.now()}`,
-        role: 'assistant',
-        content: response,
-        createdAt: Math.floor(Date.now() / 1000),
-      }
-      setMessages(prev => [...prev, assistantMsg])
-      setIsLoading(false)
-    }, 1200)
+    const assistantMsg: ChatMessage = {
+      sessionId: sessionId ?? '',
+      messageId: `assistant-${Date.now()}`,
+      role: 'assistant',
+      content: response,
+      createdAt: Math.floor(Date.now() / 1000),
+    }
+    setMessages(prev => [...prev, assistantMsg])
+    setIsLoading(false)
   }
 
   const handleKeyDown = (e: CustomEvent) => {

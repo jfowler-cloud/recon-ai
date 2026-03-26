@@ -14,24 +14,10 @@ import Input from '@cloudscape-design/components/input'
 import Textarea from '@cloudscape-design/components/textarea'
 import Select from '@cloudscape-design/components/select'
 import ContentLayout from '@cloudscape-design/components/content-layout'
-import Alert from '@cloudscape-design/components/alert'
 import Spinner from '@cloudscape-design/components/spinner'
 import { useCollection } from '@cloudscape-design/collection-hooks'
-import { listTargets, queueForRedteam } from '@/utils/api'
+import { listTargets, createTarget } from '@/utils/api'
 import type { Target } from '@/types'
-
-const MOCK_TARGETS: Target[] = [
-  { targetId: 't-001', name: 'Exchange Server (ProxyLogon)', description: 'CVE-2021-26855 on mail.meridian-defense.com', status: 'approved', priorityScore: 95, category: 'Web Server', vulnerabilities: ['CVE-2021-26855', 'CVE-2021-27065'], assigneeId: 'analyst-1', createdAt: Date.now() - 86400000 },
-  { targetId: 't-002', name: 'Jenkins CI (Exposed CLI)', description: 'Unauthenticated Jenkins CLI on ci.meridian-defense.com:8080', status: 'in-progress', priorityScore: 88, category: 'CI/CD', vulnerabilities: ['CVE-2024-23897', 'CVE-2019-1003000'], assigneeId: 'analyst-2', createdAt: Date.now() - 172800000 },
-  { targetId: 't-003', name: 'Redis Instance (No Auth)', description: 'Exposed Redis 6.2 on 10.0.5.40:6379 with no password', status: 'queued', priorityScore: 82, category: 'Database', vulnerabilities: ['CWE-306', 'CVE-2022-24735'], createdAt: Date.now() - 259200000 },
-  { targetId: 't-004', name: 'VPN Gateway (Fortinet)', description: 'FortiOS SSL VPN pre-auth RCE on vpn.meridian-defense.com', status: 'approved', priorityScore: 91, category: 'Network', vulnerabilities: ['CVE-2024-21762', 'CVE-2023-27997'], assigneeId: 'analyst-1', createdAt: Date.now() - 345600000 },
-  { targetId: 't-005', name: 'PostgreSQL (Weak Creds)', description: 'PostgreSQL 14 on db-prod.meridian-defense.com with default creds', status: 'queued', priorityScore: 76, category: 'Database', vulnerabilities: ['CWE-521', 'CWE-798'], createdAt: Date.now() - 432000000 },
-  { targetId: 't-006', name: 'Apache Struts (RCE)', description: 'Apache Struts 2.5.30 on app.meridian-defense.com with OGNL injection', status: 'queued', priorityScore: 87, category: 'Web Server', vulnerabilities: ['CVE-2023-50164'], createdAt: Date.now() - 518400000 },
-  { targetId: 't-007', name: 'MongoDB (No Auth)', description: 'MongoDB 5.0 exposed on 10.0.5.55:27017 without authentication', status: 'approved', priorityScore: 79, category: 'Database', vulnerabilities: ['CWE-306'], assigneeId: 'analyst-3', createdAt: Date.now() - 604800000 },
-  { targetId: 't-008', name: 'Kubernetes API (Exposed)', description: 'K8s API server at k8s.meridian-defense.com:6443 with anonymous auth', status: 'queued', priorityScore: 93, category: 'Container', vulnerabilities: ['CVE-2024-21626', 'CWE-306'], createdAt: Date.now() - 691200000 },
-  { targetId: 't-009', name: 'GitLab CE (CVE-2023-7028)', description: 'Password reset vulnerability on gitlab.meridian-defense.com', status: 'in-progress', priorityScore: 85, category: 'CI/CD', vulnerabilities: ['CVE-2023-7028'], assigneeId: 'analyst-2', createdAt: Date.now() - 777600000 },
-  { targetId: 't-010', name: 'MSSQL Server (sa default)', description: 'MSSQL 2019 on 10.0.5.70:1433 with default sa password', status: 'deferred', priorityScore: 71, category: 'Database', vulnerabilities: ['CWE-798', 'CWE-521'], createdAt: Date.now() - 864000000 },
-]
 
 const CATEGORY_OPTIONS = [
   { value: 'Web Server', label: 'Web Server' },
@@ -55,7 +41,6 @@ function statusBadge(status: string) {
 export default function TargetQueue() {
   const [targets, setTargets] = useState<Target[]>([])
   const [loading, setLoading] = useState(true)
-  const [usingMock, setUsingMock] = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [creating, setCreating] = useState(false)
   const [newTarget, setNewTarget] = useState({ name: '', description: '', category: '', vulnerabilities: '' })
@@ -66,17 +51,11 @@ export default function TargetQueue() {
       try {
         const result = await listTargets()
         if (!cancelled) {
-          if (result.length > 0) {
-            setTargets(result)
-          } else {
-            setTargets(MOCK_TARGETS)
-            setUsingMock(true)
-          }
+          setTargets(result)
         }
       } catch {
         if (!cancelled) {
-          setTargets(MOCK_TARGETS)
-          setUsingMock(true)
+          setTargets([])
         }
       } finally {
         if (!cancelled) setLoading(false)
@@ -92,17 +71,9 @@ export default function TargetQueue() {
   })
 
   const handleCreate = async () => {
-    const targetData: Partial<Target> = {
-      name: newTarget.name,
-      description: newTarget.description,
-      status: 'queued',
-      category: newTarget.category,
-      vulnerabilities: newTarget.vulnerabilities.split(',').map(v => v.trim()).filter(Boolean),
-    }
-
     setCreating(true)
     try {
-      const created = await queueForRedteam(targetData)
+      const created = await createTarget(newTarget.description || newTarget.name, newTarget.category || 'other')
       setTargets(prev => [...prev, created])
       setNewTarget({ name: '', description: '', category: '', vulnerabilities: '' })
       setShowCreateModal(false)
@@ -138,12 +109,6 @@ export default function TargetQueue() {
   return (
     <ContentLayout header={<Header variant="h1">Target Queue</Header>}>
       <SpaceBetween size="l">
-        {usingMock && (
-          <Alert type="info" dismissible>
-            Using demo data — backend not yet connected
-          </Alert>
-        )}
-
         <Container
           header={
             <Header

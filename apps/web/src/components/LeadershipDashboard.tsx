@@ -6,7 +6,6 @@ import Box from '@cloudscape-design/components/box'
 import SpaceBetween from '@cloudscape-design/components/space-between'
 import Badge from '@cloudscape-design/components/badge'
 import ContentLayout from '@cloudscape-design/components/content-layout'
-import Alert from '@cloudscape-design/components/alert'
 import Spinner from '@cloudscape-design/components/spinner'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { useAuth } from '@/App'
@@ -19,36 +18,15 @@ interface ActivityItem {
   timestamp: number
 }
 
-const MOCK_ACTIVITY: ActivityItem[] = [
-  { id: 'a-01', domain: 'red-team', text: 'RT-001: ProxyLogon exploitation completed successfully', timestamp: Date.now() - 1800000 },
-  { id: 'a-02', domain: 'osint', text: 'New Shodan scan uploaded: meridian-defense.com (47 hosts)', timestamp: Date.now() - 3600000 },
-  { id: 'a-03', domain: 'red-team', text: 'Target t-008 (Kubernetes API) moved to approved', timestamp: Date.now() - 7200000 },
-  { id: 'a-04', domain: 'osint', text: 'Investigation INV-012: SQL injection on portal confirmed', timestamp: Date.now() - 10800000 },
-  { id: 'a-05', domain: 'red-team', text: 'Nmap deep scan of database subnet completed (6 open ports)', timestamp: Date.now() - 14400000 },
-  { id: 'a-06', domain: 'osint', text: 'CVE-2024-21762 matched to vpn.meridian-defense.com', timestamp: Date.now() - 18000000 },
-  { id: 'a-07', domain: 'red-team', text: 'Redis no-auth access confirmed, data exfil test passed', timestamp: Date.now() - 21600000 },
-  { id: 'a-08', domain: 'osint', text: 'New Nmap XML uploaded: internal-subnet-scan.xml (128 hosts)', timestamp: Date.now() - 25200000 },
-  { id: 'a-09', domain: 'red-team', text: 'Jenkins CLI exploit attempt failed - patched version detected', timestamp: Date.now() - 28800000 },
-  { id: 'a-10', domain: 'osint', text: 'Investigation INV-008 closed: DNS zone transfer mitigated', timestamp: Date.now() - 32400000 },
-]
-
-const MOCK_STATUS_DISTRIBUTION = [
-  { name: 'Active', value: 3 },
-  { name: 'Investigating', value: 4 },
-  { name: 'Triaging', value: 2 },
-  { name: 'Completed', value: 5 },
-  { name: 'Closed', value: 2 },
-]
-
-const MOCK_METRICS = {
-  osintInvestigations: 12,
-  osintDescription: '8 active, 4 closed',
-  redTeamOperations: 5,
-  rtDescription: '3 active, 2 completed',
-  criticalFindings: 7,
-  criticalDescription: 'Across both domains',
-  teamUtilization: '78%',
-  teamDescription: '3 of 4 analysts active',
+const DEFAULT_METRICS = {
+  osintInvestigations: 0,
+  osintDescription: '',
+  redTeamOperations: 0,
+  rtDescription: '',
+  criticalFindings: 0,
+  criticalDescription: '',
+  teamUtilization: '0%',
+  teamDescription: '',
 }
 
 const PIE_COLORS = ['#e8001c', '#0972d3', '#f89256', '#29a368', '#8c8c8c']
@@ -76,11 +54,10 @@ function formatRelativeTime(timestamp: number): string {
 
 export default function LeadershipDashboard() {
   const { isDarkMode } = useAuth()
-  const [metrics, setMetrics] = useState(MOCK_METRICS)
-  const [activity, setActivity] = useState<ActivityItem[]>(MOCK_ACTIVITY)
-  const [statusDistribution, setStatusDistribution] = useState(MOCK_STATUS_DISTRIBUTION)
+  const [metrics, setMetrics] = useState(DEFAULT_METRICS)
+  const [activity, setActivity] = useState<ActivityItem[]>([])
+  const [statusDistribution, setStatusDistribution] = useState<{ name: string; value: number }[]>([])
   const [loading, setLoading] = useState(true)
-  const [usingMock, setUsingMock] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -91,27 +68,51 @@ export default function LeadershipDashboard() {
 
         if (dashboard) {
           const d = dashboard
+          const uploads = d.uploads as Record<string, unknown> | undefined
+          const tickets = d.tickets as Record<string, unknown> | undefined
+          const byStatus = tickets?.byStatus as Record<string, number> | undefined
+          const bySeverity = tickets?.bySeverity as Record<string, number> | undefined
+          const targets = d.targets as Record<string, unknown> | undefined
+
+          // Count non-closed tickets as active investigations/operations
+          const totalTickets = (tickets?.total as number) ?? 0
+          const closedTickets = byStatus?.closed ?? 0
+          const activeTickets = totalTickets - closedTickets
+
           setMetrics({
-            osintInvestigations: (d.osintInvestigations as number) ?? MOCK_METRICS.osintInvestigations,
-            osintDescription: (d.osintDescription as string) ?? MOCK_METRICS.osintDescription,
-            redTeamOperations: (d.redTeamOperations as number) ?? MOCK_METRICS.redTeamOperations,
-            rtDescription: (d.rtDescription as string) ?? MOCK_METRICS.rtDescription,
-            criticalFindings: (d.criticalFindings as number) ?? MOCK_METRICS.criticalFindings,
-            criticalDescription: (d.criticalDescription as string) ?? MOCK_METRICS.criticalDescription,
-            teamUtilization: (d.teamUtilization as string) ?? MOCK_METRICS.teamUtilization,
-            teamDescription: (d.teamDescription as string) ?? MOCK_METRICS.teamDescription,
+            osintInvestigations: (uploads?.total as number) ?? 0,
+            osintDescription: `${activeTickets} active tickets`,
+            redTeamOperations: (targets?.total as number) ?? 0,
+            rtDescription: `${byStatus?.active ?? 0} active`,
+            criticalFindings: bySeverity?.critical ?? 0,
+            criticalDescription: 'Across both domains',
+            teamUtilization: `${totalTickets}`,
+            teamDescription: 'Total tickets',
           })
-          if (Array.isArray(d.recentActivity)) {
-            setActivity(d.recentActivity as ActivityItem[])
+
+          // Build activity from recentTickets
+          const recentTickets = d.recentTickets as Array<Record<string, unknown>> | undefined
+          if (Array.isArray(recentTickets)) {
+            setActivity(recentTickets.map((t, i) => ({
+              id: (t.ticketId as string) ?? `a-${i}`,
+              domain: ((t.ticketType as string) ?? '').includes('red-team') ? 'red-team' as const : 'osint' as const,
+              text: `${t.ticketId}: ${t.title}`,
+              timestamp: (t.updatedAt as number) ?? (t.createdAt as number) ?? Date.now(),
+            })))
           }
-          if (Array.isArray(d.statusDistribution)) {
-            setStatusDistribution(d.statusDistribution as typeof MOCK_STATUS_DISTRIBUTION)
+
+          // Build status distribution from byStatus
+          if (byStatus) {
+            setStatusDistribution(
+              Object.entries(byStatus).map(([name, value]) => ({
+                name: name.charAt(0).toUpperCase() + name.slice(1),
+                value,
+              }))
+            )
           }
-        } else {
-          setUsingMock(true)
         }
       } catch {
-        if (!cancelled) setUsingMock(true)
+        // Leave defaults on error
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -132,12 +133,6 @@ export default function LeadershipDashboard() {
   return (
     <ContentLayout header={<Header variant="h1">Leadership Dashboard</Header>}>
       <SpaceBetween size="l">
-        {usingMock && (
-          <Alert type="info" dismissible>
-            Using demo data — backend not yet connected
-          </Alert>
-        )}
-
         <ColumnLayout columns={4}>
           <MetricCard title="OSINT Investigations" value={metrics.osintInvestigations} description={metrics.osintDescription} />
           <MetricCard title="Red Team Operations" value={metrics.redTeamOperations} description={metrics.rtDescription} />

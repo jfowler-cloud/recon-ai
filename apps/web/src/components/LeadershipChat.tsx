@@ -10,111 +10,18 @@ import Icon from '@cloudscape-design/components/icon'
 import ContentLayout from '@cloudscape-design/components/content-layout'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
 import { useAuth } from '@/App'
+import { sendChatMessage } from '@/utils/api'
 import type { ChatMessage } from '@/types'
 
-interface MockResponse {
-  content: string
-  chart?: {
-    type: 'pie' | 'bar'
-    data: Array<Record<string, unknown>>
-    title: string
-  }
+interface ChartConfig {
+  type: 'pie' | 'bar'
+  data: Array<Record<string, unknown>>
+  title: string
 }
 
 const PIE_COLORS = ['#e8001c', '#0972d3', '#f89256', '#29a368', '#8c8c8c']
 
-const MOCK_RESPONSES: Record<string, MockResponse> = {
-  "What's our overall security posture?": {
-    content: `**Security Posture Summary -- Q1 2026**
-
-- **Critical Findings**: 7 (3 OSINT, 4 Red Team)
-- **High Findings**: 12 (8 OSINT, 4 Red Team)
-- **Active Operations**: 5 red team ops, 8 OSINT investigations
-- **Remediation Rate**: 42% of critical findings addressed in <48h
-
-**Key Concerns:**
-1. Exchange Server ProxyLogon chain remains exploitable
-2. 3 databases with no authentication found on internal network
-3. Fortinet VPN pre-auth RCE confirmed but not yet patched
-
-**Positive Trends:**
-- DNS zone transfer vulnerability closed this week
-- Jenkins CI partially hardened (CLI disabled, web UI still exposed)
-- Team utilization at 78% -- healthy capacity`,
-    chart: {
-      type: 'pie',
-      title: 'Operations Status Distribution',
-      data: [
-        { name: 'Active', value: 3 },
-        { name: 'Investigating', value: 4 },
-        { name: 'Triaging', value: 2 },
-        { name: 'Completed', value: 5 },
-        { name: 'Closed', value: 2 },
-      ],
-    },
-  },
-  'Show analyst workload': {
-    content: `**Analyst Workload Distribution**
-
-| Analyst | OSINT Tasks | RT Operations | Total | Status |
-|---------|------------|---------------|-------|--------|
-| analyst-1 | 3 | 2 | 5 | Active |
-| analyst-2 | 2 | 2 | 4 | Active |
-| analyst-3 | 1 | 1 | 2 | Active |
-| analyst-4 | 0 | 0 | 0 | Available |
-
-**Observations:**
-- analyst-1 is handling both high-priority RT ops (Exchange, Fortinet) -- consider load balancing
-- analyst-4 is available and should be assigned to the queued Kubernetes API target
-- Average workload: 2.75 tickets per analyst`,
-    chart: {
-      type: 'bar',
-      title: 'Tasks per Analyst',
-      data: [
-        { analyst: 'analyst-1', OSINT: 3, RedTeam: 2 },
-        { analyst: 'analyst-2', OSINT: 2, RedTeam: 2 },
-        { analyst: 'analyst-3', OSINT: 1, RedTeam: 1 },
-        { analyst: 'analyst-4', OSINT: 0, RedTeam: 0 },
-      ],
-    },
-  },
-  'Generate a report on critical findings': {
-    content: `**Critical Findings Report -- Generated 2026-03-25**
-
-**OSINT-Sourced Critical Findings (3):**
-1. **CVE-2021-26855 (ProxyLogon)** -- mail.meridian-defense.com
-   - Discovered via Shodan scan on 2026-03-18
-   - Confirmed exploitable, RCE achieved in red team op RT-001
-
-2. **CVE-2024-21762 (FortiOS)** -- vpn.meridian-defense.com
-   - Discovered via Nmap service scan on 2026-03-20
-   - Pre-auth RCE, exploitation in progress (RT-004)
-
-3. **Exposed Kubernetes API** -- k8s.meridian-defense.com:6443
-   - Anonymous auth enabled, full cluster access
-   - Queued for red team engagement
-
-**Red Team-Sourced Critical Findings (4):**
-4. **Redis No Auth** -- 10.0.5.40:6379 (confirmed via RT-005)
-5. **Jenkins CLI RCE** -- ci.meridian-defense.com (CVE-2024-23897)
-6. **PostgreSQL Default Creds** -- db-prod.meridian-defense.com
-7. **MongoDB No Auth** -- 10.0.5.55:27017
-
-**Recommendation:** Prioritize patching Exchange and FortiOS -- both are internet-facing with active exploits.`,
-    chart: {
-      type: 'bar',
-      title: 'Vulnerability Trend (Last 4 Weeks)',
-      data: [
-        { week: 'Week 1', Critical: 3, High: 5, Medium: 8 },
-        { week: 'Week 2', Critical: 5, High: 7, Medium: 10 },
-        { week: 'Week 3', Critical: 6, High: 9, Medium: 12 },
-        { week: 'Week 4', Critical: 7, High: 12, Medium: 11 },
-      ],
-    },
-  },
-}
-
-function ChatBubble({ message, chart }: { message: ChatMessage; chart?: MockResponse['chart'] }) {
+function ChatBubble({ message, chart }: { message: ChatMessage; chart?: ChartConfig }) {
   const isUser = message.role === 'user'
   const { isDarkMode } = useAuth()
 
@@ -223,25 +130,26 @@ function WelcomeMessage({ onSuggestionClick }: { onSuggestionClick: (q: string) 
 }
 
 interface StoredMessage extends ChatMessage {
-  chart?: MockResponse['chart']
+  chart?: ChartConfig
 }
 
 export default function LeadershipChat() {
   const [messages, setMessages] = useState<StoredMessage[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [sessionId, setSessionId] = useState<string | undefined>()
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const { isDarkMode } = useAuth()
+  const { userId, isDarkMode } = useAuth()
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const sendMessage = (text: string) => {
+  const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return
 
     const userMsg: StoredMessage = {
-      sessionId: 'mock-session',
+      sessionId: sessionId ?? '',
       messageId: `user-${Date.now()}`,
       role: 'user',
       content: text,
@@ -251,22 +159,38 @@ export default function LeadershipChat() {
     setInput('')
     setIsLoading(true)
 
-    setTimeout(() => {
-      const mockResponse = MOCK_RESPONSES[text]
-      const content = mockResponse?.content ??
-        `Based on current data across both OSINT and red team domains, I can provide insights on "${text}". We currently have 12 OSINT investigations and 5 red team operations in progress, with 7 critical findings requiring immediate attention. Would you like me to break this down by domain, severity, or timeline?`
-
-      const assistantMsg: StoredMessage = {
-        sessionId: 'mock-session',
-        messageId: `assistant-${Date.now()}`,
-        role: 'assistant',
-        content,
-        createdAt: Math.floor(Date.now() / 1000),
-        chart: mockResponse?.chart,
+    let content: string
+    let chart: ChartConfig | undefined
+    try {
+      const result = await sendChatMessage(userId, 'leadership', text, sessionId)
+      setSessionId(result.sessionId)
+      content = result.content
+      // If the agent returned outputData with chart configs, use them
+      if (Array.isArray(result.outputData) && result.outputData.length > 0) {
+        const chartData = result.outputData[0] as ChartConfig
+        if (chartData?.type && chartData?.data) {
+          chart = chartData
+        }
+      } else if (result.outputData && typeof result.outputData === 'object' && !Array.isArray(result.outputData)) {
+        const chartData = result.outputData as ChartConfig
+        if (chartData?.type && chartData?.data) {
+          chart = chartData
+        }
       }
-      setMessages(prev => [...prev, assistantMsg])
-      setIsLoading(false)
-    }, 1500)
+    } catch (err) {
+      content = `Error: ${err instanceof Error ? err.message : 'Failed to reach the AI agent. Please try again.'}`
+    }
+
+    const assistantMsg: StoredMessage = {
+      sessionId: sessionId ?? '',
+      messageId: `assistant-${Date.now()}`,
+      role: 'assistant',
+      content,
+      createdAt: Math.floor(Date.now() / 1000),
+      chart,
+    }
+    setMessages(prev => [...prev, assistantMsg])
+    setIsLoading(false)
   }
 
   const handleKeyDown = (e: CustomEvent) => {

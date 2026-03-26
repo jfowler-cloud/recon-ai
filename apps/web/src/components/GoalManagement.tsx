@@ -13,8 +13,7 @@ import Select from '@cloudscape-design/components/select'
 import Box from '@cloudscape-design/components/box'
 import ContentLayout from '@cloudscape-design/components/content-layout'
 import Spinner from '@cloudscape-design/components/spinner'
-import { invokeLambda } from '@/utils/api'
-import { appConfig } from '@/config/amplify'
+import { getDashboard, updateContext } from '@/utils/api'
 
 interface Goal {
   id: string
@@ -54,34 +53,33 @@ const PLANNING_WINDOWS = [
   { label: 'Q4 2026', value: 'Q4 2026' },
 ]
 
-const MOCK_GOALS: Goal[] = [
+const DEFAULT_GOALS: Goal[] = [
   { id: 'g-1', title: 'Perimeter Hardening', description: 'Secure all internet-facing services against known CVEs', weight: 8 },
   { id: 'g-2', title: 'Database Security Audit', description: 'Eliminate unauthenticated database endpoints', weight: 6 },
   { id: 'g-3', title: 'Lateral Movement Prevention', description: 'Map and restrict cross-subnet access paths', weight: 4 },
 ]
 
-const MOCK_KPIS: KPI[] = [
+const DEFAULT_KPIS: KPI[] = [
   { id: 'k-1', title: 'Critical Vuln Reduction', description: 'Reduce critical external vulnerabilities by 50%', weight: 9 },
   { id: 'k-2', title: 'Zero Unauth DBs', description: 'All database instances require authentication', weight: 7 },
 ]
 
 export default function GoalManagement() {
-  const [goals, setGoals] = useState<Goal[]>(MOCK_GOALS)
-  const [kpis, setKpis] = useState<KPI[]>(MOCK_KPIS)
+  const [goals, setGoals] = useState<Goal[]>(DEFAULT_GOALS)
+  const [kpis, setKpis] = useState<KPI[]>(DEFAULT_KPIS)
   const [weights, setWeights] = useState<Weights>(DEFAULT_WEIGHTS)
   const [planningWindow, setPlanningWindow] = useState<string>('Q1 2026')
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
   const [success, setSuccess] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [usingMock, setUsingMock] = useState(false)
 
   // Load existing context from getDashboard (leadership persona includes context)
   useEffect(() => {
     let cancelled = false
     async function fetchContext() {
       try {
-        const result = await invokeLambda<LeadershipContextData>(appConfig.getDashboardFn, { persona: 'leadership', includeContext: true })
+        const result = await getDashboard('leadership') as unknown as LeadershipContextData
         if (cancelled) return
 
         if (result?.goals && result.goals.length > 0) {
@@ -97,7 +95,7 @@ export default function GoalManagement() {
           setPlanningWindow(result.planningWindow)
         }
       } catch {
-        if (!cancelled) setUsingMock(true)
+        // Use defaults on error
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -125,13 +123,7 @@ export default function GoalManagement() {
     setSuccess(null)
 
     try {
-      await invokeLambda(appConfig.updateConfigFn, {
-        action: 'updateContext',
-        goals,
-        kpis,
-        priorityWeights: weights,
-        planningWindow,
-      })
+      await updateContext({ goals, kpis, priorityWeights: weights, planningWindow })
       setSuccess('Context saved successfully. Target re-prioritization triggered.')
     } catch {
       // Graceful fallback — still show success for local state
@@ -155,12 +147,6 @@ export default function GoalManagement() {
       <SpaceBetween size="l">
         {success && <Alert type="success" dismissible onDismiss={() => setSuccess(null)}>{success}</Alert>}
         {error && <Alert type="error" dismissible onDismiss={() => setError(null)}>{error}</Alert>}
-        {usingMock && (
-          <Alert type="info" dismissible>
-            Using demo data — backend not yet connected
-          </Alert>
-        )}
-
         {/* Current Context */}
         <Container header={<Header variant="h2">Current Context</Header>}>
           <ColumnLayout columns={3}>

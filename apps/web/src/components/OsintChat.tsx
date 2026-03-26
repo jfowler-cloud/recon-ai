@@ -6,67 +6,14 @@ import Textarea from '@cloudscape-design/components/textarea'
 import Button from '@cloudscape-design/components/button'
 import Box from '@cloudscape-design/components/box'
 import Spinner from '@cloudscape-design/components/spinner'
+import { sendChatMessage } from '@/utils/api'
+import { useAuth } from '@/App'
 
 // ── Types ────────────────────────────────────────────────────────────
 
 interface Message {
   role: 'user' | 'assistant'
   content: string
-}
-
-// ── Canned responses (chat_handler Lambda is Phase 4 — keep mock) ───
-
-const CANNED_RESPONSES: Record<string, string> = {
-  'vulnerabilities': `Based on the latest scan data, here are the most critical vulnerabilities detected:
-
-1. **Unauthenticated MongoDB** (INV-001) — Port 27017 open on DMZ segment, exposing ~45K employee records. No authentication required. Severity: Critical.
-
-2. **VPN Gateway RCE** (INV-002) — CVE-2026-1234 affects the primary VPN gateway running firmware v3.2.1. A public exploit is available and the gateway serves 200+ users. Severity: Critical.
-
-3. **Cleartext FTP with Contract Docs** (INV-005) — Anonymous FTP on port 21 hosting 17 contract PDFs including government SOW documents. Severity: Critical.
-
-**Recommended priority:** Address the VPN gateway first (broadest blast radius), then the MongoDB instance (PII exposure), then FTP (document classification review needed).`,
-
-  'database': `I found **2 exposed database services** in the current scan data:
-
-- **MongoDB** on port 27017 (10.x.x.x) — No authentication, 45K records with employee PII
-- **Elasticsearch** on port 9200 (10.x.x.x) — No authentication, contains JWT tokens and 3 months of application logs
-
-Both are on the Meridian Defense production subnet. The MongoDB instance is the higher priority due to PII regulations (potential GDPR/compliance exposure).`,
-
-  'threat': `**Threat Landscape Summary — Meridian Defense Systems**
-
-**External Attack Surface:**
-- 3 critical vulnerabilities across internet-facing services
-- DNS zone transfer leaking 42 internal hostnames
-- Phishing domain (merid1an-defense.com) registered March 23
-
-**Data Exposure:**
-- Employee PII via unauthenticated MongoDB (~45K records)
-- Contract documents via anonymous FTP (17 PDFs, including government SOWs)
-- Hardcoded AWS keys and database credentials in a public GitHub repo
-
-**Social Engineering Risk:**
-- Internal org chart with clearance levels leaked on public forum
-- Phishing infrastructure being prepared (MX records configured on lookalike domain)
-
-**Overall Risk Rating: HIGH** — Multiple critical findings with active exploitation potential. Immediate remediation recommended for VPN gateway and MongoDB exposure.`,
-
-  'default': `I analyzed the available OSINT data for Meridian Defense Systems. Here is what I found:
-
-- **14 data uploads** processed today across Shodan, Nmap, social media, and log sources
-- **7 active investigations** with 3 rated critical severity
-- **10 total investigation tickets** spanning network exposure, data leaks, and social engineering vectors
-
-Key areas of concern include exposed database services, a critical VPN vulnerability, and evidence of phishing infrastructure targeting Meridian. Would you like me to drill into any specific area?`,
-}
-
-function getCannedResponse(input: string): string {
-  const lower = input.toLowerCase()
-  if (lower.includes('vulnerabil') || lower.includes('critical')) return CANNED_RESPONSES['vulnerabilities']
-  if (lower.includes('database') || lower.includes('port') || lower.includes('exposed')) return CANNED_RESPONSES['database']
-  if (lower.includes('threat') || lower.includes('landscape') || lower.includes('summary') || lower.includes('overview')) return CANNED_RESPONSES['threat']
-  return CANNED_RESPONSES['default']
 }
 
 // ── Suggested questions ──────────────────────────────────────────────
@@ -83,7 +30,9 @@ export default function OsintChat() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [sessionId, setSessionId] = useState<string | undefined>()
   const chatEndRef = useRef<HTMLDivElement>(null)
+  const { userId } = useAuth()
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -97,13 +46,18 @@ export default function OsintChat() {
     setMessages(prev => [...prev, { role: 'user', content: messageText }])
     setLoading(true)
 
-    // Chat handler Lambda is Phase 4 — use canned responses for now
-    await new Promise(resolve => setTimeout(resolve, 1200 + Math.random() * 800))
+    let response: string
+    try {
+      const result = await sendChatMessage(userId, 'osint', messageText, sessionId)
+      setSessionId(result.sessionId)
+      response = result.content
+    } catch (err) {
+      response = `Error: ${err instanceof Error ? err.message : 'Failed to reach the AI agent. Please try again.'}`
+    }
 
-    const response = getCannedResponse(messageText)
     setMessages(prev => [...prev, { role: 'assistant', content: response }])
     setLoading(false)
-  }, [input, loading])
+  }, [input, loading, userId, sessionId])
 
   const handleKeyDown = useCallback((e: CustomEvent<{ key: string; shiftKey: boolean }>) => {
     if (e.detail.key === 'Enter' && !e.detail.shiftKey) {
@@ -213,7 +167,7 @@ export default function OsintChat() {
           {messages.length > 0 && (
             <Button
               variant="normal"
-              onClick={() => { setMessages([]); setInput('') }}
+              onClick={() => { setMessages([]); setInput(''); setSessionId(undefined) }}
               disabled={loading}
             >
               Clear Chat
