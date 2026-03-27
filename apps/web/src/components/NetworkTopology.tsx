@@ -125,7 +125,6 @@ function TargetNode({ data }: NodeProps & { data: any }) {
         minWidth: 200,
         cursor: 'pointer',
       }}
-      onContextMenu={data.onContextMenu}
     >
       <Handle type="target" position={Position.Left} style={{ background: statusColor(status) }} />
       <Handle type="source" position={Position.Right} style={{ background: statusColor(status) }} />
@@ -441,7 +440,6 @@ function NetworkTopologyInner() {
           category: t.category,
           vulnCount: t.vulnerabilities?.length ?? 0,
           isDark: isDarkMode,
-          onContextMenu: (e: React.MouseEvent) => handleTargetContextMenu(e, t),
         },
       })
     })
@@ -580,7 +578,7 @@ function NetworkTopologyInner() {
     const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(rawNodes, rawEdges, direction)
     setNodes(layoutedNodes)
     setEdges(layoutedEdges)
-  }, [targets, uploads, operations, tools, loading, isDarkMode, direction, setNodes, setEdges, handleTargetContextMenu])
+  }, [targets, uploads, operations, tools, loading, isDarkMode, direction, setNodes, setEdges])
 
   // Node click handler
   const onNodeClick = useCallback((_event: React.MouseEvent, node: Node) => {
@@ -702,6 +700,13 @@ function NetworkTopologyInner() {
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onNodeClick={onNodeClick}
+            onNodeContextMenu={(event, node) => {
+              if (node.id.startsWith('target-')) {
+                const targetId = node.id.replace('target-', '')
+                const target = targets.find(t => t.targetId === targetId)
+                if (target) handleTargetContextMenu(event, target)
+              }
+            }}
             nodeTypes={nodeTypes}
             fitView
             fitViewOptions={{ padding: 0.15 }}
