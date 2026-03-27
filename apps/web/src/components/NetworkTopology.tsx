@@ -557,7 +557,7 @@ function NetworkTopologyInner() {
     operations.forEach(op => {
       if (!op.targetId) {
         const matchTarget = sorted.find(t =>
-          t.name && op.title.toLowerCase().includes(t.name.toLowerCase().split(' ')[0])
+          t.name && op.title && op.title.toLowerCase().includes(t.name.toLowerCase().split(' ')[0])
         )
         if (matchTarget) {
           rawEdges.push({
